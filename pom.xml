@@ -9,25 +9,35 @@
   <name>reproductor-javafx</name>
 
   <properties>
+    <!-- JDK 21 -->
     <maven.compiler.release>21</maven.compiler.release>
-    <javafx.version>21.0.3</javafx.version>
+    <javafx.version>21.0.5</javafx.version>
   </properties>
 
   <dependencies>
+    <!-- UI -->
     <dependency>
-	    <groupId>org.openjfx</groupId>
-	    <artifactId>javafx-controls</artifactId>
-	    <version>${javafx.version}</version>
-	    <classifier>win</classifier>
-	  </dependency>
-	
-	  <dependency>
-	    <groupId>org.openjfx</groupId>
-	    <artifactId>javafx-fxml</artifactId>
-	    <version>${javafx.version}</version>
-	    <classifier>win</classifier>
-	  </dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>win</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>win</classifier>
+    </dependency>
 
+    <!-- AUDIO (OBLIGATORIO para Media/MediaPlayer) -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-media</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>win</classifier>
+    </dependency>
+
+    <!-- Tests -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -38,14 +48,17 @@
 
   <build>
     <plugins>
+      <!-- Ejecutar con: mvn javafx:run -->
       <plugin>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
-          <mainClass>com.musica.App</mainClass>
+          <mainClass>reproductor.com.musica.App</mainClass>
         </configuration>
       </plugin>
+
+      <!-- JUnit 5 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -54,3 +67,4 @@
     </plugins>
   </build>
 </project>
+
