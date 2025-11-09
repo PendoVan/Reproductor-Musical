@@ -1,8 +1,8 @@
-# 💻 Requisitos Técnicos Mínimos (RTM)
+# 💻 Hardware y Software
 
 Este documento detalla las especificaciones mínimas de hardware y software necesarias para la correcta instalación y ejecución del Reproductor de Música de Escritorio.
 
-## 4.1 Requisitos de Hardware
+## Requisitos de Hardware
 
 Para garantizar un rendimiento fluido de la aplicación JavaFX y la reproducción de audio, el equipo del usuario debe cumplir con lo siguiente:
 
@@ -15,7 +15,7 @@ Para garantizar un rendimiento fluido de la aplicación JavaFX y la reproducció
 | **Conexión a Internet** | 5 Mbps (para búsqueda y descarga) | 20 Mbps o superior (fibra óptica) |
 | **Pantalla** | Resolución 1280x720 (HD) | Resolución 1920x1080 (Full HD) |
 
-## 4.2 Requisitos de Software
+## Requisitos de Software
 
 El entorno de operación debe contar con:
 
