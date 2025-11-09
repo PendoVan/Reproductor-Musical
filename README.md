@@ -1,1 +1,1 @@
-:v
+Te odio kath
