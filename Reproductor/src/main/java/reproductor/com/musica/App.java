@@ -11,7 +11,7 @@ public class App extends Application {
 	  public void start(Stage stage) throws Exception {
 		Parent root = FXMLLoader.load(getClass().getResource("/reproductor/com/musica/view/MainView.fxml"));
 	    var scene = new Scene(root, 900, 560);
-	    stage.setTitle("Reproductor - Grupo 3");
+	    stage.setTitle("Reproductor Musical - Grupo 3");
 	    stage.setScene(scene);
 	    stage.show();
 	  }
