@@ -157,7 +157,9 @@ CREATE TABLE APIExterna (
 
 ```
 ---
+<img width="1536" height="1024" alt="Diagrama físico ERD SQL" src="https://github.com/user-attachments/assets/85fa8b65-e2a4-4634-9058-81a433083707" />
 
+---
 ## Interpretacion:
 
 * Cada Usuario puede crear múltiples Playlists y realizar múltiples Descargas.
