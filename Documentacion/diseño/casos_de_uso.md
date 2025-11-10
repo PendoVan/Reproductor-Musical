@@ -219,7 +219,7 @@
    **Postcondición:** La reproducción continúa desde el nuevo punto.
 
 ---
-<img width="1099" height="2338" alt="Diagrama de casos de uso" src="https://github.com/user-attachments/assets/82d9f1d6-dda2-444d-9b2d-260d97274ead" />
+<img width="1372" height="1494" alt="Diagrama de casos de uso" src="https://github.com/user-attachments/assets/121a8b77-3d53-43cd-85e8-630dd2b88949" />
 
 ---
 
