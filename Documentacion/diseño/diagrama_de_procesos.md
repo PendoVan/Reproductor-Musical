@@ -104,4 +104,6 @@ Representar los **procesos clave** que realiza el sistema, según los **RF-001 a
 * Controlar volumen/progreso
 
 ---
+<img width="1536" height="1024" alt="Diagrama de procesos UML- BPMN" src="https://github.com/user-attachments/assets/2206a73a-a3d1-40a2-80dd-2135db80cf4e" />
 
+---
