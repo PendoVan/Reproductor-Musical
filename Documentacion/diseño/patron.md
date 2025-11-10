@@ -127,6 +127,8 @@ gestor.play(cancionSeleccionada);
 
   * Model → notifica cambios → View
 
+---
+<img width="1536" height="1024" alt="Diagrama del patron MVC" src="https://github.com/user-attachments/assets/c71b5050-28e3-44e7-8e1a-ecfd3df54c8f" />
 
 ---
 
