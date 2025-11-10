@@ -3,7 +3,5 @@ El plan del proyecto establece los recursos disponibles para el proyecto, el des
 
 - [Introducción](introduccion.md)
 - [Organización del proyecto](organizacion.md)
-- [Requisitos de hardware y software](hwsw.md)
 - [Desglose del trabajo](desglose.md)
 - [Riesgos](riesgos.md)
-- [Cronograma del proyecto](cronograma.md)
