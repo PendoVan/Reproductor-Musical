@@ -96,6 +96,9 @@
 ```
 
 ---
+<img width="1536" height="1024" alt="Diagrama E-R" src="https://github.com/user-attachments/assets/632c74bf-3c36-41d8-bc8a-9bd93b87df4b" />
+
+---
 
 ## **Explicación conceptual resumida**
 
