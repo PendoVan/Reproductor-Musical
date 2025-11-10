@@ -1,20 +1,27 @@
 package reproductor.com.musica.controller;
 
-import reproductor.com.musica.core.PlayerService;
-import reproductor.com.musica.core.PlaylistService;
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.stage.FileChooser;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.prefs.Preferences;
 
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Slider;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
+import reproductor.com.musica.core.PlayerService;
+import reproductor.com.musica.core.PlaylistService;
+
 public class PlayerController {
 	
+	// Elementos para la UI
 	@FXML private Slider progressSlider;
 	@FXML private Slider volumeSlider;
 	@FXML private CheckBox muteCheck;
@@ -22,76 +29,107 @@ public class PlayerController {
 	@FXML private Label currentTime;
 	@FXML private Label totalTime;
 	@FXML private ListView<Path> playlistView;
-	@FXML private javafx.scene.layout.BorderPane root;
+	@FXML private BorderPane root;
+	@FXML private Button btnPrev, btnPlay, btnPause, btnStop, btnNext;
+	@FXML private Button btnOpen;
 	
+	// Servicios
 	private final PlaylistService playlist = new PlaylistService();
 	private final PlayerService player = new PlayerService();
 	
+	// Preferencias
+	private static final String PREF_VOLUME_KEY = "volume";
 	private final Preferences prefs = Preferences.userNodeForPackage(PlayerController.class);
 	
+	// Initialization
 	@FXML
 	public void initialize() {
+		setupPlaylistBinding();
+		setupVolumeControl();
+		setupProgressControl();
+		setupPlayerUpdates();
+		setupKeyboardShortcuts();
+		setupErrorHandling();
+		
 		updateControlsEnabled(false);
-		double vol = prefs.getDouble("volume", 0.7);
+	}
 		
-		// Bind playlist
+	// Setup de métodos
+	private void setupPlaylistBinding() {
 		playlistView.setItems(playlist.getItems());
+		playlistView.getSelectionModel().selectedItemProperty()
+				.addListener((obs, oldVal, selected) -> {
+					if (selected != null) play(selected);
+				});
+	}
 		
-		// Volumen
+	private void setupVolumeControl() {
+		double savedVolume = prefs.getDouble(PREF_VOLUME_KEY, 0.7);
 		volumeSlider.setMin(0);
 		volumeSlider.setMax(1);
-		volumeSlider.setValue(vol);
-		volumeSlider.valueProperty().addListener((o, ov, nv) -> {
-			  player.setVolume(nv.doubleValue());
-			  prefs.putDouble("volume", nv.doubleValue());
-		});
+		volumeSlider.setValue(savedVolume);
 		
-		// Progreso
+		volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+			double volume = newVal.doubleValue();
+			player.setVolume(volume);
+			prefs.putDouble(PREF_VOLUME_KEY, volume);
+		});
+	}
+		
+	private void setupProgressControl() {
 	    progressSlider.setMin(0);
 	    progressSlider.setMax(1);
-	    progressSlider.valueChangingProperty().addListener((o, wasChanging, changing) -> {
-	      if (!changing) player.seekByRatio(progressSlider.getValue());
+	    progressSlider.valueChangingProperty().addListener((obs, wasChanging, isChanging) -> {
+	    	if (!isChanging) {
+	    		player.seekByRatio(progressSlider.getValue());
+	    	}
 	    });
-	    
-	    // Actualizaciones del reproductor
-	    player.onUpdate(u -> Platform.runLater(() -> {
-	        currentTime.setText(format(u.current()));
-	        totalTime.setText(format(u.total()));
-	        if (!progressSlider.isValueChanging()) progressSlider.setValue(u.ratio());
-	        trackLabel.setText(u.title() == null ? "(sin archivo)" : u.title());
-	      }));
-	    
-	    // Al seleccionar el la lista, reproducir
-	    playlistView.getSelectionModel().selectedItemProperty().addListener((o, old, sel) -> {
-	    	if (sel != null) play(sel);
-	    });
-	    
-	    Platform.runLater(() -> {
-	    	root.getScene().setOnKeyPressed(e -> {
-	    		switch (e.getCode()) {
-	    			case SPACE 	-> { if (player.isPlaying()) player.pause(); else player.play(); }
-	    			case UP		-> volumeSlider.setValue(Math.min(1.0, volumeSlider.getValue() + 0.05));
-	    			case DOWN	-> volumeSlider.setValue(Math.max(0.0, volumeSlider.getValue() - 0.05));
-	    			case RIGHT	-> player.seekByRatio(Math.min(1.0, progressSlider.getValue() + 0.05));
-	    			case LEFT	-> player.seekByRatio(Math.max(0.0, progressSlider.getValue() - 0.05));
-	    			default -> {}
-	    		}
-	    	});
-	    });
-	    
-	    if (playlist.current() == null) updateControlsEnabled(false);
-	    player.onError(msg -> Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, msg).showAndWait()));
 	}
 	
-	@FXML public void onOpenFile() {
-		FileChooser fc = new FileChooser();
-		fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Audio", List.of("*.mp3","*.wav","*.m4a")));
-		List<File> files = fc.showOpenMultipleDialog(null);
-		if (files != null && !files.isEmpty()) {
-			files.forEach(f -> playlist.add(f.toPath()));
-			if (playlistView.getSelectionModel().getSelectedIndex() < 0) {
-				playlistView.getSelectionModel().select(0);
+	private void setupPlayerUpdates() {
+		player.onUpdate(update -> Platform.runLater(() -> {
+			currentTime.setText(formatTime(update.current()));
+			totalTime.setText(formatTime(update.total()));
+			if (!progressSlider.isValueChanging()) {
+				progressSlider.setValue(update.ratio());
 			}
+			trackLabel.setText(update.title() == null ? "(Sin archivo)" : update.title());
+		}));
+	}
+	
+	private void setupKeyboardShortcuts() {
+		Platform.runLater(() -> 
+			root.getScene().setOnKeyPressed(event -> {
+				switch (event.getCode()) {
+					case SPACE -> togglePlayPause();
+					case UP -> adjustVolume(0.05);
+					case DOWN -> adjustVolume(-0.05);
+					case RIGHT -> seekProgress(0.05);
+					case LEFT -> seekProgress(-0.05);
+				default -> {}
+				}
+			})
+		);
+	}
+	
+	private void setupErrorHandling() {
+		player.onError(message -> Platform.runLater(() -> 
+				new Alert(Alert.AlertType.ERROR, message).showAndWait()));
+	}
+	
+	// Player Controls
+	@FXML public void onOpenFile() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().add(
+				new FileChooser.ExtensionFilter("Audio", List.of("*.mp3","*.wav","*.m4a"))
+		);
+		
+		List<File> files = fileChooser.showOpenMultipleDialog(null);
+		if (files == null || files.isEmpty()) return;
+		
+		files.forEach(file -> playlist.add(file.toPath()));
+		if (playlistView.getSelectionModel().getSelectedIndex() < 0) {
+			playlistView.getSelectionModel().select(0);
 		}
 	}
 	
@@ -102,6 +140,22 @@ public class PlayerController {
 	@FXML public void onNext() { play(playlist.next()); }
 	@FXML public void onToggleMute() { player.setMute(muteCheck.isSelected()); }
 	
+	private void togglePlayPause() {
+		if (player.isPlaying()) player.pause();
+		else player.play();
+	}
+	
+	private void adjustVolume(double delta) {
+		double newVolume = Math.max(0, Math.min(1, volumeSlider.getValue() + delta));
+		volumeSlider.setValue(newVolume);
+	}
+	
+	private void seekProgress(double delta) {
+		double newProgress = Math.max(0, Math.min(1, volumeSlider.getValue() + delta));
+		player.seekByRatio(newProgress);
+	}
+	
+	// Métodos útiles
 	private void play(Path path) {
 		if (path == null) return;
 		try {
@@ -114,15 +168,12 @@ public class PlayerController {
 		}
 	}
 	
-	private static String format(Duration d) {
-		if (d == null) return "00:00";
-		long s = d.getSeconds();
-		long m = s / 60; s %= 60;
-		return String.format("%02d:%02d", m, s);
+	private static String formatTime(Duration duration) {
+		if (duration == null) return "00:00";
+		long seconds = duration.getSeconds();
+		long minutes = seconds / 60; seconds %= 60;
+		return String.format("%02d:%02d", minutes, seconds);
 	}
-	
-	@FXML private Button btnPrev, btnPlay, btnPause, btnStop, btnNext;
-	@FXML Button btnOpen;
 	
 	private void updateControlsEnabled(boolean enabled) {
 		btnPrev.setDisable(!enabled);
