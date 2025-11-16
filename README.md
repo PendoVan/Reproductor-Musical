@@ -1,8 +1,8 @@
-# 🎧 Reproductor de Música - [Nombre del Proyecto]
+# 🎧 Reproductor de Música - Grupo 3
 
 ## 🎶 Descripción del Proyecto
 
-**[Nombre del Proyecto]** es un reproductor de música de escritorio desarrollado en **JavaFX** que combina la funcionalidad de un reproductor local con la potencia de la web.
+Este proyecto es un reproductor de música de escritorio desarrollado en **JavaFX** que combina la funcionalidad de un reproductor local con la potencia de la web.
 
 El objetivo principal es permitir a los usuarios gestionar sus propias playlists personalizadas, utilizando la **API de YouTube** como motor de búsqueda para encontrar y referenciar contenido musical.
 
