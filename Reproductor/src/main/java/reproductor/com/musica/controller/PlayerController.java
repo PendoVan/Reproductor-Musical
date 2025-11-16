@@ -186,4 +186,19 @@ public class PlayerController {
 		muteCheck.setDisable(!enabled);
 	}
 	
+	// Métodos vacíos para los eventos de la UI
+	@FXML
+	private void onPlayClicked() { /* TODO: integrar con PlayerService */ }
+
+	@FXML
+	private void onPauseClicked() { /* TODO */ }
+
+	@FXML
+	private void onNextClicked() { /* TODO */ }
+
+	@FXML
+	private void onPrevClicked() { /* TODO */ }
+
+	// Integrante 3: asegurar que PlayerService tiene método play()
+	// Integrante 2: si se requiere cargar desde API, usar
 }
