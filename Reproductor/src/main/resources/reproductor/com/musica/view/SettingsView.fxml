@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="reproductor.com.musica.controller.SettingsController"
+            fx:id="settingsRoot" styleClass="border-pane">
+
+  <!-- SETTINGS HEADER -->
+  <top>
+    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="header-section">
+      <Button fx:id="btnClose" text="✕" 
+              styleClass="button, animated-button" 
+              prefWidth="40" prefHeight="40" />
+      <Region HBox.hgrow="ALWAYS" />
+      <Label text="Configuración del Reproductor" 
+             styleClass="label" 
+             style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+      <Region HBox.hgrow="ALWAYS" />
+      <Button fx:id="btnReset" text="Restablecer" 
+              styleClass="button" />
+      <Button fx:id="btnSave" text="Guardar" 
+              styleClass="button, animated-button" />
+    </HBox>
+  </top>
+
+  <!-- SETTINGS CONTENT -->
+  <center>
+    <TabPane fx:id="settingsTabPane" styleClass="tab-pane">
+      
+      <!-- GENERAL SETTINGS -->
+      <Tab text="General" closable="false" styleClass="tab">
+        <VBox spacing="20" styleClass="content-section">
+          <padding>
+            <Insets topRightBottomLeft="20" />
+          </padding>
+          
+          <!-- Appearance Settings -->
+          <VBox spacing="12">
+            <Label text="Apariencia" 
+                   styleClass="label" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Separator />
+            
+            <GridPane hgap="16" vgap="12">
+              <Label text="Tema:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+              <ChoiceBox fx:id="themeChoice" 
+                        GridPane.rowIndex="0" GridPane.columnIndex="1" 
+                        prefWidth="200" />
+              
+              <Label text="Idioma:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+              <ChoiceBox fx:id="languageChoice" 
+                        GridPane.rowIndex="1" GridPane.columnIndex="1" 
+                        prefWidth="200" />
+              
+              <Label text="Opacidad de la ventana:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+              <Slider fx:id="opacitySlider" 
+                     min="0.3" max="1.0" value="1.0"
+                     GridPane.rowIndex="2" GridPane.columnIndex="1" 
+                     prefWidth="200" />
+            </GridPane>
+            
+            <CheckBox fx:id="enableAnimationsCheck" 
+                     text="Activar animaciones avanzadas" 
+                     styleClass="check-box" />
+            <CheckBox fx:id="showVisualizerCheck" 
+                     text="Mostrar visualizador de espectro" 
+                     styleClass="check-box" />
+            <CheckBox fx:id="minimizeToTrayCheck" 
+                     text="Minimizar a bandeja del sistema" 
+                     styleClass="check-box" />
+          </VBox>
+
+          <!-- Startup Settings -->
+          <VBox spacing="12">
+            <Label text="Inicio" 
+                   styleClass="label" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Separator />
+            
+            <CheckBox fx:id="autoStartCheck" 
+                     text="Iniciar con el sistema" 
+                     styleClass="check-box" />
+            <CheckBox fx:id="restorePlaylistCheck" 
+                     text="Restaurar playlist al iniciar" 
+                     styleClass="check-box" />
+            <CheckBox fx:id="resumePlaybackCheck" 
+                     text="Continuar reproducción anterior" 
+                     styleClass="check-box" />
+          </VBox>
+        </VBox>
+      </Tab>
+
+      <!-- AUDIO SETTINGS -->
+      <Tab text="Audio" closable="false" styleClass="tab">
+        <VBox spacing="20" styleClass="content-section">
+          <padding>
+            <Insets topRightBottomLeft="20" />
+          </padding>
+          
+          <!-- Playback Settings -->
+          <VBox spacing="12">
+            <Label text="Reproducción" 
+                   styleClass="label" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Separator />
+            
+            <GridPane hgap="16" vgap="12">
+              <Label text="Dispositivo de salida:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+              <ChoiceBox fx:id="audioDeviceChoice" 
+                        GridPane.rowIndex="0" GridPane.columnIndex="1" 
+                        prefWidth="300" />
+              
+              <Label text="Calidad de audio:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+              <ChoiceBox fx:id="audioQualityChoice" 
+                        GridPane.rowIndex="1" GridPane.columnIndex="1" 
+                        prefWidth="300" />
+              
+              <Label text="Buffer de audio:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+              <Slider fx:id="bufferSizeSlider" 
+                     min="1024" max="8192" value="2048"
+                     GridPane.rowIndex="2" GridPane.columnIndex="1" 
+                     prefWidth="300" />
+            </GridPane>
+            
+            <CheckBox fx:id="enableEqualizerCheck" 
+                     text="Activar ecualizador" 
+                     styleClass="check-box" />
+            <CheckBox fx:id="enableCrossfadeCheck" 
+                     text="Activar crossfade entre pistas" 
+                     styleClass="check-box" />
+          </VBox>
+
+          <!-- Volume Settings -->
+          <VBox spacing="12">
+            <Label text="Volumen" 
+                   styleClass="label" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Separator />
+            
+            <GridPane hgap="16" vgap="12">
+              <Label text="Volumen inicial:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+              <Slider fx:id="defaultVolumeSlider" 
+                     min="0" max="100" value="70"
+                     GridPane.rowIndex="0" GridPane.columnIndex="1" 
+                     prefWidth="200" />
+              
+              <Label text="Límite de volumen:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+              <Slider fx:id="maxVolumeSlider" 
+                     min="50" max="100" value="100"
+                     GridPane.rowIndex="1" GridPane.columnIndex="1" 
+                     prefWidth="200" />
+            </GridPane>
+            
+            <CheckBox fx:id="rememberVolumeCheck" 
+                     text="Recordar nivel de volumen" 
+                     styleClass="check-box" />
+            <CheckBox fx:id="volumeBoostCheck" 
+                     text="Activar amplificación de volumen" 
+                     styleClass="check-box" />
+          </VBox>
+        </VBox>
+      </Tab>
+
+      <!-- LIBRARY SETTINGS -->
+      <Tab text="Biblioteca" closable="false" styleClass="tab">
+        <VBox spacing="20" styleClass="content-section">
+          <padding>
+            <Insets topRightBottomLeft="20" />
+          </padding>
+          
+          <!-- Library Folders -->
+          <VBox spacing="12">
+            <Label text="Carpetas de Música" 
+                   styleClass="label" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Separator />
+            
+            <HBox spacing="12" alignment="CENTER_LEFT">
+              <TextField fx:id="libraryPathField" 
+                        promptText="Seleccionar carpeta de música..." 
+                        prefWidth="400" />
+              <Button fx:id="btnBrowseLibrary" text="Examinar" 
+                     styleClass="button" />
+              <Button fx:id="btnAddLibrary" text="Agregar" 
+                     styleClass="button, animated-button" />
+            </HBox>
+            
+            <CheckBox fx:id="scanSubfoldersCheck" 
+                     text="Escanear subcarpetas automáticamente" 
+                     styleClass="check-box" />
+            <CheckBox fx:id="watchFoldersCheck" 
+                     text="Detectar cambios en carpetas" 
+                     styleClass="check-box" />
+            <CheckBox fx:id="autoImportCheck" 
+                     text="Importar automáticamente nuevos archivos" 
+                     styleClass="check-box" />
+          </VBox>
+
+          <!-- File Format Settings -->
+          <VBox spacing="12">
+            <Label text="Formatos de Archivo" 
+                   styleClass="label" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Separator />
+            
+            <VBox spacing="8">
+              <CheckBox fx:id="supportMP3Check" text="MP3" selected="true" styleClass="check-box" />
+              <CheckBox fx:id="supportFLACCheck" text="FLAC" selected="true" styleClass="check-box" />
+              <CheckBox fx:id="supportWAVCheck" text="WAV" selected="true" styleClass="check-box" />
+              <CheckBox fx:id="supportM4ACheck" text="M4A/AAC" selected="true" styleClass="check-box" />
+              <CheckBox fx:id="supportOGGCheck" text="OGG Vorbis" selected="false" styleClass="check-box" />
+            </VBox>
+          </VBox>
+        </VBox>
+      </Tab>
+
+      <!-- NETWORK SETTINGS -->
+      <Tab text="Red" closable="false" styleClass="tab">
+        <VBox spacing="20" styleClass="content-section">
+          <padding>
+            <Insets topRightBottomLeft="20" />
+          </padding>
+          
+          <!-- API Settings -->
+          <VBox spacing="12">
+            <Label text="Configuración de API" 
+                   styleClass="label" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Separator />
+            
+            <GridPane hgap="16" vgap="12">
+              <Label text="URL de la API:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+              <TextField fx:id="apiUrlField" 
+                        text="http://localhost:8000" 
+                        GridPane.rowIndex="0" GridPane.columnIndex="1" 
+                        prefWidth="300" />
+              
+              <Label text="Timeout (segundos):" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+              <Slider fx:id="apiTimeoutSlider" 
+                     min="5" max="60" value="30"
+                     GridPane.rowIndex="1" GridPane.columnIndex="1" 
+                     prefWidth="300" />
+            </GridPane>
+            
+            <HBox spacing="12">
+              <Button fx:id="btnTestConnection" text="Probar Conexión" 
+                     styleClass="button, animated-button" />
+              <Label fx:id="connectionStatusLabel" text="No probado" 
+                     styleClass="label" />
+            </HBox>
+          </VBox>
+
+          <!-- Download Settings -->
+          <VBox spacing="12">
+            <Label text="Descargas" 
+                   styleClass="label" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Separator />
+            
+            <HBox spacing="12" alignment="CENTER_LEFT">
+              <Label text="Carpeta de descargas:" />
+              <TextField fx:id="downloadPathField" 
+                        promptText="Seleccionar carpeta..." 
+                        prefWidth="300" />
+              <Button fx:id="btnBrowseDownload" text="Examinar" 
+                     styleClass="button" />
+            </HBox>
+            
+            <GridPane hgap="16" vgap="12">
+              <Label text="Calidad de descarga:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+              <ChoiceBox fx:id="downloadQualityChoice" 
+                        GridPane.rowIndex="0" GridPane.columnIndex="1" 
+                        prefWidth="200" />
+              
+              <Label text="Descargas simultáneas:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+              <Slider fx:id="maxDownloadsSlider" 
+                     min="1" max="10" value="3"
+                     GridPane.rowIndex="1" GridPane.columnIndex="1" 
+                     prefWidth="200" />
+            </GridPane>
+            
+            <CheckBox fx:id="autoAddDownloadsCheck" 
+                     text="Agregar descargas automáticamente a la playlist" 
+                     styleClass="check-box" />
+          </VBox>
+        </VBox>
+      </Tab>
+    </TabPane>
+  </center>
+
+</BorderPane>

@@ -5,47 +5,141 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" 
-			fx:controller="reproductor.com.musica.controller.PlayerController"
-			fx:id="root">
+            fx:controller="reproductor.com.musica.controller.PlayerController"
+            fx:id="root" styleClass="border-pane">
+            
+  <!-- HEADER TOOLBAR -->
   <top>
-    <ToolBar>
-      <Button fx:id="btnOpen" onAction="#onOpenFile" text="Abrir..." />
-      <Separator />
-      <Button fx:id="btnPrev" onAction="#onPrev" text="Prev ⏮" />
-      <Button fx:id="btnPlay" onAction="#onPlay" text="Play ▶" />
-      <Button fx:id="btnPause" onAction="#onPause" text="Pause ⏸" />
-      <Button fx:id="btnStop" onAction="#onStop" text="Stop ⏹" />
-      <Button fx:id="btnNext" onAction="#onNext" text="Next ⏭" />
-      <Separator />
-      <Label text="Volumen" />
-      <Slider fx:id="volumeSlider" prefWidth="140" />
-      <CheckBox fx:id="muteCheck" onAction="#onToggleMute" text="Mute🔇" />
+    <ToolBar styleClass="tool-bar">
+      <!-- File Operations -->
+      <HBox spacing="8" alignment="CENTER_LEFT">
+        <Button fx:id="btnOpen" onAction="#onOpenFile" text="Abrir Archivos" 
+                styleClass="button, animated-button" />
+        <MenuButton text="Biblioteca" styleClass="button">
+          <items>
+            <MenuItem text="Importar Carpeta" />
+            <MenuItem text="Escanear Biblioteca" />
+            <MenuItem text="Configuración" />
+          </items>
+        </MenuButton>
+        <Button fx:id="btnSearch" text="Buscar Online" 
+                styleClass="button, animated-button" />
+      </HBox>
+      
+      <Region HBox.hgrow="ALWAYS" />
+      
+      <!-- Playback Mode Controls -->
+      <HBox spacing="8" alignment="CENTER_RIGHT">
+        <Button fx:id="btnShuffle" text="Aleatorio" 
+                styleClass="button, animated-button" />
+        <Button fx:id="btnRepeat" text="Repetir" 
+                styleClass="button, animated-button" />
+        <MenuButton text="Vista" styleClass="button">
+          <items>
+            <MenuItem text="Lista Compacta" />
+            <MenuItem text="Lista Detallada" />
+            <MenuItem text="Visualizador" />
+          </items>
+        </MenuButton>
+      </HBox>
     </ToolBar>
   </top>
 
+  <!-- MAIN CONTENT AREA -->
   <center>
-  <VBox spacing="8">
-    <padding>
-      <Insets topRightBottomLeft="12" />
-    </padding>
+    <VBox spacing="16" styleClass="center-panel">
+      <padding>
+        <Insets topRightBottomLeft="20" />
+      </padding>
 
-    <Label fx:id="trackLabel" text="(sin archivo)" />
-    <Slider fx:id="progressSlider" />
-    <HBox spacing="12">
-      <Label fx:id="currentTime" text="00:00" />
-      <Label text="/" />
-      <Label fx:id="totalTime" text="00:00" />
+      <!-- NOW PLAYING SECTION -->
+      <VBox spacing="12" alignment="CENTER">
+        <Label fx:id="trackLabel" text="Selecciona una canción para reproducir" 
+               styleClass="label" />
+        
+        <!-- Progress Control -->
+        <VBox spacing="8" alignment="CENTER">
+          <Slider fx:id="progressSlider" prefWidth="600" 
+                  styleClass="slider" />
+          <HBox spacing="16" alignment="CENTER">
+            <Label fx:id="currentTime" text="00:00" 
+                   styleClass="time-label" />
+            <Label text="•" styleClass="time-label" />
+            <Label fx:id="totalTime" text="00:00" 
+                   styleClass="time-label" />
+          </HBox>
+        </VBox>
+      </VBox>
+
+      <!-- TRANSPORT CONTROLS -->
+      <HBox spacing="16" alignment="CENTER">
+        <Button fx:id="btnPrev" onAction="#onPrev" text="⏮" 
+                styleClass="button, animated-button" 
+                prefWidth="50" prefHeight="50" />
+        <Button fx:id="btnPlay" onAction="#onPlay" text="▶" 
+                styleClass="button, animated-button" 
+                prefWidth="60" prefHeight="60" />
+        <Button fx:id="btnPause" onAction="#onPause" text="⏸" 
+                styleClass="button, animated-button" 
+                prefWidth="60" prefHeight="60" />
+        <Button fx:id="btnStop" onAction="#onStop" text="⏹" 
+                styleClass="button, animated-button" 
+                prefWidth="50" prefHeight="50" />
+        <Button fx:id="btnNext" onAction="#onNext" text="⏭" 
+                styleClass="button, animated-button" 
+                prefWidth="50" prefHeight="50" />
+      </HBox>
+
+      <!-- VOLUME CONTROL SECTION -->
+      <HBox spacing="12" alignment="CENTER">
+        <Label text="Volumen:" styleClass="label" />
+        <Slider fx:id="volumeSlider" prefWidth="200" 
+                styleClass="slider" />
+        <CheckBox fx:id="muteCheck" onAction="#onToggleMute" 
+                  text="Silenciar" styleClass="check-box" />
+      </HBox>
+
+      <!-- PLAYLIST SECTION -->
+      <VBox spacing="8" VBox.vgrow="ALWAYS">
+        <HBox spacing="12" alignment="CENTER_LEFT">
+          <Label text="Lista de Reproducción" 
+                 styleClass="label" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+          <Region HBox.hgrow="ALWAYS" />
+          <Button text="Limpiar Lista" styleClass="button" />
+          <Button text="Guardar Lista" styleClass="button" />
+        </HBox>
+        
+        <ListView fx:id="playlistView" VBox.vgrow="ALWAYS" 
+                  styleClass="list-view" prefHeight="300" />
+      </VBox>
+    </VBox>
+  </center>
+
+  <!-- STATUS BAR (BOTTOM) -->
+  <bottom>
+    <HBox spacing="16" alignment="CENTER_LEFT" 
+          style="-fx-background-color: rgba(26, 26, 46, 0.8); -fx-padding: 8 16;">
+      <Label fx:id="statusLabel" text="Listo" 
+             styleClass="label" style="-fx-font-size: 12px;" />
+      <Region HBox.hgrow="ALWAYS" />
+      <Label fx:id="trackCountLabel" text="0 canciones" 
+             styleClass="label" style="-fx-font-size: 12px;" />
+      <Separator orientation="VERTICAL" />
+      <Label fx:id="totalDurationLabel" text="00:00:00" 
+             styleClass="time-label" />
     </HBox>
-    <ListView fx:id="playlistView" VBox.vgrow="ALWAYS" />
-  </VBox>
-</center>
+  </bottom>
 
 </BorderPane>

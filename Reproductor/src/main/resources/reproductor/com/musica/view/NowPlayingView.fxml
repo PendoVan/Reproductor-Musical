@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="reproductor.com.musica.controller.NowPlayingController"
+            fx:id="nowPlayingRoot" styleClass="border-pane">
+
+  <!-- NOW PLAYING HEADER -->
+  <top>
+    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="header-section">
+      <Button fx:id="btnMinimize" text="↓" 
+              styleClass="button, animated-button" 
+              prefWidth="40" prefHeight="40" />
+      <Region HBox.hgrow="ALWAYS" />
+      <Label text="Reproduciendo Ahora" 
+             styleClass="label" 
+             style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+      <Region HBox.hgrow="ALWAYS" />
+      <Button fx:id="btnSettings" text="⚙" 
+              styleClass="button, animated-button" 
+              prefWidth="40" prefHeight="40" />
+    </HBox>
+  </top>
+
+  <!-- MAIN NOW PLAYING CONTENT -->
+  <center>
+    <VBox spacing="24" alignment="CENTER" styleClass="content-section">
+      <padding>
+        <Insets topRightBottomLeft="32" />
+      </padding>
+      
+      <!-- ALBUM ART SECTION -->
+      <VBox spacing="16" alignment="CENTER">
+        <ImageView fx:id="albumArtView" 
+                   fitWidth="300" fitHeight="300" 
+                   preserveRatio="true" 
+                   styleClass="album-art" />
+        
+        <!-- TRACK INFO -->
+        <VBox spacing="8" alignment="CENTER">
+          <Label fx:id="trackTitleLabel" 
+                 text="Título de la Canción" 
+                 styleClass="label" 
+                 style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+          <Label fx:id="artistNameLabel" 
+                 text="Nombre del Artista" 
+                 styleClass="label" 
+                 style="-fx-font-size: 18px; -fx-text-fill: #cbd5e1;" />
+          <Label fx:id="albumNameLabel" 
+                 text="Nombre del Álbum" 
+                 styleClass="label" 
+                 style="-fx-font-size: 16px; -fx-text-fill: #94a3b8;" />
+        </VBox>
+      </VBox>
+
+      <!-- PROGRESS SECTION -->
+      <VBox spacing="12" alignment="CENTER" prefWidth="400">
+        <Slider fx:id="trackProgressSlider" 
+                prefWidth="400" 
+                styleClass="slider" />
+        <HBox spacing="16" alignment="CENTER">
+          <Label fx:id="currentTimeLabel" text="00:00" 
+                 styleClass="time-label" 
+                 style="-fx-font-size: 14px;" />
+          <Region HBox.hgrow="ALWAYS" />
+          <Label fx:id="remainingTimeLabel" text="-00:00" 
+                 styleClass="time-label" 
+                 style="-fx-font-size: 14px;" />
+          <Label fx:id="totalTimeLabel" text="00:00" 
+                 styleClass="time-label" 
+                 style="-fx-font-size: 14px;" />
+        </HBox>
+      </VBox>
+
+      <!-- TRANSPORT CONTROLS -->
+      <HBox spacing="20" alignment="CENTER">
+        <Button fx:id="btnShuffle" text="🔀" 
+                styleClass="button, animated-button" 
+                prefWidth="50" prefHeight="50" />
+        <Button fx:id="btnPrevious" text="⏮" 
+                styleClass="button, animated-button" 
+                prefWidth="60" prefHeight="60" />
+        <Button fx:id="btnPlayPause" text="▶" 
+                styleClass="button, animated-button" 
+                prefWidth="80" prefHeight="80" 
+                style="-fx-font-size: 24px;" />
+        <Button fx:id="btnNext" text="⏭" 
+                styleClass="button, animated-button" 
+                prefWidth="60" prefHeight="60" />
+        <Button fx:id="btnRepeat" text="🔁" 
+                styleClass="button, animated-button" 
+                prefWidth="50" prefHeight="50" />
+      </HBox>
+
+      <!-- ADDITIONAL CONTROLS -->
+      <HBox spacing="16" alignment="CENTER">
+        <Button fx:id="btnLike" text="♡" 
+                styleClass="button, animated-button" />
+        <Button fx:id="btnAddToPlaylist" text="+" 
+                styleClass="button, animated-button" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label text="Vol:" styleClass="label" />
+        <Slider fx:id="volumeSlider" 
+                prefWidth="120" 
+                styleClass="slider" />
+        <Button fx:id="btnMute" text="🔊" 
+                styleClass="button, animated-button" />
+      </HBox>
+    </VBox>
+  </center>
+
+  <!-- ADDITIONAL INFO FOOTER -->
+  <bottom>
+    <VBox spacing="8" styleClass="footer-section">
+      <!-- Audio Quality & Info -->
+      <HBox spacing="16" alignment="CENTER_LEFT">
+        <Label fx:id="qualityLabel" text="MP3 • 320kbps" 
+               styleClass="label" 
+               style="-fx-font-size: 12px;" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label fx:id="bitrateLabel" text="44.1kHz" 
+               styleClass="label" 
+               style="-fx-font-size: 12px;" />
+        <Label fx:id="sizeLabel" text="8.5 MB" 
+               styleClass="label" 
+               style="-fx-font-size: 12px;" />
+      </HBox>
+      
+      <!-- Playback Mode & Stats -->
+      <HBox spacing="16" alignment="CENTER_LEFT">
+        <Label fx:id="playbackModeLabel" text="Modo: Normal" 
+               styleClass="label" 
+               style="-fx-font-size: 12px;" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label fx:id="playCountLabel" text="Reproducido 3 veces" 
+               styleClass="label" 
+               style="-fx-font-size: 12px;" />
+      </HBox>
+    </VBox>
+  </bottom>
+
+</BorderPane>
