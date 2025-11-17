@@ -29,8 +29,7 @@
                 styleClass="button, animated-button" />
         <Region HBox.hgrow="ALWAYS" />
         <Label text="Búsqueda Online de Música"
-               styleClass="label"
-               style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+               styleClass="search-title" />
         <Region HBox.hgrow="ALWAYS" />
       </HBox>
 

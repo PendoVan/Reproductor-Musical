@@ -203,6 +203,51 @@ public class SearchController {
                 new javafx.beans.property.SimpleStringProperty(
                         formatDuration(cellData.getValue().getDurationSeconds())));
 
+        // Aplicar clases CSS específicas a cada columna
+        titleColumn.setCellFactory(column -> {
+            var cell = new javafx.scene.control.TableCell<Song, String>();
+            cell.getStyleClass().add("title-cell");
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null) {
+                    cell.setText(newItem);
+                }
+            });
+            return cell;
+        });
+
+        artistColumn.setCellFactory(column -> {
+            var cell = new javafx.scene.control.TableCell<Song, String>();
+            cell.getStyleClass().add("artist-cell");
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null) {
+                    cell.setText(newItem);
+                }
+            });
+            return cell;
+        });
+
+        albumColumn.setCellFactory(column -> {
+            var cell = new javafx.scene.control.TableCell<Song, String>();
+            cell.getStyleClass().add("album-cell");
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null) {
+                    cell.setText(newItem);
+                }
+            });
+            return cell;
+        });
+
+        durationColumn.setCellFactory(column -> {
+            var cell = new javafx.scene.control.TableCell<Song, String>();
+            cell.getStyleClass().add("duration-cell");
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null) {
+                    cell.setText(newItem);
+                }
+            });
+            return cell;
+        });
+
         // Permitir selección múltiple
         resultsTable.getSelectionModel().setSelectionMode(
                 SelectionMode.MULTIPLE);
