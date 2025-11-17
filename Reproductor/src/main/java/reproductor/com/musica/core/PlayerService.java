@@ -1,14 +1,7 @@
 package reproductor.com.musica.core;
 
 import java.io.File;
-import java.nio.file.Path;
-
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
@@ -93,7 +86,10 @@ public class PlayerService {
     // ========= CONTROL DE REPRODUCCIÓN =========
 
     public void playSong(Song song) {
-        if (song == null) return;
+        if (song == null) {
+            System.err.println("[PlayerService] Song es null");
+            return;
+        }
 
         // Si ya está ese mismo song y solo estaba pausado, reanudar
         if (song.equals(currentSong.get()) && mediaPlayer != null) {
@@ -106,40 +102,61 @@ public class PlayerService {
 
         currentSong.set(song);
         String uri = resolveMediaUri(song);
+        
         if (uri == null) {
-            System.err.println("[PlayerService] No se pudo obtener la ruta de la canción");
+            System.err.println("[PlayerService] No se pudo obtener la ruta de la canción: " + song.getTitle());
             return;
         }
 
-        Media media = new Media(uri);
-        mediaPlayer = new MediaPlayer(media);
+        try {
+            Media media = new Media(uri);
+            mediaPlayer = new MediaPlayer(media);
 
-        mediaPlayer.setOnReady(() -> {
-            Duration dur = mediaPlayer.getTotalDuration();
-            totalDurationSeconds.set(dur.toSeconds());
-        });
+            mediaPlayer.setOnReady(() -> {
+                Duration dur = mediaPlayer.getTotalDuration();
+                totalDurationSeconds.set(dur.toSeconds());
+                System.out.println("[PlayerService] Canción lista: " + song.getTitle() + 
+                                 " - Duración: " + dur.toSeconds() + "s");
+            });
 
-        mediaPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) ->
-                currentTimeSeconds.set(newTime.toSeconds()));
+            mediaPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) ->
+                    currentTimeSeconds.set(newTime.toSeconds()));
 
-        mediaPlayer.setOnPlaying(() -> {
-            playing.set(true);
-            stoppedByEndOfMedia = false;
-        });
+            mediaPlayer.setOnPlaying(() -> {
+                playing.set(true);
+                stoppedByEndOfMedia = false;
+                System.out.println("[PlayerService] Reproduciendo: " + song.getTitle());
+            });
 
-        mediaPlayer.setOnPaused(() -> playing.set(false));
+            mediaPlayer.setOnPaused(() -> {
+                playing.set(false);
+                System.out.println("[PlayerService] Pausado");
+            });
 
-        mediaPlayer.setOnStopped(() -> playing.set(false));
+            mediaPlayer.setOnStopped(() -> {
+                playing.set(false);
+                System.out.println("[PlayerService] Detenido");
+            });
 
-        mediaPlayer.setOnEndOfMedia(() -> {
-            playing.set(false);
-            stoppedByEndOfMedia = true;
-        });
+            mediaPlayer.setOnEndOfMedia(() -> {
+                playing.set(false);
+                stoppedByEndOfMedia = true;
+                System.out.println("[PlayerService] Fin del medio");
+            });
 
-        mediaPlayer.setVolume(clamp(volume.get(), 0.0, 1.0));
-        mediaPlayer.setMute(muted.get());
+            mediaPlayer.setOnError(() -> {
+                System.err.println("[PlayerService] Error: " + mediaPlayer.getError().getMessage());
+            });
 
-        mediaPlayer.play();
+            mediaPlayer.setVolume(clamp(volume.get(), 0.0, 1.0));
+            mediaPlayer.setMute(muted.get());
+
+            mediaPlayer.play();
+            
+        } catch (Exception e) {
+            System.err.println("[PlayerService] Error al crear Media/MediaPlayer: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public void pause() {
@@ -157,7 +174,6 @@ public class PlayerService {
 
     /**
      * Mueve la reproducción a una fracción de la duración total.
-     * Si fraction es relativo (0..1), se usa como multiplicador.
      */
     public void seekToFraction(double fraction) {
         if (mediaPlayer == null) return;
@@ -189,10 +205,24 @@ public class PlayerService {
     private String resolveMediaUri(Song song) {
         if (song == null) return null;
 
-        String filePath = song.getFilePath();
+        // CORRECCIÓN: Usar getFilePathString() en lugar de getFilePath()
+        String filePathString = song.getFilePathString();
 
-        if (filePath == null) return null;
-        return new File(filePath).toURI().toString();
+        if (filePathString == null || filePathString.isEmpty()) {
+            System.err.println("[PlayerService] La ruta del archivo es null o vacía");
+            return null;
+        }
+
+        File file = new File(filePathString);
+        
+        if (!file.exists()) {
+            System.err.println("[PlayerService] El archivo no existe: " + filePathString);
+            return null;
+        }
+
+        String uri = file.toURI().toString();
+        System.out.println("[PlayerService] URI resuelto: " + uri);
+        return uri;
     }
 
     private static double clamp(double value, double min, double max) {

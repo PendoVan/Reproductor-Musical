@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import reproductor.com.musica.api.ApiException;
 import reproductor.com.musica.api.SearchService;
 import reproductor.com.musica.core.PlaylistService;
@@ -41,22 +42,20 @@ public class SearchController {
     @FXML private Button btnSelectAll;
 
     private final SearchService searchService;
-    private final PlaylistService playlistService;
+    private PlaylistService playlistService;
     private final ObservableList<Song> searchResults;
 
     public SearchController() {
         this.searchService = new SearchService();
-        this.playlistService = new PlaylistService(); // o inyectar desde fuera
         this.searchResults = FXCollections.observableArrayList();
     }
 
     /**
-     * Constructor con inyección de dependencias (opcional si algún día quieres usarlo).
+     * Permite inyectar el PlaylistService desde el PlayerController
      */
-    public SearchController(SearchService searchService, PlaylistService playlistService) {
-        this.searchService = searchService != null ? searchService : new SearchService();
-        this.playlistService = playlistService != null ? playlistService : new PlaylistService();
-        this.searchResults = FXCollections.observableArrayList();
+    public void setPlaylistService(PlaylistService playlistService) {
+        this.playlistService = playlistService;
+        System.out.println("[SearchController] PlaylistService inyectado correctamente");
     }
 
     @FXML
@@ -64,6 +63,13 @@ public class SearchController {
         setupTableColumns();
         setupTableData();
         checkApiConnection();
+        
+        // Configurar botón de cerrar
+        if (btnBack != null) {
+            btnBack.setOnAction(e -> closeWindow());
+        }
+        
+        System.out.println("[SearchController] Inicializado");
     }
 
     @FXML
@@ -89,6 +95,11 @@ public class SearchController {
 
     @FXML
     private void onAddToPlaylistClicked() {
+        if (playlistService == null) {
+            showError("Error: PlaylistService no está inicializado");
+            return;
+        }
+
         List<Song> selected = resultsTable.getSelectionModel().getSelectedItems();
 
         if (selected == null || selected.isEmpty()) {
@@ -97,7 +108,9 @@ public class SearchController {
         }
 
         playlistService.addSongs(selected);
-        showInfo("Agregadas " + selected.size() + " canciones a la playlist");
+        showInfo("✅ Agregadas " + selected.size() + " canciones a la playlist");
+        
+        System.out.println("[SearchController] Agregadas " + selected.size() + " canciones");
     }
 
     @FXML
@@ -110,7 +123,7 @@ public class SearchController {
     private void performSearch(List<String> searchTerms) {
         disableSearchControls(true);
         searchProgress.setVisible(true);
-        searchStatusLabel.setText("Buscando...");
+        searchStatusLabel.setText("🔍 Buscando y descargando...");
 
         Task<List<Song>> searchTask = searchService.searchAndDownloadAsync(searchTerms);
 
@@ -125,9 +138,11 @@ public class SearchController {
             resultsTable.refresh();
 
             resultsCountLabel.setText(results.size() + " resultados");
-            searchStatusLabel.setText("Búsqueda completada");
+            searchStatusLabel.setText("✅ Búsqueda completada - " + results.size() + " canciones encontradas");
             disableSearchControls(false);
             searchProgress.setVisible(false);
+            
+            System.out.println("[SearchController] Búsqueda exitosa: " + results.size() + " resultados");
         });
 
         searchTask.setOnFailed(event -> {
@@ -136,11 +151,17 @@ public class SearchController {
             searchProgress.setVisible(false);
             disableSearchControls(false);
 
+            String errorMsg;
             if (ex instanceof ApiException apiEx) {
-                showError("Error en la API: " + apiEx.getMessage());
+                errorMsg = "Error en la API: " + apiEx.getMessage();
             } else {
-                showError("Error inesperado al buscar: " + ex.getMessage());
+                errorMsg = "Error inesperado: " + ex.getMessage();
             }
+            
+            searchStatusLabel.setText("❌ " + errorMsg);
+            showError(errorMsg);
+            
+            System.err.println("[SearchController] Error en búsqueda: " + errorMsg);
             ex.printStackTrace();
         });
 
@@ -155,10 +176,12 @@ public class SearchController {
         btnAddSelected.setDisable(disable);
         btnSelectAll.setDisable(disable);
         resultsTable.setDisable(disable);
+        searchField.setDisable(disable);
     }
 
     private List<String> parseSearchQuery(String query) {
-        return Arrays.stream(query.split(","))
+        // Permite separar por coma o línea nueva
+        return Arrays.stream(query.split("[,\\n]"))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
@@ -192,9 +215,9 @@ public class SearchController {
         resultsTable.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 Song selected = resultsTable.getSelectionModel().getSelectedItem();
-                if (selected != null) {
+                if (selected != null && playlistService != null) {
                     playlistService.addSong(selected);
-                    showInfo("Agregado: " + selected.getTitle());
+                    showInfo("✅ Agregado: " + selected.getTitle());
                 }
             }
         });
@@ -203,13 +226,29 @@ public class SearchController {
     // ===== HELPERS =====
 
     private void checkApiConnection() {
-        // Esto es un ejemplo; si tienes un método real de healthcheck, llámalo aquí.
-        new Thread(() -> {
+        Task<Boolean> connectionTask = searchService.checkApiConnectionAsync();
+        
+        connectionTask.setOnSucceeded(e -> {
+            boolean connected = connectionTask.getValue();
             Platform.runLater(() -> {
-                connectionStatusLabel.setText("Conectado");
-                connectionStatusLabel.getStyleClass().add("connection-success");
+                if (connected) {
+                    connectionStatusLabel.setText("🟢 Conectado");
+                    connectionStatusLabel.setStyle("-fx-text-fill: #1DB954;");
+                } else {
+                    connectionStatusLabel.setText("🔴 Desconectado");
+                    connectionStatusLabel.setStyle("-fx-text-fill: #f44336;");
+                }
             });
-        }).start();
+        });
+        
+        connectionTask.setOnFailed(e -> {
+            Platform.runLater(() -> {
+                connectionStatusLabel.setText("🔴 Error de conexión");
+                connectionStatusLabel.setStyle("-fx-text-fill: #f44336;");
+            });
+        });
+        
+        new Thread(connectionTask).start();
     }
 
     private String formatDuration(double seconds) {
@@ -217,6 +256,11 @@ public class SearchController {
         int m = total / 60;
         int s = total % 60;
         return String.format("%02d:%02d", m, s);
+    }
+
+    private void closeWindow() {
+        Stage stage = (Stage) searchField.getScene().getWindow();
+        stage.close();
     }
 
     private void showInfo(String message) {

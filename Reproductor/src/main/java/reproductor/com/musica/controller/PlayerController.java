@@ -1,21 +1,21 @@
 package reproductor.com.musica.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.prefs.Preferences;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import reproductor.com.musica.core.PlayerService;
 import reproductor.com.musica.core.PlaylistService;
@@ -82,7 +82,9 @@ public class PlayerController {
         setupVolumeControl();
         setupProgressControl();
         setupKeyboardShortcuts();
-        updateStatus("Listo");
+        updateStatus("Listo - Abre archivos o busca música online");
+        
+        System.out.println("[PlayerController] Inicializado correctamente");
     }
 
     // ==========================
@@ -130,7 +132,7 @@ public class PlayerController {
         // Cambiar texto de pista cuando cambia la canción
         player.currentSongProperty().addListener((obs, oldSong, newSong) -> {
             if (newSong != null) {
-                trackLabel.setText(newSong.getTitle());
+                trackLabel.setText(newSong.toString());
             } else {
                 trackLabel.setText("Selecciona una canción para reproducir");
             }
@@ -173,23 +175,25 @@ public class PlayerController {
     private void setupProgressControl() {
         progressSlider.setOnMouseReleased(event -> {
             double progress = progressSlider.getValue();
-            seekProgress(progress);
+            player.seekToFraction(progress);
         });
     }
 
     private void setupKeyboardShortcuts() {
-        Platform.runLater(() ->
+        Platform.runLater(() -> {
+            if (root.getScene() != null) {
                 root.getScene().setOnKeyPressed(event -> {
                     switch (event.getCode()) {
                         case SPACE -> togglePlayPause();
                         case UP -> adjustVolume(0.05);
                         case DOWN -> adjustVolume(-0.05);
-                        case RIGHT -> seekProgress(0.05);
-                        case LEFT -> seekProgress(-0.05);
+                        case RIGHT -> adjustProgress(0.05);
+                        case LEFT -> adjustProgress(-0.05);
                         default -> {}
                     }
-                })
-        );
+                });
+            }
+        });
     }
 
     // ==========================
@@ -211,9 +215,9 @@ public class PlayerController {
             List<Song> added = playlist.addFiles(files);
             if (!added.isEmpty()) {
                 playlistView.getSelectionModel().select(added.get(0));
-                updateStatus("Se agregaron " + added.size() + " canciones a la lista");
+                updateStatus("✅ Se agregaron " + added.size() + " canciones a la lista");
             } else {
-                updateStatus("No se agregaron canciones válidas");
+                updateStatus("❌ No se agregaron canciones válidas");
             }
         }
     }
@@ -281,10 +285,9 @@ public class PlayerController {
     private void adjustVolume(double delta) {
         double newVolume = clamp(player.getVolume() + delta, 0.0, 1.0);
         volumeSlider.setValue(newVolume);
-        player.setVolume(newVolume);
     }
 
-    private void seekProgress(double deltaFraction) {
+    private void adjustProgress(double deltaFraction) {
         double progress = clamp(progressSlider.getValue() + deltaFraction, 0.0, 1.0);
         progressSlider.setValue(progress);
         player.seekToFraction(progress);
@@ -307,12 +310,10 @@ public class PlayerController {
             playlist.setPlaybackMode(PlaybackMode.NORMAL);
             updateShuffleButton(false);
             updateStatus("🔀 Aleatorio: DESACTIVADO");
-            System.out.println("🔀 Modo Aleatorio desactivado");
         } else {
             playlist.setPlaybackMode(PlaybackMode.SHUFFLE);
             updateShuffleButton(true);
             updateStatus("🔀 Aleatorio: ACTIVADO");
-            System.out.println("🔀 Modo Aleatorio activado");
         }
     }
 
@@ -324,19 +325,16 @@ public class PlayerController {
                 playlist.setPlaybackMode(PlaybackMode.REPEAT_ALL);
                 updateRepeatButton(PlaybackMode.REPEAT_ALL);
                 updateStatus("🔁 Repetir: TODA LA LISTA");
-                System.out.println("🔁 Modo Repetir Todo activado");
                 break;
             case REPEAT_ALL:
                 playlist.setPlaybackMode(PlaybackMode.REPEAT_ONE);
                 updateRepeatButton(PlaybackMode.REPEAT_ONE);
                 updateStatus("🔂 Repetir: CANCIÓN ACTUAL");
-                System.out.println("🔂 Modo Repetir Una activado");
                 break;
             case REPEAT_ONE:
                 playlist.setPlaybackMode(PlaybackMode.NORMAL);
                 updateRepeatButton(PlaybackMode.NORMAL);
                 updateStatus("▶️ Repetir: DESACTIVADO");
-                System.out.println("▶️ Modo Repetir desactivado");
                 break;
         }
     }
@@ -359,14 +357,41 @@ public class PlayerController {
     }
 
     // ==========================
-    // BÚSQUEDA ONLINE (CAMBIO DE VISTA)
+    // BÚSQUEDA ONLINE
     // ==========================
 
     @FXML
     public void onSearchClicked() {
-        // Aquí solo dejas un TODO por ahora o abres otra ventana con SearchView.fxml.
-        System.out.println("Buscar Online clickeado - navegación a SearchView pendiente");
-        updateStatus("Búsqueda online aún no implementada");
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/reproductor/com/musica/view/SearchView.fxml")
+            );
+            
+            Parent searchRoot = loader.load();
+            
+            // Obtener el controlador y pasarle la referencia del PlaylistService
+            SearchController searchController = loader.getController();
+            searchController.setPlaylistService(playlist);
+            
+            // Crear nueva ventana modal
+            Stage searchStage = new Stage();
+            searchStage.setTitle("Buscar Música Online");
+            searchStage.initModality(Modality.APPLICATION_MODAL);
+            searchStage.initOwner(root.getScene().getWindow());
+            
+            Scene scene = new Scene(searchRoot, 900, 600);
+            searchStage.setScene(scene);
+            
+            updateStatus("🔍 Abriendo búsqueda online...");
+            searchStage.showAndWait();
+            
+            updateStatus("Lista actualizada con nuevas canciones");
+            
+        } catch (IOException e) {
+            System.err.println("[PlayerController] Error al abrir SearchView: " + e.getMessage());
+            e.printStackTrace();
+            showError("Error al abrir la ventana de búsqueda: " + e.getMessage());
+        }
     }
 
     // ==========================
@@ -374,13 +399,23 @@ public class PlayerController {
     // ==========================
 
     public void onClearPlaylist(ActionEvent e) {
-        playlist.clearCurrentPlaylist();
-        updateStatus("Lista de reproducción limpiada");
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmar");
+        confirm.setHeaderText("¿Limpiar toda la lista?");
+        confirm.setContentText("Esta acción eliminará todas las canciones de la lista actual.");
+        
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                playlist.clearCurrentPlaylist();
+                updateStatus("🗑️ Lista de reproducción limpiada");
+            }
+        });
     }
 
     public void onSavePlaylist(ActionEvent e) {
         playlist.saveCurrentPlaylist();
-        updateStatus("Lista de reproducción guardada");
+        updateStatus("💾 Lista de reproducción guardada");
+        showInfo("Funcionalidad de guardado en desarrollo");
     }
 
     // ==========================
@@ -389,6 +424,7 @@ public class PlayerController {
 
     private void updateStatus(String message) {
         statusLabel.setText(message);
+        System.out.println("[Status] " + message);
     }
 
     private static double clamp(double value, double min, double max) {
@@ -410,6 +446,10 @@ public class PlayerController {
 
     private void showInfo(String msg) {
         showAlert(Alert.AlertType.INFORMATION, "Información", msg);
+    }
+
+    private void showError(String msg) {
+        showAlert(Alert.AlertType.ERROR, "Error", msg);
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
