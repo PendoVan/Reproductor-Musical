@@ -1,128 +1,184 @@
 package reproductor.com.musica.core;
 
+import java.net.MalformedURLException;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
-
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.time.temporal.ChronoUnit;
-import java.util.Objects;
-import java.util.function.Consumer;
+import reproductor.com.musica.model.Song;
 
 public class PlayerService {
 
-    private MediaPlayer player;
-    private String currentTitle;
+    private MediaPlayer mediaPlayer;
 
-    private Consumer<Update> onUpdate = update -> {};
-    private Consumer<String> onError = message -> {};
+    private final ObjectProperty<Song> currentSong = new SimpleObjectProperty<>();
+    private final DoubleProperty currentTimeSeconds = new SimpleDoubleProperty(0);
+    private final DoubleProperty totalDurationSeconds = new SimpleDoubleProperty(0);
+    private final DoubleProperty volume = new SimpleDoubleProperty(0.5);
+    private final BooleanProperty playing = new SimpleBooleanProperty(false);
 
-    /** Registro inmutable que contiene la información de progreso actual del reproductor. */
-    public record Update(java.time.Duration current, java.time.Duration total, double ratio, String title) {}
-
-    // === Event Handlers ===
-    public void onUpdate(Consumer<Update> handler) {
-        this.onUpdate = Objects.requireNonNull(handler);
+    public PlayerService() {
+        // volumen por defecto al 50%
+        volume.addListener((obs, oldV, newV) -> {
+            if (mediaPlayer != null) {
+                mediaPlayer.setVolume(newV.doubleValue());
+            }
+        });
     }
 
-    public void onError(Consumer<String> handler) {
-        this.onError = Objects.requireNonNull(handler);
+    // Propiedades para la UI
+    public ReadOnlyObjectProperty<Song> currentSongProperty() {
+        return currentSong;
     }
 
-    // === Core Methods ===
-    public void open(Path path) {
-        stop();
-        try {
-            Media media = new Media(path.toUri().toURL().toExternalForm());
-            player = new MediaPlayer(media);
-
-            configurePlayer(media, path);
-            currentTitle = path.getFileName().toString();
-
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Ruta inválida: " + path, e);
-        }
+    public Song getCurrentSong() {
+        return currentSong.get();
     }
 
-    private void configurePlayer(Media media, Path path) {
-        player.setOnReady(this::notifyUpdate);
-        player.currentTimeProperty().addListener((obs, oldVal, newVal) -> notifyUpdate());
-        player.setOnEndOfMedia(this::notifyUpdate);
-
-        player.setOnError(() -> onError.accept("Error de reproducción: " + player.getError()));
-        media.setOnError(() -> onError.accept("Archivo no soportado o corrupto: " + path.getFileName()));
+    public ReadOnlyDoubleProperty currentTimeSecondsProperty() {
+        return currentTimeSeconds;
     }
 
-    public void play() {
-        if (player != null) player.play();
+    public double getCurrentTimeSeconds() {
+        return currentTimeSeconds.get();
     }
 
-    public void pause() {
-        if (player != null) player.pause();
+    public ReadOnlyDoubleProperty totalDurationSecondsProperty() {
+        return totalDurationSeconds;
     }
 
-    public void stop() {
-        if (player != null) {
-            player.stop();
-            player.dispose();
-            player = null;
-        }
+    public double getTotalDurationSeconds() {
+        return totalDurationSeconds.get();
     }
 
-    public void setVolume(double volume) {
-        if (player != null) player.setVolume(volume);
+    public DoubleProperty volumeProperty() {
+        return volume;
     }
 
-    public void setMute(boolean mute) {
-        if (player != null) player.setMute(mute);
+    public double getVolume() {
+        return volume.get();
+    }
+
+    public void setVolume(double value) {
+        volume.set(clamp(value, 0.0, 1.0));
+    }
+
+    public ReadOnlyBooleanProperty playingProperty() {
+        return playing;
     }
 
     public boolean isPlaying() {
-        return player != null && player.getStatus() == MediaPlayer.Status.PLAYING;
+        return playing.get();
     }
 
-    // === Seek & Progress ===
-    public void seekByRatio(double ratio) {
-        if (player == null) return;
+    // Control de reproducción
+    
+    //Carga y reproduce la canción indicada.
+    public void playSong(Song song) {
+        if (song == null) return;
 
-        ratio = clamp(ratio, 0.0, 1.0);
-        Duration total = player.getTotalDuration();
+        disposeMediaPlayer();
 
-        if (total == null || total.isUnknown()) return;
-        player.seek(total.multiply(ratio));
+        String source = buildMediaSource(song);
+        Media media = new Media(source);
+        mediaPlayer = new MediaPlayer(media);
+        mediaPlayer.setVolume(volume.get());
+
+        // listeners para tiempo y estado
+        mediaPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) -> {
+            currentTimeSeconds.set(newTime.toSeconds());
+        });
+
+        mediaPlayer.setOnReady(() -> {
+            Duration total = mediaPlayer.getMedia().getDuration();
+            totalDurationSeconds.set(total.toSeconds());
+        });
+
+        mediaPlayer.setOnPlaying(() -> playing.set(true));
+        mediaPlayer.setOnPaused(() -> playing.set(false));
+        mediaPlayer.setOnStopped(() -> playing.set(false));
+        mediaPlayer.setOnEndOfMedia(() -> playing.set(false));
+
+        currentSong.set(song);
+        mediaPlayer.play();
     }
 
-    private void notifyUpdate() {
-        if (player == null) {
-            onUpdate.accept(new Update(null, null, 0, null));
-            return;
+     // Reanuda la reproducción si hay una canción cargada.
+    public void play() {
+        if (mediaPlayer != null) {
+            mediaPlayer.play();
+        }
+    }
+
+     // Pausa la reproducción actual.
+    public void pause() {
+        if (mediaPlayer != null) {
+            mediaPlayer.pause();
+        }
+    }
+
+     // Detiene la reproducción actual y reinicia el tiempo a 0.
+    public void stop() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+        }
+    }
+
+     // Salta a un punto de la canción según un progreso 0.0–1.0.
+    public void seek(double progress) {
+        if (mediaPlayer == null || totalDurationSeconds.get() <= 0) return;
+        progress = clamp(progress, 0.0, 1.0);
+        double targetSeconds = totalDurationSeconds.get() * progress;
+        mediaPlayer.seek(Duration.seconds(targetSeconds));
+    }
+
+     // Libera recursos del MediaPlayer actual.
+    public void dispose() {
+        disposeMediaPlayer();
+    }
+
+    // Helpers internos
+    private void disposeMediaPlayer() {
+        if (mediaPlayer != null) {
+            try {
+                mediaPlayer.stop();
+            } catch (Exception ignored) {
+            }
+            mediaPlayer.dispose();
+            mediaPlayer = null;
+        }
+        currentTimeSeconds.set(0);
+        totalDurationSeconds.set(0);
+        playing.set(false);
+    }
+
+    private String buildMediaSource(Song song) {
+        try {
+            if (song.isLocal() && song.getFilePath() != null) {
+                return song.getFilePath().toUri().toURL().toExternalForm();
+            }
+        } catch (MalformedURLException e) {
+            // si falla, intentaremos streamUrl
         }
 
-        Duration currentFx = player.getCurrentTime();
-        Duration totalFx = player.getTotalDuration();
-        double ratio = calculateRatio(currentFx, totalFx);
+        if (song.isRemote() && song.getStreamUrl() != null) {
+            return song.getStreamUrl();
+        }
 
-        onUpdate.accept(new Update(
-                toJavaDuration(currentFx),
-                totalFx == null || totalFx.isUnknown() ? null : toJavaDuration(totalFx),
-                ratio,
-                currentTitle
-        ));
-    }
-
-    // === Utility Methods ===
-    private double calculateRatio(Duration current, Duration total) {
-        if (total == null || total.isUnknown() || total.toMillis() == 0) return 0;
-        return current.toMillis() / total.toMillis();
-    }
-
-    private java.time.Duration toJavaDuration(Duration fxDuration) {
-        return java.time.Duration.of((long) fxDuration.toMillis(), ChronoUnit.MILLIS);
+        throw new IllegalArgumentException("La canción no tiene una fuente válida (filePath o streamUrl).");
     }
 
     private double clamp(double value, double min, double max) {
-        return Math.max(min, Math.min(max, value));
+        if (value < min) return min;
+        return Math.min(value, max);
     }
 }
-
