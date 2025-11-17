@@ -1,435 +1,203 @@
 package reproductor.com.musica.core;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.nio.file.Path;
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import reproductor.com.musica.model.PlaybackMode;
 import reproductor.com.musica.model.Song;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class PlaylistServiceTest {
 
     private PlaylistService playlist;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         playlist = new PlaylistService();
     }
 
-    // ------------------------------------------------------------
-    // Inicialización
-    // ------------------------------------------------------------
-
-    @Test
-    void testInitialState() {
-        assertEquals(-1, playlist.getCurrentIndex());
-        assertEquals(0, playlist.getSongs().size());
-        assertEquals(PlaybackMode.NORMAL, playlist.getPlaybackMode());
+    private Song song(String title, double duration) {
+        return new Song(title, "/tmp/" + title, duration);
     }
 
-    // ------------------------------------------------------------
-    // setCurrentIndex
-    // ------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // --------------------- TESTS BÁSICOS ---------------------------
+    // ---------------------------------------------------------------
 
     @Test
-    void testSetCurrentIndex_Valid() {
-        Song s = new Song("A", "", Path.of("A.mp3"));
-        playlist.addSong(s);
-
-        playlist.setCurrentIndex(0);
-        assertEquals(0, playlist.getCurrentIndex());
-    }
-
-    @Test
-    void testSetCurrentIndex_InvalidNegative() {
-        playlist.setCurrentIndex(-5);
-        assertEquals(-1, playlist.getCurrentIndex());
-    }
-
-    @Test
-    void testSetCurrentIndex_OutOfBounds() {
-        Song s = new Song("A", "", Path.of("A.mp3"));
-        playlist.addSong(s);
-
-        playlist.setCurrentIndex(99);
-        assertEquals(-1, playlist.getCurrentIndex());
-    }
-
-    // ------------------------------------------------------------
-    // addSong
-    // ------------------------------------------------------------
-
-    @Test
-    void testAddSong_Normal() {
-        Song s = new Song("A", "", Path.of("A.mp3"));
-        playlist.addSong(s);
-
-        assertEquals(1, playlist.getSongs().size());
-        assertEquals(0, playlist.getCurrentIndex());
-        assertEquals(s, playlist.getCurrentSong());
-    }
-
-    @Test
-    void testAddSong_NullIgnored() {
-        playlist.addSong(null);
-        assertTrue(playlist.getSongs().isEmpty());
-        assertEquals(-1, playlist.getCurrentIndex());
-    }
-
-    @Test
-    void testAddSong_AfterFirstCurrentIndexRemains() {
-        Song s1 = new Song("A", "", Path.of("A.mp3"));
-        Song s2 = new Song("B", "", Path.of("B.mp3"));
+    void testAddSongUpdatesDuration() {
+        Song s1 = song("A", 10);
+        Song s2 = song("B", 20);
 
         playlist.addSong(s1);
         playlist.addSong(s2);
 
-        assertEquals(0, playlist.getCurrentIndex());
-    }
-
-    // ------------------------------------------------------------
-    // add(Path)
-    // ------------------------------------------------------------
-
-    @Test
-    void testAddPath() {
-        Path p = Path.of("song.mp3");
-        playlist.add(p);
-
-        assertEquals(1, playlist.getSongs().size());
-        assertEquals("song.mp3", playlist.getSongs().get(0).getTitle());
+        assertEquals(2, playlist.getSongs().size());
+        assertEquals(30, playlist.totalDurationProperty().get(), 0.001);
     }
 
     @Test
-    void testAddPath_NullDoesNothing() {
-        playlist.add(null);
-        assertTrue(playlist.getSongs().isEmpty());
+    void testAddSongs() {
+        List<Song> list = List.of(song("A", 5), song("B", 15));
+
+        playlist.addSongs(list);
+
+        assertEquals(2, playlist.getSongs().size());
+        assertEquals(20, playlist.totalDurationProperty().get(), 0.001);
     }
 
-    // ------------------------------------------------------------
-    // addSongs(Collection)
-    // ------------------------------------------------------------
-
     @Test
-    void testAddSongs_Normal() {
-        Song s1 = new Song("A", "", Path.of("A.mp3"));
-        Song s2 = new Song("B", "", Path.of("B.mp3"));
-
+    void testSetCurrentSong() {
+        Song s1 = song("A", 3);
+        Song s2 = song("B", 4);
         playlist.addSongs(List.of(s1, s2));
 
-        assertEquals(2, playlist.getSongs().size());
+        playlist.setCurrentSong(s2);
+
+        assertEquals(1, playlist.currentIndexProperty().get());
+        assertEquals("B", playlist.getCurrentSong().getTitle());
     }
 
     @Test
-    void testAddSongs_NullCollection() {
-        playlist.addSongs(null);
-        assertTrue(playlist.getSongs().isEmpty());
-    }
-
-    // ------------------------------------------------------------
-    // removeSong
-    // ------------------------------------------------------------
-
-    @Test
-    void testRemoveSong_Normal() {
-        Song s1 = new Song("A", "", Path.of("A.mp3"));
-        Song s2 = new Song("B", "", Path.of("B.mp3"));
-
-        playlist.addSong(s1);
-        playlist.addSong(s2);
-        playlist.setCurrentIndex(1);
-
-        playlist.removeSong(s2);
-
-        assertEquals(1, playlist.getSongs().size());
-        assertEquals(0, playlist.getCurrentIndex());
-        assertEquals(s1, playlist.getCurrentSong());
+    void testCurrentSongOrFirstWhenEmpty() {
+        assertNull(playlist.getCurrentSongOrFirst());
     }
 
     @Test
-    void testRemoveSong_NullDoesNothing() {
-        Song s = new Song("A", "", Path.of("A.mp3"));
+    void testCurrentSongOrFirstAssignsFirst() {
+        Song s = song("X", 8);
         playlist.addSong(s);
-        playlist.removeSong(null);
 
-        assertEquals(1, playlist.getSongs().size());
+        assertEquals(s, playlist.getCurrentSongOrFirst());
+        assertEquals(0, playlist.currentIndexProperty().get());
     }
 
-    @Test
-    void testRemoveSong_NotInListDoesNothing() {
-        Song s1 = new Song("A", "", Path.of("A.mp3"));
-        Song s2 = new Song("B", "", Path.of("B.mp3"));
-
-        playlist.addSong(s1);
-        playlist.removeSong(s2);
-
-        assertEquals(1, playlist.getSongs().size());
-    }
+    // ---------------------------------------------------------------
+    // ----------------------- TEST NEXT() ---------------------------
+    // ---------------------------------------------------------------
 
     @Test
-    void testRemoveSong_LeavesListEmpty() {
-        Song s1 = new Song("A", "", Path.of("A.mp3"));
-        playlist.addSong(s1);
-
-        playlist.removeSong(s1);
-
-        assertTrue(playlist.getSongs().isEmpty());
-        assertEquals(-1, playlist.getCurrentIndex());
-    }
-
-    @Test
-    void testRemoveSong_BeforeCurrentMovesIndexDown() {
-        Song s1 = new Song("A", "", Path.of("A.mp3"));
-        Song s2 = new Song("B", "", Path.of("B.mp3"));
-        Song s3 = new Song("C", "", Path.of("C.mp3"));
-
-        playlist.addSongs(List.of(s1, s2, s3));
-        playlist.setCurrentIndex(2);
-
-        playlist.removeSong(s2);
-
-        assertEquals(1, playlist.getCurrentIndex());
-    }
-
-    // ------------------------------------------------------------
-    // clear
-    // ------------------------------------------------------------
-
-    @Test
-    void testClear() {
-        Song s1 = new Song("A", "", Path.of("A.mp3"));
-        playlist.addSong(s1);
-
-        playlist.clear();
-
-        assertTrue(playlist.getSongs().isEmpty());
-        assertEquals(-1, playlist.getCurrentIndex());
-    }
-
-    // ------------------------------------------------------------
-    // loadFromPaths
-    // ------------------------------------------------------------
-
-    @Test
-    void testLoadFromPaths_Normal() {
-        Path p1 = Path.of("A.mp3");
-        Path p2 = Path.of("B.mp3");
-
-        playlist.loadFromPaths(List.of(p1, p2));
-
-        assertEquals(2, playlist.getSongs().size());
-        assertEquals(0, playlist.getCurrentIndex());
-    }
-
-    @Test
-    void testLoadFromPaths_Null() {
-        playlist.loadFromPaths(null);
-
-        assertTrue(playlist.getSongs().isEmpty());
-        assertEquals(-1, playlist.getCurrentIndex());
-    }
-
-    @Test
-    void testLoadFromPaths_EmptyList() {
-        playlist.loadFromPaths(List.of());
-
-        assertTrue(playlist.getSongs().isEmpty());
-        assertEquals(-1, playlist.getCurrentIndex());
-    }
-
-    // ------------------------------------------------------------
-    // hasNext
-    // ------------------------------------------------------------
-
-    @Test
-    void testHasNext_Normal() {
+    void testNextNormalMode() {
         playlist.addSongs(List.of(
-                new Song("A", "", Path.of("A")), 
-                new Song("B", "", Path.of("B"))
+                song("A", 2),
+                song("B", 2),
+                song("C", 2)
         ));
 
-        playlist.setCurrentIndex(0);
-        assertTrue(playlist.hasNext());
+        playlist.setCurrentSong(playlist.getSongs().get(0));
 
-        playlist.setCurrentIndex(1);
-        assertFalse(playlist.hasNext());
+        Song next = playlist.getNextSong();
+        assertEquals("B", next.getTitle());
+
+        next = playlist.getNextSong();
+        assertEquals("C", next.getTitle());
+
+        // Final → NORMAL devuelve null
+        assertNull(playlist.getNextSong());
     }
 
     @Test
-    void testHasNext_RepeatAll() {
+    void testNextRepeatAll() {
         playlist.setPlaybackMode(PlaybackMode.REPEAT_ALL);
-        playlist.addSong(new Song("A", "", Path.of("A")));
+        playlist.addSongs(List.of(
+                song("A", 2),
+                song("B", 2)
+        ));
 
-        playlist.setCurrentIndex(0);
-        assertTrue(playlist.hasNext());
+        playlist.setCurrentSong(playlist.getSongs().get(1)); // B
+
+        Song next = playlist.getNextSong(); // vuelve a A
+        assertEquals("A", next.getTitle());
+        assertEquals(0, playlist.currentIndexProperty().get());
     }
 
     @Test
-    void testHasNext_RepeatOne() {
+    void testNextRepeatOne() {
         playlist.setPlaybackMode(PlaybackMode.REPEAT_ONE);
-        playlist.addSong(new Song("A", "", Path.of("A")));
+        playlist.addSongs(List.of(song("A", 2), song("B", 2)));
 
-        assertTrue(playlist.hasNext());
+        playlist.setCurrentSong(playlist.getSongs().get(0));
+
+        Song next = playlist.getNextSong();
+        assertEquals("A", next.getTitle());
+        assertEquals(0, playlist.currentIndexProperty().get());
     }
 
     @Test
-    void testHasNext_Shuffle() {
+    void testNextShuffle() {
         playlist.setPlaybackMode(PlaybackMode.SHUFFLE);
         playlist.addSongs(List.of(
-                new Song("A", "", Path.of("A")), 
-                new Song("B", "", Path.of("B"))
+                song("A", 2),
+                song("B", 2),
+                song("C", 2)
         ));
 
-        assertTrue(playlist.hasNext());
+        playlist.setCurrentSong(playlist.getSongs().get(0));
 
-        // Con solo 1 → false
-        PlaylistService p2 = new PlaylistService();
-        p2.setPlaybackMode(PlaybackMode.SHUFFLE);
-        p2.addSong(new Song("A", "", Path.of("A")));
-        assertFalse(p2.hasNext());
+        Song next = playlist.getNextSong();
+
+        assertNotNull(next);
+        assertTrue(List.of("A", "B", "C").contains(next.getTitle()));
     }
 
-    // ------------------------------------------------------------
-    // hasPrevious
-    // ------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // --------------------- TEST PREVIOUS() -------------------------
+    // ---------------------------------------------------------------
 
     @Test
-    void testHasPrevious_Normal() {
+    void testPreviousNormalMode() {
         playlist.addSongs(List.of(
-                new Song("A", "", Path.of("A")), 
-                new Song("B", "", Path.of("B"))
+                song("A", 2),
+                song("B", 2),
+                song("C", 2)
         ));
 
-        playlist.setCurrentIndex(1);
-        assertTrue(playlist.hasPrevious());
+        playlist.setCurrentSong(playlist.getSongs().get(2));
 
-        playlist.setCurrentIndex(0);
-        assertFalse(playlist.hasPrevious());
+        Song prev = playlist.getPreviousSong();
+        assertEquals("B", prev.getTitle());
+
+        prev = playlist.getPreviousSong();
+        assertEquals("A", prev.getTitle());
+
+        // no baja más de 0
+        prev = playlist.getPreviousSong();
+        assertEquals("A", prev.getTitle());
     }
 
     @Test
-    void testHasPrevious_RepeatOne() {
-        playlist.setPlaybackMode(PlaybackMode.REPEAT_ONE);
-        playlist.addSong(new Song("A", "", Path.of("A")));
-
-        assertTrue(playlist.hasPrevious());
-    }
-
-    @Test
-    void testHasPrevious_RepeatAll() {
-        playlist.setPlaybackMode(PlaybackMode.REPEAT_ALL);
-        playlist.addSong(new Song("A", "", Path.of("A")));
-
-        assertTrue(playlist.hasPrevious());
-    }
-
-    @Test
-    void testHasPrevious_Shuffle() {
+    void testPreviousShuffle() {
         playlist.setPlaybackMode(PlaybackMode.SHUFFLE);
+
         playlist.addSongs(List.of(
-                new Song("A", "", Path.of("A")), 
-                new Song("B", "", Path.of("B"))
+                song("A", 2),
+                song("B", 2),
+                song("C", 2)
         ));
 
-        assertTrue(playlist.hasPrevious());
+        playlist.setCurrentSong(playlist.getSongs().get(1));
+
+        Song prev = playlist.getPreviousSong();
+
+        assertNotNull(prev);
+        assertTrue(List.of("A", "B", "C").contains(prev.getTitle()));
     }
 
-    // ------------------------------------------------------------
-    // next()
-    // ------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // ----------------------- CLEAR --------------------------------
+    // ---------------------------------------------------------------
 
     @Test
-    void testNext_Normal() {
-        playlist.addSongs(List.of(
-                new Song("A", "", Path.of("A")), 
-                new Song("B", "", Path.of("B"))
-        ));
+    void testClearPlaylist() {
+        playlist.addSongs(List.of(song("A", 2), song("B", 2)));
+        playlist.setCurrentSong(playlist.getSongs().get(1));
 
-        playlist.setCurrentIndex(0);
-        Song s2 = playlist.next();
-        assertEquals("B", s2.getTitle());
+        playlist.clearCurrentPlaylist();
 
-        // final → no avanza más
-        Song sLast = playlist.next();
-        assertEquals("B", sLast.getTitle());
-    }
-
-    @Test
-    void testNext_RepeatAll() {
-        playlist.setPlaybackMode(PlaybackMode.REPEAT_ALL);
-        playlist.addSongs(List.of(
-                new Song("A", "", Path.of("A")), 
-                new Song("B", "", Path.of("B"))
-        ));
-
-        playlist.setCurrentIndex(1);
-        Song s = playlist.next();
-        assertEquals("A", s.getTitle());
-    }
-
-    @Test
-    void testNext_RepeatOne() {
-        playlist.setPlaybackMode(PlaybackMode.REPEAT_ONE);
-        playlist.addSong(new Song("A", "", Path.of("A")));
-
-        playlist.setCurrentIndex(0);
-        Song s = playlist.next();
-        assertEquals("A", s.getTitle());
-    }
-
-    @Test
-    void testNext_EmptyListReturnsNull() {
-        assertNull(playlist.next());
-    }
-
-    // ------------------------------------------------------------
-    // prev()
-    // ------------------------------------------------------------
-
-    @Test
-    void testPrev_Normal() {
-        playlist.addSongs(List.of(
-                new Song("A", "", Path.of("A")), 
-                new Song("B", "", Path.of("B"))
-        ));
-
-        playlist.setCurrentIndex(1);
-        Song s = playlist.prev();
-        assertEquals("A", s.getTitle());
-
-        playlist.setCurrentIndex(0);
-        Song s2 = playlist.prev();
-        assertEquals("A", s2.getTitle());
-    }
-
-    @Test
-    void testPrev_RepeatAll() {
-        playlist.setPlaybackMode(PlaybackMode.REPEAT_ALL);
-        playlist.addSongs(List.of(
-                new Song("A", "", Path.of("A")), 
-                new Song("B", "", Path.of("B"))
-        ));
-
-        playlist.setCurrentIndex(0);
-        Song s = playlist.prev();
-        assertEquals("B", s.getTitle());
-    }
-
-    @Test
-    void testPrev_RepeatOne() {
-        playlist.setPlaybackMode(PlaybackMode.REPEAT_ONE);
-        playlist.addSong(new Song("A", "", Path.of("A")));
-
-        Song s = playlist.prev();
-        assertEquals("A", s.getTitle());
-    }
-
-    @Test
-    void testPrev_EmptyListReturnsNull() {
-        assertNull(playlist.prev());
+        assertEquals(0, playlist.getSongs().size());
+        assertEquals(-1, playlist.currentIndexProperty().get());
+        assertEquals(0, playlist.totalDurationProperty().get(), 0.0001);
     }
 }

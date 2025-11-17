@@ -1,78 +1,134 @@
 package reproductor.com.musica.model;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SongTest {
 
+    // -------------------------------------------------------------
+    // 1) Constructor con Path (archivo local)
+    // -------------------------------------------------------------
     @Test
-    void testIsLocalWhenFilePathIsSet() {
-        Song song = new Song("Title", "Artist", Path.of("music.mp3"));
-        assertTrue(song.isLocal());
-        assertFalse(song.isRemote());
+    void testConstructorWithPath() {
+        Path p = Path.of("/music/test.mp3");
+        Song s = new Song("Titulo", "Artista", p);
+
+        assertEquals("Titulo", s.getTitle());
+        assertEquals("Artista", s.getArtist());
+        assertEquals(p, s.getFilePath());
+        assertNull(s.getStreamUrl());
+        assertTrue(s.isLocal());
+        assertFalse(s.isRemote());
     }
 
+    // -------------------------------------------------------------
+    // 2) Constructor con streamUrl (remoto)
+    // -------------------------------------------------------------
     @Test
-    void testIsRemoteWhenStreamUrlIsSet() {
-        Song song = new Song("Title", "Artist", "http://example.com/stream");
-        assertTrue(song.isRemote());
-        assertFalse(song.isLocal());
+    void testConstructorWithStreamUrl() {
+        Song s = new Song("Song", "Artist", "http://example.com/stream");
+
+        assertEquals("Song", s.getTitle());
+        assertEquals("Artist", s.getArtist());
+        assertNull(s.getFilePath());
+        assertEquals("http://example.com/stream", s.getStreamUrl());
+        assertTrue(s.isRemote());
+        assertFalse(s.isLocal());
     }
 
+    // -------------------------------------------------------------
+    // 3) Constructor simplificado con ruta String y duración
+    // -------------------------------------------------------------
     @Test
-    void testIsRemoteWhenStreamUrlIsBlank() {
-        Song song = new Song();
-        song.setStreamUrl("   ");
-        assertFalse(song.isRemote());
+    void testConstructorSimple() {
+        Song s = new Song("Titulo", "/tmp/a.mp3", 12.7);
+
+        assertEquals("Titulo", s.getTitle());
+        assertEquals("Desconocido", s.getArtist());
+        assertEquals(Path.of("/tmp/a.mp3"), s.getFilePath());
+        assertEquals(12, s.getDurationSeconds());
+        assertTrue(s.isLocal());
+        assertFalse(s.isRemote());
     }
 
+    // -------------------------------------------------------------
+    // 4) Autodetección de artista desde "Artista - Título"
+    // -------------------------------------------------------------
+    @Test
+    void testConstructorSimpleWithArtistExtraction() {
+        Song s = new Song("Metallica - Nothing Else Matters", "/tmp/m.mp3", 300);
+
+        assertEquals("Nothing Else Matters", s.getTitle());
+        assertEquals("Metallica", s.getArtist());
+    }
+
+    // -------------------------------------------------------------
+    // 5) toString() con y sin artista
+    // -------------------------------------------------------------
     @Test
     void testToStringWithArtist() {
-        Song song = new Song("Imagine", "John Lennon", (Path) null);
-        assertEquals("Imagine - John Lennon", song.toString());
+        Song s = new Song("Artist - Track", "/tmp/x.mp3", 50);
+
+        assertEquals("Artist - Track", s.toString());
     }
 
     @Test
     void testToStringWithoutArtist() {
-        Song song = new Song("Imagine", null, (Path) null);
-        assertEquals("Imagine", song.toString());
+        Song s = new Song("Titulo", "/tmp/y.mp3", 50);
+
+        assertEquals("Titulo", s.toString());
     }
 
+    // -------------------------------------------------------------
+    // 6) isLocal() e isRemote()
+    // -------------------------------------------------------------
     @Test
-    void testEqualsWhenIdsArePresent() {
-        Song s1 = new Song();
-        Song s2 = new Song();
-        s1.setId(10);
-        s2.setId(10);
+    void testLocalVsRemoteFlags() {
+        Song local = new Song("A", "/tmp/a.mp3", 20);
+        Song remote = new Song("B", "Artist", "https://example.com/stream");
+
+        assertTrue(local.isLocal());
+        assertFalse(local.isRemote());
+
+        assertTrue(remote.isRemote());
+        assertFalse(remote.isLocal());
+    }
+
+    // -------------------------------------------------------------
+    // 7) equals() y hashCode() sin id
+    // -------------------------------------------------------------
+    @Test
+    void testEqualsWithoutId() {
+        Song s1 = new Song("A", "/tmp/a.mp3", 20);
+        Song s2 = new Song("A", "/tmp/a.mp3", 20);
+
+        assertEquals(s1, s2);
+        assertEquals(s1.hashCode(), s2.hashCode());
+    }
+
+    // -------------------------------------------------------------
+    // 8) equals() y hashCode() con id asignado
+    // -------------------------------------------------------------
+    @Test
+    void testEqualsWithId() {
+        Song s1 = new Song("A", "/tmp/a.mp3", 20);
+        Song s2 = new Song("A", "/tmp/a.mp3", 20);
+
+        s1.setId(5);
+        s2.setId(5);
 
         assertEquals(s1, s2);
         assertEquals(s1.hashCode(), s2.hashCode());
     }
 
     @Test
-    void testEqualsWithoutIds() {
-        Song s1 = new Song("A", "B", Path.of("x.mp3"));
-        Song s2 = new Song("A", "B", Path.of("x.mp3"));
+    void testEqualsWithDifferentId() {
+        Song s1 = new Song("A", "/tmp/a.mp3", 20);
+        Song s2 = new Song("A", "/tmp/a.mp3", 20);
 
-        assertEquals(s1, s2);
-        assertEquals(s1.hashCode(), s2.hashCode());
-    }
-
-    @Test
-    void testNotEqualsDifferentAttributes() {
-        Song s1 = new Song("A", "B", Path.of("x.mp3"));
-        Song s2 = new Song("A", "B", Path.of("y.mp3"));
-
-        assertNotEquals(s1, s2);
-    }
-
-    @Test
-    void testEqualsWithDifferentIds() {
-        Song s1 = new Song();
-        Song s2 = new Song();
         s1.setId(1);
         s2.setId(2);
 
@@ -80,16 +136,9 @@ class SongTest {
     }
 
     @Test
-    void testGetTitleReturnsEmptyWhenNull() {
-        Song s = new Song();
-        s.setTitle(null);
-        assertEquals("", s.getTitle());
-    }
+    void testGetFilePathStringNull() {
+        Song s = new Song("A", "Artist", "http://example.com");
 
-    @Test
-    void testGetArtistReturnsEmptyWhenNull() {
-        Song s = new Song();
-        s.setArtist(null);
-        assertEquals("", s.getArtist());
+        assertNull(s.getFilePathString());
     }
 }
