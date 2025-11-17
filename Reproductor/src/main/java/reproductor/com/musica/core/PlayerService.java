@@ -1,6 +1,8 @@
 package reproductor.com.musica.core;
 
 import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.util.function.Consumer;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -16,6 +18,10 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import reproductor.com.musica.model.Song;
 
+/**
+ * Servicio encargado de reproducir audio usando JavaFX MediaPlayer.
+ * No gestiona la lista de canciones, solo la reproducción de la canción actual.
+ */
 public class PlayerService {
 
     private MediaPlayer mediaPlayer;
@@ -26,6 +32,30 @@ public class PlayerService {
     private final DoubleProperty volume = new SimpleDoubleProperty(0.5);
     private final BooleanProperty playing = new SimpleBooleanProperty(false);
 
+    private double previousVolume = 0.5;
+
+    // Listeners de compatibilidad con el código antiguo
+    private Consumer<Update> updateListener;
+    private Consumer<String> errorListener;
+
+    /** Pequeño DTO para reportar estado al controlador antiguo. */
+    public static class Update {
+        private final double current;
+        private final double total;
+
+        public Update(double current, double total) {
+            this.current = current;
+            this.total = total;
+        }
+
+        public double current() { return current; }
+        public double total() { return total; }
+        public double ratio() {
+            if (total <= 0) return 0.0;
+            return current / total;
+        }
+    }
+
     public PlayerService() {
         // volumen por defecto al 50%
         volume.addListener((obs, oldV, newV) -> {
@@ -35,7 +65,10 @@ public class PlayerService {
         });
     }
 
+    // -------------------------
     // Propiedades para la UI
+    // -------------------------
+
     public ReadOnlyObjectProperty<Song> currentSongProperty() {
         return currentSong;
     }
@@ -80,9 +113,11 @@ public class PlayerService {
         return playing.get();
     }
 
+    // -------------------------
     // Control de reproducción
-    
-    //Carga y reproduce la canción indicada.
+    // -------------------------
+
+    // Carga y reproduce la canción indicada.
     public void playSong(Song song) {
         if (song == null) return;
 
@@ -96,11 +131,17 @@ public class PlayerService {
         // listeners para tiempo y estado
         mediaPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) -> {
             currentTimeSeconds.set(newTime.toSeconds());
+            if (updateListener != null) {
+                updateListener.accept(new Update(currentTimeSeconds.get(), totalDurationSeconds.get()));
+            }
         });
 
         mediaPlayer.setOnReady(() -> {
             Duration total = mediaPlayer.getMedia().getDuration();
             totalDurationSeconds.set(total.toSeconds());
+            if (updateListener != null) {
+                updateListener.accept(new Update(currentTimeSeconds.get(), totalDurationSeconds.get()));
+            }
         });
 
         mediaPlayer.setOnPlaying(() -> playing.set(true));
@@ -108,32 +149,42 @@ public class PlayerService {
         mediaPlayer.setOnStopped(() -> playing.set(false));
         mediaPlayer.setOnEndOfMedia(() -> playing.set(false));
 
+        mediaPlayer.setOnError(() -> {
+            String msg = "Error al reproducir la pista";
+            if (mediaPlayer.getError() != null) {
+                msg = mediaPlayer.getError().getMessage();
+            }
+            if (errorListener != null) {
+                errorListener.accept(msg);
+            }
+        });
+
         currentSong.set(song);
         mediaPlayer.play();
     }
 
-     // Reanuda la reproducción si hay una canción cargada.
+    // Reanuda la reproducción si hay una canción cargada.
     public void play() {
         if (mediaPlayer != null) {
             mediaPlayer.play();
         }
     }
 
-     // Pausa la reproducción actual.
+    // Pausa la reproducción actual.
     public void pause() {
         if (mediaPlayer != null) {
             mediaPlayer.pause();
         }
     }
 
-     // Detiene la reproducción actual y reinicia el tiempo a 0.
+    // Detiene la reproducción actual y reinicia el tiempo a 0.
     public void stop() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
         }
     }
 
-     // Salta a un punto de la canción según un progreso 0.0–1.0.
+    // Salta a un punto de la canción según un progreso 0.0–1.0.
     public void seek(double progress) {
         if (mediaPlayer == null || totalDurationSeconds.get() <= 0) return;
         progress = clamp(progress, 0.0, 1.0);
@@ -141,7 +192,35 @@ public class PlayerService {
         mediaPlayer.seek(Duration.seconds(targetSeconds));
     }
 
-     // Libera recursos del MediaPlayer actual.
+    // ---- Métodos de compatibilidad con PlayerController antiguo ----
+    public void seekByRatio(double ratio) {
+        seek(ratio);
+    }
+
+    public void setMute(boolean mute) {
+        if (mute) {
+            previousVolume = getVolume();
+            setVolume(0.0);
+        } else {
+            setVolume(previousVolume);
+        }
+    }
+
+    public void open(Path path) {
+        if (path == null) return;
+        Song s = new Song(path.getFileName().toString(), "", path);
+        playSong(s);
+    }
+
+    public void onUpdate(Consumer<Update> listener) {
+        this.updateListener = listener;
+    }
+
+    public void onError(Consumer<String> listener) {
+        this.errorListener = listener;
+    }
+
+    // Libera recursos del MediaPlayer actual.
     public void dispose() {
         disposeMediaPlayer();
     }

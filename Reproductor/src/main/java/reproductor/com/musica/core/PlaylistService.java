@@ -20,6 +20,10 @@ public class PlaylistService {
     public ObservableList<Song> getSongs() {
         return songs;
     }
+    
+    public ObservableList<Song> getItems() {
+        return songs;
+    }
 
     public int getCurrentIndex() {
         return currentIndex;
@@ -65,6 +69,12 @@ public class PlaylistService {
         for (Song s : newSongs) {
             addSong(s);
         }
+    }
+    
+    public void add(Path path) {
+        if (path == null) return;
+        Song s = new Song(path.getFileName().toString(), "", path);
+        addSong(s);
     }
 
     public void removeSong(Song song) {
@@ -164,7 +174,7 @@ public class PlaylistService {
         return getCurrentSong();
     }
 
-    public Song previous() {
+    public Song prev() {
         if (songs.isEmpty()) return null;
 
         switch (playbackMode) {
