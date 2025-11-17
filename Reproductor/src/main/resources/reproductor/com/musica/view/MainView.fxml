@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="root" styleClass="border-pane" stylesheets="@app.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="reproductor.com.musica.controller.PlayerController">
+<BorderPane fx:id="root" styleClass="border-pane" stylesheets="@dark-theme.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="reproductor.com.musica.controller.PlayerController">
 
   <!-- HEADER TOOLBAR -->
   <top>
