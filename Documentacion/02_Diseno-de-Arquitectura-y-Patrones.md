@@ -1,7 +1,5 @@
 
 
-**02_Diseño-de-Arquitectura-y-Patrones.md**
-
 ---
 
 # **02. Diseño de Arquitectura y Patrones**
