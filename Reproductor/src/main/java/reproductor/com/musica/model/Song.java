@@ -9,17 +9,13 @@ public class Song {
 	private String title;
 	private String artist;
 	private int durationSeconds;
-	
-	private Path filePath;
+	private Path filePath;    // Si es archivo local
 	private String streamUrl;
 	
-	public Song() {
-	}
-	
-	public Song(String title, String artist, Path filePath) {
+	public Song(String title, String artist, Path i) {
 		this.title = title;
 		this.artist = artist;
-		this.filePath = filePath;
+		this.filePath = i;
 	}
 	
 	public Song(String title, String artist, String streamUrl) {
