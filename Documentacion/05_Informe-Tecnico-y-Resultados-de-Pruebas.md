@@ -2,199 +2,246 @@
 
 # **05. Informe Técnico y Resultados de Pruebas**
 
----
+**Servicios de integración con la API**
 
-## 1. Introducción
+- **Propósito y alcance**
 
-El presente informe documenta los aspectos técnicos más relevantes del sistema *Reproductor Musical* y los resultados de las pruebas realizadas durante su desarrollo.
-El propósito de este documento es demostrar la solidez de la implementación, validar el funcionamiento esperado de las funcionalidades principales y registrar los procedimientos seguidos durante la verificación del software.
+Los servicios de integración encapsulan la comunicación entre la aplicación de escritorio y la API remota que provee búsquedas y descargas de audio. Su objetivo es:
 
-Este informe está dirigido a evaluadores, docentes y desarrolladores que requieran comprender el comportamiento interno del sistema y la calidad alcanzada en esta versión del prototipo.
+- Aislar la lógica HTTP en capas reutilizables.
+- Serializar / deserializar modelos JSON hacia objetos Java.
+- Centralizar manejo de errores y tiempo de espera.
+- Facilitar pruebas unitarias e integración.
 
----
+Las clases principales implicadas son ApiClient, AuthService (y su implementación), SearchService (y su implementación), y DTOs como DownloadRequest y DownloadResponse.
 
-## 2. Descripción técnica del sistema
+- ` `**Contratos y endpoints**
 
-### 2.1 Lenguaje y entorno de desarrollo
+Los endpoints consumidos por la aplicación son, como ejemplo en ApiClient:
 
-El sistema fue desarrollado utilizando:
+- POST /descargar — Solicita la descarga de una o varias canciones. Cuerpo: JSON con lista de nombres.
+- GET /descargas — Lista de archivos disponibles en el servidor. Respuesta: JSON con clave archivos.
+- GET /descargas/{fileName} — Descarga un archivo específico (flujo binario).
+- DELETE /descargas/{fileName} — Elimina un archivo.
 
-* Lenguaje de programación: **Java** (JDK 21)
-* Interfaz gráfica: **JavaFX**
-* IDE: **Eclipse IDE**
-* Patrón arquitectónico: **MVC/MVVM simplificado**
-* Patrones de diseño: **Singleton**, **Observer**, **Strategy conceptual**
+Estos endpoints se consumen construyendo URIs sobre la baseUrl configurada en ApiClient, concatenando el path y codificando parámetros cuando corresponde (uso de URLEncoder).
 
-### 2.2 Módulos principales
+- ` `**Formato JSON (ejemplos)**
 
-El sistema se estructura en tres capas:
+Los contratos JSON relevantes son:
 
-1. **Presentación (JavaFX):**
-   Conformada por vistas FXML y controladores responsables de recibir interacciones del usuario.
+**Request** — POST /descargar (ejemplo)
 
-2. **Lógica de negocio:**
-   Implementada mediante servicios internos:
+{
 
-   * `PlayerService` (control del reproductor).
-   * `PlaylistService` (gestión de listas de reproducción).
+`  `"nombres": ["songA", "songB"]
 
-3. **Datos (Modelos):**
-   Incluye representaciones de canciones, playlists y modos de reproducción.
+}
 
-### 2.3 Reproducción de audio
+(En el código se utiliza DownloadRequest que contiene la lista de nombres.)
 
-La reproducción está basada en:
+**Response** — POST /descargar (ejemplo)
 
-* Clase `Media` de JavaFX para cargar la fuente de audio.
-* Clase `MediaPlayer` para controlar:
+{
 
-  * Play
-  * Pausa
-  * Stop
-  * Avance y retroceso
-  * Control de volumen
-  * Estado de la reproducción
+`  `"estadoDescargas": {
 
-El sistema admite archivos locales en formatos compatibles (.mp3, .wav).
+`    `"songA": "OK",
 
----
+`    `"songB": "NOT\_FOUND"
 
-## 3. Objetivos de las pruebas
+`  `}
 
-Las pruebas realizadas tienen como propósito validar:
+}
 
-1. La operación adecuada del reproductor bajo distintos escenarios.
-2. La gestión correcta de las playlists (crear, agregar, eliminar).
-3. La estabilidad general de la interfaz y ausencia de errores críticos.
-4. La correcta interacción entre controladores, servicios y modelos.
-5. El cumplimiento de los requisitos funcionales establecidos en el documento de requisitos.
+(En el código se utiliza DownloadResponse que mapea estadoDescargas a un Map<String,String>.)
 
----
+**Response** — GET /descargas
 
-## 4. Tipos de pruebas realizadas
+{
 
-### 4.1 Pruebas funcionales
+`  `"archivos": ["a.mp3", "b.mp3", "c.mp3"]
 
-Validan que los requisitos funcionales (RF) se cumplan de manera completa.
+}
 
-Ejemplos de funciones verificadas:
+**Descarga binaria** — GET /descargas/{fileName}\
+Respuesta: Body binario (application/octet-stream o audio/mpeg). ApiClient usa HttpResponse.BodyHandlers.ofFile(...) para escribir directamente a disco.
 
-* Reproducción de archivos locales.
-* Control de volumen.
-* Avanzar y retroceder entre canciones.
-* Crear y eliminar playlists.
-* Agregar y quitar canciones de una playlist.
+- ` `**Serialización y librerías**
+- Se emplea Jackson (com.fasterxml.jackson.databind.ObjectMapper) para serializar objetos Java a JSON y deserializar respuestas JSON a clases DTO.
+- Cuando se parsean estructuras genéricas (por ejemplo Map<String,List<String>>), prestar atención a tipos y advertencias de unchecked. En casos que requieran tipos parametrizados, usar TypeReference<>.
 
-### 4.2 Pruebas unitarias conceptuales
+Ejemplo:
 
-Aunque el prototipo no incluye un conjunto formal de pruebas automatizadas (JUnit), se realizaron pruebas unitarias manuales sobre métodos clave, tales como:
+Map<String, List<String>> result = objectMapper.readValue(json, new TypeReference<Map<String,List<String>>>(){});
 
-* Métodos de selección de la siguiente canción.
-* Métodos de manipulación de listas en `PlaylistService`.
-* Encapsulación y obtención de datos en los modelos.
+- ` `**Manejo de errores y excepciones**
+- Todos los errores de comunicación o parseo se normalizan en ApiException, que encapsula mensaje y causa:
+  - Errores de validación de entrada— ApiException lanzada antes de invocar HTTP.
+  - Códigos HTTP distintos de 200 — ApiException con mensaje que incluye statusCode y cuerpo cuando proceda.
+  - Errores de red / timeout / IO — ApiException con la causa original.
+  - Errores de parseo JSON — ApiException con la causa IOException o JsonProcessingException.
+- ApiClient captura InterruptedException y reestablece el flag de interrupción del hilo (Thread.currentThread().interrupt()), luego lanza ApiException.
+- Para descargas de archivos se revisa response.statusCode() y se lanza ApiException si no es 200.
+- ` `**Estrategia de reintento y timeouts**
+- Tiempo de espera configurable en ApiClient (por ejemplo TIMEOUT\_SECONDS).
+- Política de reintento no incluida por defecto; si se desea, proponer un decorador que implemente reintentos exponiendo parámetros: número máximo de reintentos, backoff exponencial y manejo de idempotencia.
+- ` `**Seguridad y autenticación**
+- AuthService centraliza login/refresh/logout y devuelve tokens (Optional<String>) para ser almacenados por SessionManager.
+- ApiClient debe permitir inyección de token en el header Authorization: Bearer {token} en peticiones que requieran autenticación.
+- Nunca persistir tokens en texto plano fuera del directorio de usuario protegido. Para pruebas usar tokens dummy.
+- ` `**Consideraciones operacionales**
+- Directorio de descargas: ApiClient crea el directorio si no existe (Files.createDirectories(...)) y lanza IllegalStateException sólo en caso de fallo al crear la carpeta.
+- Validar espacio disponible y permisos de escritura en despliegue real.
+- Logs: registrar solicitudes y respuestas (solo metadatos, no payloads sensibles) con nivel DEBUG para diagnóstico; registrar errores con stack trace en nivel ERROR.
 
-### 4.3 Pruebas de integración
+**Anexo técnico de pruebas**
 
-Se verificó la interacción entre:
+**3.2.1 Objetivo del anexo**
 
-* Controladores JavaFX y PlayerService.
-* Vistas FXML y controladores.
-* PlaylistService y modelos.
+Documentar qué pruebas existen, qué cubren y cómo ejecutarlas en local y en CI. Incluir comandos, rutas de reportes y criterios de aceptación.
 
-Estas pruebas permiten asegurar que los cambios en una capa no afectan la estabilidad del sistema completo.
+**3.2.2 Qué se prueba (resumen)**
 
-### 4.4 Pruebas de interfaz de usuario
+- **Modelos**: Song, Playlist — pruebas de getters/setters, equals, hashCode, toString, validaciones (nulos, blanks).
+- **Servicios de negocio**: PlaylistService — agregar/eliminar canciones, navegación (next/prev/hasNext/hasPrevious), carga desde paths, límites, modos de reproducción.
+- **Clientes HTTP**: ApiClient — validaciones de entrada, manejo de directorio de descargas, respuesta correcta en escenarios controlados (tests con servidor embebido o con inyección de HttpClient para pruebas unitarias).
+- **Utilidades**: SessionManager, Config — manejo de tokens y configuración.
 
-El objetivo fue validar:
+Pruebas que no se realizan en esta suite por decisión de alcance:
 
-* Comportamiento visual coherente.
-* Respuestas adecuadas a clics, desplazamientos y eventos.
-* Actualización correcta de información durante la reproducción.
+- Tests que requieren GUI de JavaFX (controladores) salvo pruebas unitarias sin inicialización UI.
+- Tests de integración a la API en entornos externos (esto se realiza con pipelines de integración separados si se necesita).
 
----
+**3.2.3 Estructura de los tests en el proyecto**
 
-## 5. Casos de prueba
+Ubicación:
 
-A continuación se incluye una tabla con los principales casos de prueba ejecutados.
+Reproductor/src/test/java/reproductor/com/musica/...
 
-### 5.1 Tabla de casos de prueba
+Convenciones:
 
-| ID    | Descripción del caso          | Datos de entrada               | Resultado esperado                                 | Estado   |
-| ----- | ----------------------------- | ------------------------------ | -------------------------------------------------- | -------- |
-| CP-01 | Reproducción de canción local | Archivo .mp3 existente         | El reproductor inicia la reproducción sin errores  | Correcto |
-| CP-02 | Pausar canción                | Canción en reproducción        | La reproducción se detiene temporalmente           | Correcto |
-| CP-03 | Detener reproducción          | Canción en reproducción        | La canción vuelve al inicio                        | Correcto |
-| CP-04 | Siguiente canción             | Playlist con varias canciones  | Se reproduce la siguiente canción de la lista      | Correcto |
-| CP-05 | Canción anterior              | Playlist con varias canciones  | Se reproduce la canción previa                     | Correcto |
-| CP-06 | Crear playlist                | Nombre de playlist válido      | Se crea una nueva lista de reproducción            | Correcto |
-| CP-07 | Agregar canción a playlist    | Canción seleccionada           | La canción se agrega correctamente                 | Correcto |
-| CP-08 | Eliminar canción de playlist  | Canción dentro de una lista    | La canción es removida de la playlist              | Correcto |
-| CP-09 | Eliminar playlist             | Playlist seleccionada          | La lista es eliminada sin afectar archivos locales | Correcto |
-| CP-10 | Ajustar volumen               | Nivel de volumen entre 0 y 100 | El volumen del reproductor varía correctamente     | Correcto |
-| CP-11 | Silenciar volumen             | Opción Mute seleccionada       | El volumen se silenció y puede restaurarse         | Correcto |
-| CP-12 | Barra de progreso             | Canción en reproducción        | El usuario puede adelantar o retroceder            | Correcto |
-| CP-13 | Cargar vista principal        | Inicio del sistema             | Las vistas FXML se cargan sin errores              | Correcto |
+- Cada clase X tiene una clase de test XTest.
+- Tests que requieren JavaFX deben inicializar el toolkit (Platform.startup) en @BeforeAll si manipulan ObservableList o propiedades.
+- Tests que interactúan con HTTP usan:
+  - servidor embebido (com.sun.net.httpserver.HttpServer) para pruebas reales de ApiClient, o
+  - constructor package-private en ApiClient para inyectar HttpClient y ObjectMapper mockeados en pruebas unitarias.
 
----
+**3.2.4 Dependencias de test (Maven)**
 
-## 6. Resultados generales de las pruebas
+Agregar en pom.xml:
 
-Los resultados obtenidos fueron los siguientes:
+<!-- JUnit 5 -->
 
-* Todas las pruebas funcionales fueron exitosas.
-* Las interacciones entre vistas, controladores y servicios funcionan correctamente.
-* El sistema se comporta de manera estable durante la reproducción prolongada.
-* No se detectaron pérdidas de memoria ni cierres inesperados.
-* El sistema responde adecuadamente a la manipulación simultánea de controles (por ejemplo, cambiar volumen durante la reproducción).
-* Las playlists mantienen integridad en su estructura durante operaciones múltiples de inserción o eliminación.
+<dependency>
 
----
+`  `<groupId>org.junit.jupiter</groupId>
 
-## 7. Problemas encontrados y soluciones aplicadas
+`  `<artifactId>junit-jupiter</artifactId>
 
-Durante la etapa de pruebas se identificaron los siguientes inconvenientes:
+`  `<version>5.10.0</version>
 
-### 7.1 Rutas de archivos incorrectas
+`  `<scope>test</scope>
 
-Algunas canciones no podían reproducirse debido a rutas inválidas.
-Solución aplicada: Validación previa del archivo mediante la clase `File`.
+</dependency>
 
-### 7.2 Congelamiento ocasional de la interfaz
+<!-- Mockito -->
 
-Se presentó un pequeño retraso al cargar ciertos archivos.
-Solución aplicada: Uso adecuado del módulo `Media` y optimización del llamado a eventos gráficos.
+<dependency>
 
-### 7.3 Falta de sincronización de la barra de progreso
+`  `<groupId>org.mockito</groupId>
 
-La barra de progreso no reflejaba correctamente el tiempo transcurrido.
-Solución aplicada: Agregar un listener al `currentTimeProperty` del `MediaPlayer`.
+`  `<artifactId>mockito-core</artifactId>
 
----
+`  `<version>5.5.0</version>
 
-## 8. Evaluación del cumplimiento de requisitos
+`  `<scope>test</scope>
 
-El análisis final indica lo siguiente:
+</dependency>
 
-* La mayoría de los **requisitos funcionales** fueron implementados correctamente.
-* La funcionalidad de integración con API externa, si bien fue incluida en los requisitos, **no fue implementada en esta versión**, quedando como un objetivo para versiones futuras.
-* Los requisitos no funcionales relacionados con usabilidad, rendimiento y estabilidad se cumplieron adecuadamente.
-* La arquitectura propuesta (MVC/MVVM) puede ampliarse sin dificultades técnicas.
+Para cobertura:
 
----
+<plugin>
 
-## 9. Conclusiones
+`  `<groupId>org.jacoco</groupId>
 
-Las pruebas realizadas permiten concluir que el sistema **Reproductor Musical** cumple satisfactoriamente su propósito académico.
-El reproductor es capaz de gestionar canciones locales, reproducir audio de manera estable, administrar playlists y ofrecer una interfaz amigable para el usuario.
+`  `<artifactId>jacoco-maven-plugin</artifactId>
 
-El análisis técnico evidencia:
+`  `<version>0.8.12</version>
 
-* Correcto funcionamiento de los servicios internos.
-* Interacción fluida entre interfaz y lógica del sistema.
-* Bajo índice de errores.
-* Código estructurado y fácilmente ampliable.
+`  `<executions>
 
-Aunque la integración con API externa queda pendiente, el prototipo cumple las funciones esenciales propias de un reproductor musical de escritorio.
+`    `<execution>
+
+`      `<goals><goal>prepare-agent</goal></goals>
+
+`    `</execution>
+
+`    `<execution>
+
+`      `<id>report</id>
+
+`      `<phase>test</phase>
+
+`      `<goals><goal>report</goal></goals>
+
+`    `</execution>
+
+`  `</executions>
+
+</plugin>
+
+- **Criterios de aceptación para tests**
+- Todos los tests unitarios deben pasar en el pipeline principal.
+- Cobertura mínima requerida (sugerida): 60% líneas en el módulo Reproductor; objetivo 80% para clases críticas (modelos y servicios).
+- No admitir tests frágiles que dependan de entornos externos; todo acceso a red se simula o se aísla en pruebas de integración separadas.
+- ` `**Buenas prácticas de pruebas**
+- Tests unitarios deben ser deterministas y rápidos (< 200 ms por test idealmente).
+- Separar pruebas unitarias de pruebas de integración (naming: \*IT para integración).
+- Usar datos de prueba pequeños y claros; evitar grandes fixtures.
+- Para pruebas que involucran archivo, usar el directorio target/test-... y limpiarlo en @AfterEach o @AfterAll.
+- Documentar cualquier dependencia global (por ejemplo, variable de entorno que cambie URLs).
+
+**Carencia de errores y warnings; tests automatizados; clean code**
+
+- **Correcciones prioritarias**
+  1. Tipos genéricos: reemplazar raw types (List, Map sin parámetros) con parámetros concretos (List<Song>).
+  1. @Override: añadir a todos los métodos que sobrescriben contratos.
+  1. Eliminar import .\* y reemplazarlos por imports explícitos.
+  1. Eliminar código muerto (métodos no referenciados); si se preserva por compatibilidad, añadir comentario justificativo.
+- ` `**Herramientas de análisis**
+  1. Checkstyle: estandarizar estilo (reglas mínimas: imports, nombre de clases, longitud de línea si aplica).
+  1. PMD: detectar complejidad, código duplicado.
+- **Formato y codificación**
+  1. Forzar codificación UTF-8 en pom.xml y en la configuración del IDE:
+     1. Maven compiler plugin:
+     1. <plugin>
+     1. `  `<groupId>org.apache.maven.plugins</groupId>
+     1. `  `<artifactId>maven-compiler-plugin</artifactId>
+     1. `  `<configuration>
+     1. `    `<encoding>UTF-8</encoding>
+     1. `  `</configuration>
+     1. </plugin>
+- **Refactors y organización**
+  1. Organización de paquetes clara y coherente:
+  1. reproductor.com.musica.api
+  1. reproductor.com.musica.model
+  1. reproductor.com.musica.core
+  1. reproductor.com.musica.controller
+  1. reproductor.com.musica.util
+  1. Separar DTOs (api.dto) de excepciones (api.exceptions).
+  1. Mantener clases con responsabilidad única (Single Responsibility Principle).
+  1. Extraer clases helper para evitar métodos muy largos.
+- ` `**Checklist pre-merge**
+  1. Código compila sin warnings críticos.
+  1. Tests unitarios pasan en local.
+  1. Cobertura no inferior al umbral acordado.
+  1. No hay System.out.println en código productivo.
+  1. No hay TODO o FIXME sin issue asociado. **3.3.3 Recomendaciones concretas para mantenimiento**
+
+Mantener documentación técnica (este informe) dentro de Documentacion/ y actualizarla cuando cambie la API.
+
+
 
 Este informe proporciona evidencia suficiente del correcto funcionamiento del sistema y del proceso de verificación seguido durante el desarrollo.
 
