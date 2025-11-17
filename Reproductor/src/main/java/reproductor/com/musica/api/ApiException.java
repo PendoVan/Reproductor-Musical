@@ -1,0 +1,33 @@
+package reproductor.com.musica.api;
+
+/**
+ * Excepción específica para errores de la API.
+ * Facilita el manejo de errores y logging.
+ */
+public class ApiException extends Exception {
+    
+    private final int statusCode;
+    
+    public ApiException(String message) {
+        super(message);
+        this.statusCode = -1;
+    }
+    
+    public ApiException(String message, Throwable cause) {
+        super(message, cause);
+        this.statusCode = -1;
+    }
+    
+    public ApiException(String message, int statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+    
+    public int getStatusCode() {
+        return statusCode;
+    }
+    
+    public boolean hasStatusCode() {
+        return statusCode > 0;
+    }
+}
