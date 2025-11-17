@@ -15,7 +15,7 @@ Los servicios de integración encapsulan la comunicación entre la aplicación d
 
 Las clases principales implicadas son ApiClient, AuthService (y su implementación), SearchService (y su implementación), y DTOs como DownloadRequest y DownloadResponse.
 
-- ` `**Contratos y endpoints**
+- **Contratos y endpoints**
 
 Los endpoints consumidos por la aplicación son, como ejemplo en ApiClient:
 
@@ -26,7 +26,7 @@ Los endpoints consumidos por la aplicación son, como ejemplo en ApiClient:
 
 Estos endpoints se consumen construyendo URIs sobre la baseUrl configurada en ApiClient, concatenando el path y codificando parámetros cuando corresponde (uso de URLEncoder).
 
-- ` `**Formato JSON (ejemplos)**
+- **Formato JSON (ejemplos)**
 
 Los contratos JSON relevantes son:
 
@@ -67,7 +67,7 @@ Los contratos JSON relevantes son:
 **Descarga binaria** — GET /descargas/{fileName}\
 Respuesta: Body binario (application/octet-stream o audio/mpeg). ApiClient usa HttpResponse.BodyHandlers.ofFile(...) para escribir directamente a disco.
 
-- ` `**Serialización y librerías**
+**Serialización y librerías**
 - Se emplea Jackson (com.fasterxml.jackson.databind.ObjectMapper) para serializar objetos Java a JSON y deserializar respuestas JSON a clases DTO.
 - Cuando se parsean estructuras genéricas (por ejemplo Map<String,List<String>>), prestar atención a tipos y advertencias de unchecked. En casos que requieran tipos parametrizados, usar TypeReference<>.
 
@@ -75,7 +75,7 @@ Ejemplo:
 
 Map<String, List<String>> result = objectMapper.readValue(json, new TypeReference<Map<String,List<String>>>(){});
 
-- ` `**Manejo de errores y excepciones**
+**Manejo de errores y excepciones**
 - Todos los errores de comunicación o parseo se normalizan en ApiException, que encapsula mensaje y causa:
   - Errores de validación de entrada— ApiException lanzada antes de invocar HTTP.
   - Códigos HTTP distintos de 200 — ApiException con mensaje que incluye statusCode y cuerpo cuando proceda.
@@ -83,25 +83,28 @@ Map<String, List<String>> result = objectMapper.readValue(json, new TypeReferenc
   - Errores de parseo JSON — ApiException con la causa IOException o JsonProcessingException.
 - ApiClient captura InterruptedException y reestablece el flag de interrupción del hilo (Thread.currentThread().interrupt()), luego lanza ApiException.
 - Para descargas de archivos se revisa response.statusCode() y se lanza ApiException si no es 200.
-- ` `**Estrategia de reintento y timeouts**
+  
+**Estrategia de reintento y timeouts**
 - Tiempo de espera configurable en ApiClient (por ejemplo TIMEOUT\_SECONDS).
 - Política de reintento no incluida por defecto; si se desea, proponer un decorador que implemente reintentos exponiendo parámetros: número máximo de reintentos, backoff exponencial y manejo de idempotencia.
-- ` `**Seguridad y autenticación**
+  
+**Seguridad y autenticación**
 - AuthService centraliza login/refresh/logout y devuelve tokens (Optional<String>) para ser almacenados por SessionManager.
 - ApiClient debe permitir inyección de token en el header Authorization: Bearer {token} en peticiones que requieran autenticación.
 - Nunca persistir tokens en texto plano fuera del directorio de usuario protegido. Para pruebas usar tokens dummy.
-- ` `**Consideraciones operacionales**
+  
+**Consideraciones operacionales**
 - Directorio de descargas: ApiClient crea el directorio si no existe (Files.createDirectories(...)) y lanza IllegalStateException sólo en caso de fallo al crear la carpeta.
 - Validar espacio disponible y permisos de escritura en despliegue real.
 - Logs: registrar solicitudes y respuestas (solo metadatos, no payloads sensibles) con nivel DEBUG para diagnóstico; registrar errores con stack trace en nivel ERROR.
 
 **Anexo técnico de pruebas**
 
-**3.2.1 Objetivo del anexo**
+**Objetivo del anexo**
 
 Documentar qué pruebas existen, qué cubren y cómo ejecutarlas en local y en CI. Incluir comandos, rutas de reportes y criterios de aceptación.
 
-**3.2.2 Qué se prueba (resumen)**
+**Qué se prueba (resumen)**
 
 - **Modelos**: Song, Playlist — pruebas de getters/setters, equals, hashCode, toString, validaciones (nulos, blanks).
 - **Servicios de negocio**: PlaylistService — agregar/eliminar canciones, navegación (next/prev/hasNext/hasPrevious), carga desde paths, límites, modos de reproducción.
@@ -113,7 +116,7 @@ Pruebas que no se realizan en esta suite por decisión de alcance:
 - Tests que requieren GUI de JavaFX (controladores) salvo pruebas unitarias sin inicialización UI.
 - Tests de integración a la API en entornos externos (esto se realiza con pipelines de integración separados si se necesita).
 
-**3.2.3 Estructura de los tests en el proyecto**
+**Estructura de los tests en el proyecto**
 
 Ubicación:
 
@@ -127,7 +130,7 @@ Convenciones:
   - servidor embebido (com.sun.net.httpserver.HttpServer) para pruebas reales de ApiClient, o
   - constructor package-private en ApiClient para inyectar HttpClient y ObjectMapper mockeados en pruebas unitarias.
 
-**3.2.4 Dependencias de test (Maven)**
+**Dependencias de test (Maven)**
 
 Agregar en pom.xml:
 
@@ -145,57 +148,12 @@ Agregar en pom.xml:
 
 </dependency>
 
-<!-- Mockito -->
-
-<dependency>
-
-`  `<groupId>org.mockito</groupId>
-
-`  `<artifactId>mockito-core</artifactId>
-
-`  `<version>5.5.0</version>
-
-`  `<scope>test</scope>
-
-</dependency>
-
-Para cobertura:
-
-<plugin>
-
-`  `<groupId>org.jacoco</groupId>
-
-`  `<artifactId>jacoco-maven-plugin</artifactId>
-
-`  `<version>0.8.12</version>
-
-`  `<executions>
-
-`    `<execution>
-
-`      `<goals><goal>prepare-agent</goal></goals>
-
-`    `</execution>
-
-`    `<execution>
-
-`      `<id>report</id>
-
-`      `<phase>test</phase>
-
-`      `<goals><goal>report</goal></goals>
-
-`    `</execution>
-
-`  `</executions>
-
-</plugin>
-
-- **Criterios de aceptación para tests**
+**Criterios de aceptación para tests**
 - Todos los tests unitarios deben pasar en el pipeline principal.
 - Cobertura mínima requerida (sugerida): 60% líneas en el módulo Reproductor; objetivo 80% para clases críticas (modelos y servicios).
 - No admitir tests frágiles que dependan de entornos externos; todo acceso a red se simula o se aísla en pruebas de integración separadas.
-- ` `**Buenas prácticas de pruebas**
+  
+**Buenas prácticas de pruebas**
 - Tests unitarios deben ser deterministas y rápidos (< 200 ms por test idealmente).
 - Separar pruebas unitarias de pruebas de integración (naming: \*IT para integración).
 - Usar datos de prueba pequeños y claros; evitar grandes fixtures.
@@ -204,25 +162,23 @@ Para cobertura:
 
 **Carencia de errores y warnings; tests automatizados; clean code**
 
-- **Correcciones prioritarias**
+**Correcciones prioritarias**
   1. Tipos genéricos: reemplazar raw types (List, Map sin parámetros) con parámetros concretos (List<Song>).
   1. @Override: añadir a todos los métodos que sobrescriben contratos.
   1. Eliminar import .\* y reemplazarlos por imports explícitos.
   1. Eliminar código muerto (métodos no referenciados); si se preserva por compatibilidad, añadir comentario justificativo.
-- ` `**Herramientas de análisis**
-  1. Checkstyle: estandarizar estilo (reglas mínimas: imports, nombre de clases, longitud de línea si aplica).
-  1. PMD: detectar complejidad, código duplicado.
-- **Formato y codificación**
+     
+**Formato y codificación**
   1. Forzar codificación UTF-8 en pom.xml y en la configuración del IDE:
      1. Maven compiler plugin:
-     1. <plugin>
-     1. `  `<groupId>org.apache.maven.plugins</groupId>
-     1. `  `<artifactId>maven-compiler-plugin</artifactId>
-     1. `  `<configuration>
-     1. `    `<encoding>UTF-8</encoding>
-     1. `  `</configuration>
-     1. </plugin>
-- **Refactors y organización**
+      <plugin>
+      `  `<groupId>org.apache.maven.plugins</groupId>
+      `  `<artifactId>maven-compiler-plugin</artifactId>
+      `  `<configuration>
+      `    `<encoding>UTF-8</encoding>
+      `  `</configuration>
+      </plugin>
+**Refactors y organización**
   1. Organización de paquetes clara y coherente:
   1. reproductor.com.musica.api
   1. reproductor.com.musica.model
@@ -232,17 +188,16 @@ Para cobertura:
   1. Separar DTOs (api.dto) de excepciones (api.exceptions).
   1. Mantener clases con responsabilidad única (Single Responsibility Principle).
   1. Extraer clases helper para evitar métodos muy largos.
-- ` `**Checklist pre-merge**
+     
+**Checklist pre-merge**
   1. Código compila sin warnings críticos.
   1. Tests unitarios pasan en local.
   1. Cobertura no inferior al umbral acordado.
   1. No hay System.out.println en código productivo.
-  1. No hay TODO o FIXME sin issue asociado. **3.3.3 Recomendaciones concretas para mantenimiento**
+  1. No hay TODO o FIXME sin issue asociado.
 
 Mantener documentación técnica (este informe) dentro de Documentacion/ y actualizarla cuando cambie la API.
 
 
 
 Este informe proporciona evidencia suficiente del correcto funcionamiento del sistema y del proceso de verificación seguido durante el desarrollo.
-
----
