@@ -212,7 +212,7 @@ public class SearchService {
         String fileName = filePath.getFileName().toString();
         String nameWithoutExt = fileName.replace(".mp3", "");
         
-        Song song = new Song();
+        Song song = new Song(nameWithoutExt, nameWithoutExt, filePath);
         
         // Intentar extraer artista y título
         if (nameWithoutExt.contains("-")) {
