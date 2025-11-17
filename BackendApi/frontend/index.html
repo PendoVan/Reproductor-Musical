@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>YT Downloader</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; }
+    input, textarea, button { font-size: 16px; padding: 8px; margin: 5px 0; width: 100%; }
+    button { cursor: pointer; }
+    .resultado { margin-top: 20px; }
+    .cancion { margin: 5px 0; }
+    .status { margin-top: 15px; font-weight: bold; color: #0066cc; }
+    .error { color: red; }
+    .success { color: green; }
+  </style>
+</head>
+<body>
+  <h1>🎵 YT Music Downloader</h1>
+
+  <label for="canciones">Escribe nombres de canciones (una por línea):</label>
+  <textarea id="canciones" rows="5" placeholder="Adele - Hello\nColdplay - Yellow"></textarea>
+
+  <button onclick="descargarCanciones()">Descargar Canciones</button>
+
+  <div id="status" class="status"></div>
+
+  <h2>Canciones disponibles</h2>
+  <button onclick="cargarLista()">🔄 Actualizar lista</button>
+  <div id="lista" class="resultado"></div>
+
+  <script>
+    const API = "http://localhost:8000";
+    const STATUS = document.getElementById("status");
+
+    async function descargarCanciones() {
+      const texto = document.getElementById("canciones").value.trim();
+      if (!texto) {
+        STATUS.textContent = "❌ Escribe al menos una canción.";
+        STATUS.className = "status error";
+        return;
+      }
+
+      const nombres = texto.split("\\n").filter(linea => linea.trim() !== "");
+
+      STATUS.textContent = "⏳ Descargando canciones...";
+      STATUS.className = "status";
+
+      try {
+        const res = await fetch(`${API}/descargar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ canciones: nombres })
+        });
+
+        const data = await res.json();
+        console.log(data);
+
+        STATUS.textContent = "✅ Descarga finalizada. Actualizando lista...";
+        STATUS.className = "status success";
+
+        setTimeout(cargarLista, 2000);
+      } catch (err) {
+        console.error(err);
+        STATUS.textContent = "❌ Error al descargar canciones.";
+        STATUS.className = "status error";
+      }
+    }
+
+    async function cargarLista() {
+      try {
+        const res = await fetch(`${API}/descargas`);
+        const data = await res.json();
+        const contenedor = document.getElementById("lista");
+        contenedor.innerHTML = "";
+
+        if (data.archivos && data.archivos.length > 0) {
+          data.archivos.forEach(nombre => {
+            const fila = document.createElement("div");
+            fila.className = "cancion";
+            fila.style.display = "flex";
+            fila.style.alignItems = "center";
+            fila.style.justifyContent = "space-between";
+            fila.style.marginBottom = "10px";
+
+            // Nombre de la canción
+            const label = document.createElement("span");
+            label.textContent = `🎧 ${nombre}`;
+
+            // Estilos comunes
+            const estiloBoton = (btn) => {
+              btn.style.color = "white";
+              btn.style.padding = "8px 16px";
+              btn.style.marginRight = "10px";
+              btn.style.border = "none";
+              btn.style.cursor = "pointer";
+              btn.style.borderRadius = "5px";
+              btn.style.fontSize = "14px";
+              btn.style.textAlign = "center";
+              btn.style.minWidth = "130px"; // 🔁 Fuerza ancho mínimo
+              btn.style.display = "inline-block"; // ✅ Muy importante para <a>
+              btn.style.boxSizing = "border-box";
+            };
+
+           // Botón de descarga (como <button> en lugar de <a>)
+            const btnDescargar = document.createElement("button");
+            btnDescargar.textContent = "⬇️ Descargar";
+
+            estiloBoton(btnDescargar);
+            btnDescargar.style.backgroundColor = "#4CAF50";
+
+            // Evento descargar
+            btnDescargar.onclick = async () => {
+              try {
+                const link = document.createElement("a");
+                link.href = `${API}/descargas/${encodeURIComponent(nombre)}`;
+                link.download = nombre;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              } catch (err) {
+                alert("❌ No se pudo iniciar la descarga.");
+              }
+            };
+
+            // Botón de eliminar
+            const btnEliminar = document.createElement("button");
+            btnEliminar.textContent = "🗑️ Eliminar";
+
+            estiloBoton(btnEliminar);
+            btnEliminar.style.backgroundColor = "#f44336";
+
+            // Evento eliminar
+            btnEliminar.onclick = async () => {
+              const confirmacion = confirm(`¿Eliminar "${nombre}"?`);
+              if (!confirmacion) return;
+
+              const res = await fetch(`${API}/descargas/${encodeURIComponent(nombre)}`, {
+                method: "DELETE"
+              });
+
+              const resultado = await res.json();
+              alert(resultado.mensaje || "Eliminado");
+              cargarLista();
+            };
+
+
+            const acciones = document.createElement("div");
+            acciones.appendChild(btnDescargar);
+            acciones.appendChild(btnEliminar);
+
+            fila.appendChild(label);
+            fila.appendChild(acciones);
+            contenedor.appendChild(fila);
+          });
+        } else {
+          contenedor.textContent = "No hay canciones descargadas.";
+        }
+      } catch (e) {
+        document.getElementById("lista").textContent = "❌ Error al cargar lista.";
+      }
+    }
+
+
+    // 🔄 Auto recargar la lista cada 10 segundos
+    setInterval(cargarLista, 10000);
+
+    // Cargar al inicio
+    cargarLista();
+  </script>
+</body>
+</html>
