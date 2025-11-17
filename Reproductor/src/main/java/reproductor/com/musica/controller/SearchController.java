@@ -50,9 +50,6 @@ public class SearchController {
         this.searchResults = FXCollections.observableArrayList();
     }
 
-    /**
-     * Permite inyectar el PlaylistService desde el PlayerController
-     */
     public void setPlaylistService(PlaylistService playlistService) {
         this.playlistService = playlistService;
         System.out.println("[SearchController] PlaylistService inyectado correctamente");

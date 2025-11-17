@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
+import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -21,13 +22,12 @@ import java.util.Map;
 
 /**
  * Cliente HTTP para comunicarse con la API de descarga de música.
- * Sigue principios de Single Responsibility y Dependency Injection.
  */
 public class ApiClient {
     
     private static final String ENDPOINT_DOWNLOAD = "/descargar";
     private static final String ENDPOINT_LIST = "/descargas";
-    private static final int TIMEOUT_SECONDS = 30;
+    private static final int TIMEOUT_SECONDS = 300;
     
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -48,9 +48,10 @@ public class ApiClient {
      * @param downloadDirectory Directorio de descargas local
      */
     public ApiClient(String baseUrl, Path downloadDirectory) {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                .build();
+    	this.httpClient = HttpClient.newBuilder()
+    	        .version(Version.HTTP_1_1)
+    	        .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
+    	        .build();
         this.objectMapper = new ObjectMapper();
         this.baseUrl = baseUrl;
         this.downloadDirectory = downloadDirectory;
@@ -75,6 +76,11 @@ public class ApiClient {
             HttpRequest httpRequest = buildPostRequest(ENDPOINT_DOWNLOAD, jsonBody);
             HttpResponse<String> response = httpClient.send(httpRequest, 
                     HttpResponse.BodyHandlers.ofString());
+            
+            System.out.println("➡ Enviando JSON:");
+            System.out.println(jsonBody);
+            System.out.println("➡ URL: " + (baseUrl + ENDPOINT_DOWNLOAD));
+
             
             return handleDownloadResponse(response);
             
@@ -115,7 +121,7 @@ public class ApiClient {
         validateFileName(fileName);
         
         try {
-            String encodedName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        	String encodedName = encodeFileName(fileName);
             String endpoint = ENDPOINT_LIST + "/" + encodedName;
             
             HttpRequest request = buildGetRequest(endpoint);
@@ -217,6 +223,12 @@ public class ApiClient {
         }
     }
     
+    private String encodeFileName(String name) {
+        return name.replace(" ", "%20")
+                   .replace("(", "%28")
+                   .replace(")", "%29");
+    }
+
     @SuppressWarnings("unchecked")
     private List<String> handleListResponse(HttpResponse<String> response) 
             throws ApiException {
