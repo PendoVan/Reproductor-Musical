@@ -56,7 +56,6 @@
 /* MAIN CONTAINER */
 .border-pane {
     -fx-background-color: -md-background;
-    -fx-effect: -md-elevation-1;
 }
 
 /* MATERIAL TOOLBAR */
@@ -66,7 +65,6 @@
     -fx-border-width: 0 0 1 0;
     -fx-padding: 16 24;
     -fx-spacing: 12;
-    -fx-effect: -md-elevation-2;
     -fx-background-radius: 0;
 }
 
@@ -82,7 +80,6 @@
     -fx-font-size: 14px;
     -fx-padding: 10 24;
     -fx-cursor: hand;
-    -fx-effect: -md-elevation-1;
 }
 
 /* BUTTONS WITH EMOJIS - Larger font for emojis */
@@ -95,25 +92,21 @@
 #btnLibrary:hover, #btnView:hover {
     -fx-background-color: derive(-md-primary, -8%);
     -fx-text-fill: #1a1a1a;
-    -fx-effect: -md-elevation-2;
 }
 
 #btnLibrary:pressed, #btnView:pressed {
     -fx-background-color: derive(-md-primary, -12%);
     -fx-text-fill: #000000;
-    -fx-effect: -md-elevation-1;
 }
 
 .button:hover {
     -fx-background-color: derive(-md-primary, -8%);
     -fx-text-fill: #000000;
-    -fx-effect: -md-elevation-2;
 }
 
 .button:pressed {
     -fx-background-color: derive(-md-primary, -12%);
     -fx-text-fill: #000000;
-    -fx-effect: -md-elevation-1;
 }
 
 /* MATERIAL FAB (FLOATING ACTION BUTTON) */
@@ -121,15 +114,14 @@
     -fx-background-color: -md-primary;
     -fx-text-fill: #1a1a1a;
     -fx-border-color: transparent;
-    -fx-border-radius: 28;
-    -fx-background-radius: 28;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
     -fx-pref-width: 56;
     -fx-pref-height: 56;
     -fx-min-width: 56;
     -fx-min-height: 56;
     -fx-max-width: 56;
     -fx-max-height: 56;
-    -fx-effect: -md-elevation-3;
     -fx-font-size: 18px;
     -fx-font-weight: 700;
 }
@@ -137,13 +129,11 @@
 #btnPlay:hover {
     -fx-background-color: derive(-md-primary, -8%);
     -fx-text-fill: #000000;
-    -fx-effect: -md-elevation-4;
 }
 
 #btnPlay:pressed {
     -fx-background-color: derive(-md-primary, -12%);
     -fx-text-fill: #000000;
-    -fx-effect: -md-elevation-2;
 }
 
 /* MATERIAL SLIDERS */
@@ -173,7 +163,6 @@
 
 .slider .thumb:hover {
     -fx-background-color: derive(-md-primary, -8%);
-    -fx-effect: -md-elevation-2;
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
 }
@@ -337,7 +326,6 @@
     -fx-font-size: 16px;
     -fx-padding: 10 24;
     -fx-cursor: hand;
-    -fx-effect: -md-elevation-1;
 }
 
 .list-cell {
@@ -583,7 +571,6 @@
 
 /* ANIMATIONS */
 .animated-button {
-    -fx-transition: all 0.2s ease;
 }
 
 .fade-in {
@@ -978,17 +965,6 @@
     -fx-background-radius: 4;
 }
 
-/* RESPONSIVE BREAKPOINTS */
-@media (max-width: 1200px) {
-    .responsive-text { -fx-font-size: 12px; }
-    .responsive-button { -fx-padding: 6 12; }
-}
-
-@media (max-width: 800px) {
-    .responsive-text { -fx-font-size: 11px; }
-    .responsive-button { -fx-padding: 4 8; }
-}
-
 /* ACCESSIBILITY ENHANCEMENTS */
 .high-contrast {
     -fx-text-fill: #ffffff;
@@ -1054,11 +1030,9 @@
     -fx-border-radius: 12;
     -fx-background-radius: 12;
     -fx-padding: 16;
-    -fx-effect: -md-elevation-1;
 }
 
 .material-card:hover {
-    -fx-effect: -md-elevation-2;
 }
 
 /* MATERIAL CHIPS */
