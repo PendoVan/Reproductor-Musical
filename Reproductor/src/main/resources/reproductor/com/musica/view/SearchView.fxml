@@ -37,11 +37,12 @@
       
       <!-- Search Input -->
       <HBox spacing="12" alignment="CENTER">
-        <TextField fx:id="searchField" 
+        <TextField fx:id="txtSearch" 
                    promptText="Buscar canciones, artistas, álbumes..." 
                    prefWidth="500"
                    styleClass="search-field" />
         <Button fx:id="btnSearch" text="Buscar" 
+                onAction="#onSearchClicked"
                 styleClass="button, animated-button" 
                 prefWidth="100" />
         <Button fx:id="btnClear" text="Limpiar" 
@@ -82,28 +83,14 @@
         <Button fx:id="btnSelectAll" text="Seleccionar Todo" 
                 styleClass="button" />
         <Button fx:id="btnAddSelected" text="Agregar Seleccionados" 
+                onAction="#onAddToPlaylistClicked"
                 styleClass="button, animated-button" />
       </HBox>
       
       <!-- Results Table -->
-      <TableView fx:id="resultsTable" VBox.vgrow="ALWAYS" 
-                 styleClass="results-table" 
-                 prefHeight="400">
-        <columns>
-          <TableColumn fx:id="titleColumn" text="Título" 
-                       prefWidth="250" />
-          <TableColumn fx:id="artistColumn" text="Artista" 
-                       prefWidth="200" />
-          <TableColumn fx:id="albumColumn" text="Álbum" 
-                       prefWidth="200" />
-          <TableColumn fx:id="durationColumn" text="Duración" 
-                       prefWidth="80" />
-          <TableColumn fx:id="qualityColumn" text="Calidad" 
-                       prefWidth="80" />
-          <TableColumn fx:id="actionsColumn" text="Acciones" 
-                       prefWidth="120" />
-        </columns>
-      </TableView>
+      <ListView fx:id="listResults" VBox.vgrow="ALWAYS" 
+                styleClass="list-view" 
+                prefHeight="400" />
       
       <!-- Results Actions -->
       <HBox spacing="12" alignment="CENTER">

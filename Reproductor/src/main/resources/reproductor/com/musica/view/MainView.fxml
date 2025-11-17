@@ -18,6 +18,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="reproductor.com.musica.controller.PlayerController"
+            stylesheets="@app.css"
             fx:id="root" styleClass="border-pane">
             
   <!-- HEADER TOOLBAR -->
@@ -35,6 +36,7 @@
           </items>
         </MenuButton>
         <Button fx:id="btnSearch" text="Buscar Online" 
+                onAction="#onSearchClicked"
                 styleClass="button, animated-button" />
       </HBox>
       
@@ -42,10 +44,12 @@
       
       <!-- Playback Mode Controls -->
       <HBox spacing="8" alignment="CENTER_RIGHT">
-        <Button fx:id="btnShuffle" text="Aleatorio" 
-                styleClass="button, animated-button" />
-        <Button fx:id="btnRepeat" text="Repetir" 
-                styleClass="button, animated-button" />
+        <Button fx:id="btnShuffle" text="🔀 Aleatorio" 
+                onAction="#onShuffleClicked"
+                styleClass="button, mode-button" />
+        <Button fx:id="btnRepeat" text="🔁 Repetir" 
+                onAction="#onRepeatClicked"
+                styleClass="button, mode-button" />
         <MenuButton text="Vista" styleClass="button">
           <items>
             <MenuItem text="Lista Compacta" />
@@ -66,8 +70,10 @@
 
       <!-- NOW PLAYING SECTION -->
       <VBox spacing="12" alignment="CENTER">
-        <Label fx:id="trackLabel" text="Selecciona una canción para reproducir" 
-               styleClass="label" />
+        <Label fx:id="trackLabel" text="🎵 Selecciona una canción para reproducir" 
+               styleClass="track-title" />
+        <Label fx:id="statusLabel" text="⏹️ Detenido" 
+               styleClass="status-indicator" />
         
         <!-- Progress Control -->
         <VBox spacing="8" alignment="CENTER">

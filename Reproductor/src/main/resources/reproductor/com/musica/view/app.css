@@ -1,132 +1,185 @@
-/* ROOT & GLOBAL STYLES */
+/* ===============================================
+   MATERIAL DESIGN 3.0 - MUSIC PLAYER THEME
+   =============================================== */
+
 .root {
-    -fx-background-color: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-background-color: #1c1b1f;
+    -fx-font-family: "Roboto", "Segoe UI", "Arial", sans-serif;
     -fx-font-size: 14px;
 }
 
-/* IMMEDIATE VISUAL FEEDBACK */
-.button:disabled {
-    -fx-opacity: 0.6;
-    -fx-text-fill: #94a3b8;
-    -fx-background-color: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+/* MATERIAL DESIGN COLOR SYSTEM */
+* {
+    /* Material Primary Colors */
+    -md-primary: #d0bcff;
+    -md-on-primary: #371e73;
+    -md-primary-container: #4f378b;
+    -md-on-primary-container: #eaddff;
+    
+    /* Material Surface Colors */
+    -md-surface: #1c1b1f;
+    -md-on-surface: #e6e0e9;
+    -md-surface-variant: #49454f;
+    -md-on-surface-variant: #cac4d0;
+    
+    /* Material Background */
+    -md-background: #141218;
+    -md-on-background: #e6e0e9;
+    
+    /* Material Outline */
+    -md-outline: #938f99;
+    -md-outline-variant: #49454f;
+    
+    /* Material Success/Error */
+    -md-error: #f2b8b5;
+    -md-on-error: #601410;
+    -md-success: #4caf50;
+    
+    /* Material Elevation Shadows */
+    -md-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+    -md-elevation-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
+    -md-elevation-3: 0 4px 8px 3px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
+    -md-elevation-4: 0 6px 10px 4px rgba(0, 0, 0, 0.15), 0 2px 3px rgba(0, 0, 0, 0.3);
+    
+    /* Material State Layers */
+    -md-hover-opacity: 0.08;
+    -md-focus-opacity: 0.12;
+    -md-pressed-opacity: 0.12;
 }
 
-/* CUSTOM COLOR PALETTE */
-* {
-    /* Primary Colors */
-    -primary-dark: #0a0a1a;
-    -primary-medium: #1a1a2e;
-    -primary-light: #16213e;
-    
-    /* Accent Colors */
-    -accent-blue: #0ea5e9;
-    -accent-cyan: #06b6d4;
-    -accent-purple: #8b5cf6;
-    -accent-pink: #ec4899;
-    
-    /* Neutral Colors */
-    -surface-dark: rgba(26, 26, 46, 0.8);
-    -surface-medium: rgba(34, 34, 54, 0.9);
-    -surface-light: rgba(45, 45, 65, 0.95);
-    
-    /* Text Colors */
-    -text-primary: #f8fafc;
-    -text-secondary: #cbd5e1;
-    -text-muted: #94a3b8;
-    
-    /* Glass Effect */
-    -glass-bg: rgba(255, 255, 255, 0.1);
-    -glass-border: rgba(255, 255, 255, 0.2);
-    
-    /* Shadows */
-    -shadow-small: 0 2px 8px rgba(0, 0, 0, 0.3);
-    -shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.4);
-    -shadow-large: 0 8px 32px rgba(0, 0, 0, 0.5);
+/* DISABLED STATES */
+.button:disabled {
+    -fx-opacity: 0.38;
+    -fx-text-fill: -md-on-surface;
 }
 
 /* MAIN CONTAINER */
 .border-pane {
-    -fx-background-color: linear-gradient(135deg, -primary-dark 0%, -primary-medium 50%, -primary-light 100%);
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 20, 0.3, 0, 0);
+    -fx-background-color: -md-background;
+    -fx-effect: -md-elevation-1;
 }
 
-/* TOOLBAR STYLING */
+/* MATERIAL TOOLBAR */
 .tool-bar {
-    -fx-background-color: linear-gradient(90deg, -surface-dark 0%, -surface-medium 100%);
-    -fx-border-color: -glass-border;
+    -fx-background-color: -md-surface;
+    -fx-border-color: -md-outline-variant;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 12 16;
-    -fx-spacing: 8;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0.2, 0, 2);
-    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 16 24;
+    -fx-spacing: 12;
+    -fx-effect: -md-elevation-2;
+    -fx-background-radius: 0;
 }
 
-/* BUTTONS */
+/* MATERIAL FILLED BUTTONS */
 .button {
-    -fx-background-color: linear-gradient(135deg, -glass-bg 0%, rgba(255, 255, 255, 0.05) 100%);
-    -fx-border-color: -glass-border;
-    -fx-border-width: 1;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-    -fx-text-fill: -text-primary;
-    -fx-font-weight: 500;
-    -fx-padding: 8 16;
+    -fx-background-color: -md-primary;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-text-fill: #1a1a1a;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
+    -fx-padding: 10 24;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 4, 0.3, 0, 1);
+    -fx-effect: -md-elevation-1;
+}
+
+/* BUTTONS WITH EMOJIS - Larger font for emojis */
+#btnOpen, #btnSearch, #btnShuffle, #btnRepeat, #btnLibrary, #btnView {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+}
+
+/* BIBLIOTECA Y VISTA HOVER EFFECTS */
+#btnLibrary:hover, #btnView:hover {
+    -fx-background-color: derive(-md-primary, -8%);
+    -fx-text-fill: #1a1a1a;
+    -fx-effect: -md-elevation-2;
+}
+
+#btnLibrary:pressed, #btnView:pressed {
+    -fx-background-color: derive(-md-primary, -12%);
+    -fx-text-fill: #000000;
+    -fx-effect: -md-elevation-1;
 }
 
 .button:hover {
-    -fx-background-color: linear-gradient(135deg, -accent-blue 0%, -accent-cyan 100%);
-    -fx-border-color: -accent-cyan;
-    -fx-effect: dropshadow(gaussian, -accent-blue, 8, 0.4, 0, 2);
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
+    -fx-background-color: derive(-md-primary, -8%);
+    -fx-text-fill: #000000;
+    -fx-effect: -md-elevation-2;
 }
 
 .button:pressed {
-    -fx-background-color: linear-gradient(135deg, -accent-purple 0%, -accent-pink 100%);
-    -fx-effect: dropshadow(gaussian, -accent-purple, 6, 0.5, 0, 1);
-    -fx-scale-x: 0.95;
-    -fx-scale-y: 0.95;
+    -fx-background-color: derive(-md-primary, -12%);
+    -fx-text-fill: #000000;
+    -fx-effect: -md-elevation-1;
 }
 
-/* PLAY BUTTON SPECIAL STYLING */
+/* MATERIAL FAB (FLOATING ACTION BUTTON) */
 #btnPlay {
-    -fx-background-color: linear-gradient(135deg, -accent-blue 0%, -accent-cyan 100%);
-    -fx-border-color: -accent-cyan;
-    -fx-effect: dropshadow(gaussian, -accent-blue, 10, 0.5, 0, 3);
+    -fx-background-color: -md-primary;
+    -fx-text-fill: #1a1a1a;
+    -fx-border-color: transparent;
+    -fx-border-radius: 28;
+    -fx-background-radius: 28;
+    -fx-pref-width: 56;
+    -fx-pref-height: 56;
+    -fx-min-width: 56;
+    -fx-min-height: 56;
+    -fx-max-width: 56;
+    -fx-max-height: 56;
+    -fx-effect: -md-elevation-3;
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
 }
 
 #btnPlay:hover {
-    -fx-background-color: linear-gradient(135deg, -accent-cyan 0%, -accent-blue 100%);
-    -fx-effect: dropshadow(gaussian, -accent-cyan, 12, 0.6, 0, 4);
+    -fx-background-color: derive(-md-primary, -8%);
+    -fx-text-fill: #000000;
+    -fx-effect: -md-elevation-4;
 }
 
-/* SLIDERS */
+#btnPlay:pressed {
+    -fx-background-color: derive(-md-primary, -12%);
+    -fx-text-fill: #000000;
+    -fx-effect: -md-elevation-2;
+}
+
+/* MATERIAL SLIDERS */
 .slider {
     -fx-background-color: transparent;
 }
 
 .slider .track {
-    -fx-background-color: linear-gradient(90deg, -surface-dark 0%, -surface-light 100%);
-    -fx-background-radius: 10;
-    -fx-pref-height: 6;
-    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.4), 4, 0.3, 0, 0);
+    -fx-background-color: -md-outline-variant;
+    -fx-background-radius: 2;
+    -fx-pref-height: 4;
+}
+
+.slider .filled-track {
+    -fx-background-color: -md-primary;
+    -fx-background-radius: 2;
 }
 
 .slider .thumb {
-    -fx-background-color: linear-gradient(135deg, -accent-blue 0%, -accent-cyan 100%);
+    -fx-background-color: -md-primary;
     -fx-background-radius: 10;
-    -fx-pref-width: 18;
-    -fx-pref-height: 18;
-    -fx-effect: dropshadow(gaussian, -accent-blue, 6, 0.4, 0, 2);
+    -fx-pref-width: 20;
+    -fx-pref-height: 20;
     -fx-cursor: hand;
+    -fx-effect: -md-elevation-1;
 }
 
 .slider .thumb:hover {
-    -fx-background-color: linear-gradient(135deg, -accent-cyan 0%, -accent-blue 100%);
-    -fx-effect: dropshadow(gaussian, -accent-cyan, 8, 0.6, 0, 3);
+    -fx-background-color: derive(-md-primary, -8%);
+    -fx-effect: -md-elevation-2;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.slider .thumb:pressed {
+    -fx-background-color: derive(-md-primary, -12%);
     -fx-scale-x: 1.2;
     -fx-scale-y: 1.2;
 }
@@ -148,38 +201,84 @@
     -fx-pref-width: 120;
 }
 
-/* LABELS */
+/* MATERIAL TYPOGRAPHY - Texto blanco para volumen y labels */
 .label {
-    -fx-text-fill: -text-primary;
-    -fx-font-weight: 400;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
 }
 
-/* IMPROVED VISIBILITY */
+/* Material Text Styles - Texto consistente con botones */
+.headline-large {
+    -fx-font-size: 32px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #2d2d2d;
+}
+
+.headline-medium {
+    -fx-font-size: 28px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #2d2d2d;
+}
+
+.title-large {
+    -fx-font-size: 22px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #2d2d2d;
+}
+
+.title-medium {
+    -fx-font-size: 16px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #2d2d2d;
+}
+
+.body-large {
+    -fx-font-size: 16px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #2d2d2d;
+}
+
+.body-medium {
+    -fx-font-size: 14px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #2d2d2d;
+}
+
+.label-large {
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #2d2d2d;
+}
+
+/* IMPROVED VISIBILITY - Texto oscuro para mejor legibilidad */
 .button {
-    -fx-text-fill: #ffffff !important;
+    -fx-text-fill: #2d2d2d !important;
+    -fx-font-weight: 600 !important;
 }
 
 .button:hover {
-    -fx-text-fill: #ffffff !important;
+    -fx-text-fill: #1a1a1a !important;
 }
 
 .menu-button {
-    -fx-text-fill: #ffffff !important;
+    -fx-text-fill: #2d2d2d !important;
+    -fx-font-weight: 600 !important;
 }
 
 .menu-button:hover {
-    -fx-text-fill: #ffffff !important;
+    -fx-text-fill: #1a1a1a !important;
 }
 
 #trackLabel {
-    -fx-text-fill: -text-primary;
+    -fx-text-fill: #ffffff;
     -fx-font-size: 18px;
     -fx-font-weight: 600;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 2, 0.8, 0, 1);
 }
 
 .time-label {
-    -fx-text-fill: -text-secondary;
+    -fx-text-fill: #ffffff;
     -fx-font-size: 12px;
     -fx-font-weight: 500;
     -fx-font-family: "Consolas", "Monaco", monospace;
@@ -187,48 +286,86 @@
 
 /* CHECKBOX */
 .check-box {
-    -fx-text-fill: -text-secondary;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: 600;
+    -fx-font-size: 16px;
 }
 
 .check-box .box {
-    -fx-background-color: -glass-bg;
-    -fx-border-color: -glass-border;
+    -fx-background-color: transparent;
+    -fx-border-color: -md-outline-variant;
     -fx-border-radius: 4;
     -fx-background-radius: 4;
 }
 
 .check-box:selected .mark {
-    -fx-background-color: -accent-blue;
+    -fx-background-color: -md-primary;
 }
 
-/* LIST VIEW */
+/* MUTE BUTTON SPECIFIC */
+#muteCheck {
+    -fx-text-fill: #ffffff !important;
+    -fx-font-weight: 600 !important;
+    -fx-font-size: 18px !important;
+}
+
+#muteCheck:hover {
+    -fx-text-fill: -md-primary !important;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+/* MATERIAL LIST - Biblioteca con emoji */
 .list-view {
-    -fx-background-color: -surface-dark;
-    -fx-border-color: -glass-border;
+    -fx-background-color: -md-surface;
+    -fx-border-color: -md-outline-variant;
     -fx-border-width: 1;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
     -fx-background-insets: 0;
-    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0.2, 0, 0);
+}
+
+/* BIBLIOTECA Y VISTA - Forma redondeada como otros botones */
+#btnLibrary, #btnView {
+    -fx-background-color: -md-primary;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-text-fill: #2d2d2d;
+    -fx-font-weight: 600;
+    -fx-font-size: 16px;
+    -fx-padding: 10 24;
+    -fx-cursor: hand;
+    -fx-effect: -md-elevation-1;
 }
 
 .list-cell {
     -fx-background-color: transparent;
-    -fx-text-fill: -text-secondary;
-    -fx-padding: 8 12;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 16 16;
     -fx-border-color: transparent;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
 }
 
 .list-cell:filled:selected {
-    -fx-background-color: linear-gradient(90deg, -accent-blue 0%, -accent-cyan 100%);
-    -fx-text-fill: -text-primary;
-    -fx-background-radius: 4;
-    -fx-effect: dropshadow(gaussian, -accent-blue, 4, 0.3, 0, 1);
+    -fx-background-color: rgba(208, 188, 255, 0.12);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 8;
+    -fx-font-weight: 700;
 }
 
 .list-cell:filled:hover {
-    -fx-background-color: -glass-bg;
-    -fx-background-radius: 4;
+    -fx-background-color: rgba(208, 188, 255, 0.08);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 8;
+}
+
+.list-cell:filled:pressed {
+    -fx-background-color: rgba(208, 188, 255, 0.16);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 8;
 }
 
 /* SEPARATORS */
@@ -520,6 +657,13 @@
     -fx-font-weight: 600;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0.3, 0, 2);
+}
+
+/* TRANSPORT BUTTONS WITH EMOJIS */
+#btnPrev, #btnNext, #btnPlay, #btnPause, #btnStop {
+    -fx-font-size: 20px;
+    -fx-text-fill: #2d2d2d;
+    -fx-font-weight: 700;
 }
 
 .transport-button:hover {
@@ -855,4 +999,141 @@
     -fx-border-color: #ffff00;
     -fx-border-width: 2;
     -fx-effect: dropshadow(gaussian, #ffff00, 6, 0.5, 0, 0);
+}
+
+/* ===============================================
+   MATERIAL DESIGN COMPONENTS
+   =============================================== */
+
+/* MATERIAL OUTLINED BUTTONS */
+.outlined-button {
+    -fx-background-color: transparent;
+    -fx-border-color: -md-outline;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-text-fill: -md-primary;
+    -fx-padding: 10 24;
+    -fx-font-weight: 500;
+    -fx-font-size: 14px;
+}
+
+.outlined-button:hover {
+    -fx-background-color: rgba(208, 188, 255, 0.08);
+    -fx-border-color: -md-primary;
+}
+
+.outlined-button:pressed {
+    -fx-background-color: rgba(208, 188, 255, 0.16);
+}
+
+/* MATERIAL TEXT BUTTONS */
+.text-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -md-primary;
+    -fx-padding: 10 12;
+    -fx-font-weight: 500;
+    -fx-font-size: 14px;
+    -fx-background-radius: 20;
+}
+
+.text-button:hover {
+    -fx-background-color: rgba(208, 188, 255, 0.08);
+}
+
+.text-button:pressed {
+    -fx-background-color: rgba(208, 188, 255, 0.16);
+}
+
+/* MATERIAL CARDS */
+.material-card {
+    -fx-background-color: -md-surface;
+    -fx-border-color: -md-outline-variant;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+    -fx-effect: -md-elevation-1;
+}
+
+.material-card:hover {
+    -fx-effect: -md-elevation-2;
+}
+
+/* MATERIAL CHIPS */
+.material-chip {
+    -fx-background-color: -md-surface-variant;
+    -fx-border-color: -md-outline;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: -md-on-surface-variant;
+    -fx-padding: 6 16;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+}
+
+.material-chip:hover {
+    -fx-background-color: derive(-md-surface-variant, -5%);
+}
+
+.material-chip.selected {
+    -fx-background-color: -md-primary-container;
+    -fx-text-fill: -md-on-primary-container;
+    -fx-border-color: transparent;
+}
+
+/* MATERIAL PROGRESS INDICATOR */
+.material-progress {
+    -fx-background-color: -md-primary-container;
+    -fx-background-radius: 2;
+    -fx-pref-height: 4;
+}
+
+.material-progress .bar {
+    -fx-background-color: -md-primary;
+    -fx-background-radius: 2;
+}
+
+/* STATUS STYLES */
+.success-text {
+    -fx-text-fill: -md-success;
+    -fx-font-weight: 500;
+}
+
+.error-text {
+    -fx-text-fill: -md-error;
+    -fx-font-weight: 500;
+}
+
+/* MATERIAL DIVIDERS */
+.material-divider {
+    -fx-background-color: -md-outline-variant;
+    -fx-pref-height: 1;
+    -fx-max-height: 1;
+}
+
+/* ACCESSIBILITY & FOCUS */
+.button:focused,
+.outlined-button:focused,
+.text-button:focused {
+    -fx-border-color: -md-primary;
+    -fx-border-width: 2;
+}
+
+/* RESPONSIVE UTILITIES */
+.surface-container {
+    -fx-background-color: -md-surface;
+    -fx-padding: 16;
+}
+
+.surface-container-high {
+    -fx-background-color: derive(-md-surface, 5%);
+    -fx-padding: 20;
+}
+
+.surface-container-highest {
+    -fx-background-color: derive(-md-surface, 10%);
+    -fx-padding: 24;
 }

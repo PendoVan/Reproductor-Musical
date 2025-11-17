@@ -1,0 +1,478 @@
+/* =============================================================================
+   SPOTIFY-INSPIRED DARK THEME
+   ============================================================================= */
+
+/* Root and Base Styles */
+#root {
+    -fx-background-color: #121212;
+    -fx-font-family: "Segoe UI", "Arial", "Helvetica", sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* =============================================================================
+   HEADER BAR
+   ============================================================================= */
+
+.header-bar {
+    -fx-background-color: #181818;
+    -fx-border-color: transparent transparent #282828 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-min-height: 60px;
+}
+
+/* =============================================================================
+   MAIN CONTENT AREA
+   ============================================================================= */
+
+.main-content {
+    -fx-background-color: #121212;
+}
+
+/* Now Playing Section */
+.now-playing-section {
+    -fx-background-color: #121212;
+    -fx-padding: 24;
+}
+
+/* Playlist Section */
+.playlist-section {
+    -fx-background-color: #121212;
+    -fx-padding: 24;
+}
+
+/* =============================================================================
+   TEXT STYLES
+   ============================================================================= */
+
+.primary-text {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: 600;
+}
+
+.secondary-text {
+    -fx-text-fill: #B3B3B3;
+    -fx-font-weight: 400;
+}
+
+.status-text {
+    -fx-text-fill: #1DB954;
+    -fx-font-weight: 500;
+    -fx-font-size: 12px;
+}
+
+.track-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-alignment: center;
+}
+
+.artist-name {
+    -fx-font-size: 16px;
+    -fx-text-alignment: center;
+}
+
+.section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+
+.time-label {
+    -fx-font-size: 11px;
+    -fx-font-family: "Consolas", "Monaco", monospace;
+}
+
+/* =============================================================================
+   BUTTONS
+   ============================================================================= */
+
+/* Base button style */
+.control-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B3B3B3;
+    -fx-border-color: transparent;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 8 16;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+}
+
+.control-button:hover {
+    -fx-background-color: #282828;
+    -fx-text-fill: #FFFFFF;
+}
+
+.control-button:pressed {
+    -fx-background-color: #1a1a1a;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* Toggle buttons */
+.toggle-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B3B3B3;
+    -fx-border-color: transparent;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-padding: 6 12;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+}
+
+.toggle-button:hover {
+    -fx-background-color: #282828;
+    -fx-text-fill: #FFFFFF;
+}
+
+.toggle-button.active {
+    -fx-background-color: #1DB954;
+    -fx-text-fill: #000000;
+}
+
+/* Secondary buttons */
+.secondary-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B3B3B3;
+    -fx-border-color: #535353;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 8 16;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #282828;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #B3B3B3;
+}
+
+/* Transport Control Buttons */
+.transport-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B3B3B3;
+    -fx-border-color: transparent;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-font-size: 16px;
+}
+
+.transport-button:hover {
+    -fx-background-color: #282828;
+    -fx-text-fill: #FFFFFF;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.transport-button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+/* Play Button (Special) */
+.play-button {
+    -fx-background-color: #1DB954;
+    -fx-text-fill: #000000;
+    -fx-border-color: transparent;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-min-width: 56px;
+    -fx-min-height: 56px;
+    -fx-max-width: 56px;
+    -fx-max-height: 56px;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.play-button:hover {
+    -fx-background-color: #1ed760;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.play-button:pressed {
+    -fx-background-color: #1aa34a;
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+/* =============================================================================
+   SLIDERS
+   ============================================================================= */
+
+/* Progress Slider */
+.progress-slider {
+    -fx-padding: 0;
+}
+
+.progress-slider .track {
+    -fx-background-color: #404040;
+    -fx-background-radius: 2;
+    -fx-pref-height: 4;
+}
+
+.progress-slider .filled-track {
+    -fx-background-color: #1DB954;
+    -fx-background-radius: 2;
+}
+
+.progress-slider .thumb {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 6;
+    -fx-pref-width: 12;
+    -fx-pref-height: 12;
+    -fx-border-color: transparent;
+}
+
+.progress-slider:hover .thumb {
+    -fx-background-color: #1DB954;
+}
+
+/* Volume Slider */
+.volume-slider {
+    -fx-padding: 0;
+}
+
+.volume-slider .track {
+    -fx-background-color: #404040;
+    -fx-background-radius: 2;
+    -fx-pref-height: 4;
+}
+
+.volume-slider .filled-track {
+    -fx-background-color: #1DB954;
+    -fx-background-radius: 2;
+}
+
+.volume-slider .thumb {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 5;
+    -fx-pref-width: 10;
+    -fx-pref-height: 10;
+    -fx-border-color: transparent;
+}
+
+.volume-slider:hover .thumb {
+    -fx-background-color: #1DB954;
+}
+
+/* =============================================================================
+   ALBUM COVER
+   ============================================================================= */
+
+.album-cover {
+    -fx-background-color: #282828;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 16, 0.2, 0, 4);
+}
+
+.album-placeholder {
+    -fx-fill: linear-gradient(135deg, #404040 0%, #282828 100%);
+    -fx-arc-width: 16;
+    -fx-arc-height: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 16, 0.2, 0, 4);
+}
+
+/* =============================================================================
+   PLAYLIST
+   ============================================================================= */
+
+.playlist {
+    -fx-background-color: #181818;
+    -fx-border-color: transparent;
+    -fx-background-radius: 8;
+    -fx-padding: 0;
+}
+
+.playlist .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B3B3B3;
+    -fx-padding: 8 16;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+    -fx-background-radius: 0;
+}
+
+.playlist .list-cell:hover {
+    -fx-background-color: #282828;
+    -fx-text-fill: #FFFFFF;
+}
+
+.playlist .list-cell:selected {
+    -fx-background-color: rgba(29, 185, 84, 0.1);
+    -fx-text-fill: #1DB954;
+}
+
+.playlist .list-cell.playlist-item-playing {
+    -fx-background-color: rgba(29, 185, 84, 0.2);
+    -fx-text-fill: #1DB954;
+    -fx-font-weight: 600;
+}
+
+/* Hide scrollbars but keep functionality */
+.playlist .scroll-bar {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+}
+
+.playlist .scroll-bar:hover {
+    -fx-opacity: 0.3;
+    -fx-pref-width: 8;
+}
+
+/* =============================================================================
+   CHECKBOX
+   ============================================================================= */
+
+.mute-checkbox {
+    -fx-text-fill: #B3B3B3;
+    -fx-font-size: 12px;
+}
+
+.mute-checkbox .box {
+    -fx-background-color: transparent;
+    -fx-border-color: #535353;
+    -fx-border-width: 2;
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+}
+
+.mute-checkbox:selected .box {
+    -fx-background-color: #1DB954;
+    -fx-border-color: #1DB954;
+}
+
+.mute-checkbox .mark {
+    -fx-background-color: #000000;
+    -fx-padding: 2;
+}
+
+.mute-checkbox:hover {
+    -fx-text-fill: #FFFFFF;
+}
+
+.mute-checkbox:hover .box {
+    -fx-border-color: #FFFFFF;
+}
+
+/* =============================================================================
+   STATUS BAR
+   ============================================================================= */
+
+.status-bar {
+    -fx-background-color: #181818;
+    -fx-border-color: #282828 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-min-height: 40px;
+}
+
+/* =============================================================================
+   SEPARATOR
+   ============================================================================= */
+
+.separator {
+    -fx-background-color: #282828;
+}
+
+.separator .line {
+    -fx-background-color: #282828;
+    -fx-border-color: transparent;
+}
+
+/* =============================================================================
+   LAYOUT CONTAINERS
+   ============================================================================= */
+
+.border-pane {
+    -fx-background-color: #121212;
+}
+
+.vbox, .hbox {
+    -fx-background-color: transparent;
+}
+
+/* =============================================================================
+   FOCUS AND DISABLED STATES
+   ============================================================================= */
+
+*:focused {
+    -fx-background-color: rgba(29, 185, 84, 0.1);
+    -fx-border-color: #1DB954;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+*:disabled {
+    -fx-opacity: 0.4;
+}
+
+/* Remove focus indicators for better Spotify look */
+.button:focused,
+.slider:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* =============================================================================
+   ANIMATIONS AND TRANSITIONS
+   ============================================================================= */
+
+.button,
+.list-cell {
+    -fx-cursor: hand;
+}
+
+/* Smooth transitions for hover effects */
+.control-button,
+.transport-button,
+.toggle-button,
+.secondary-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B3B3B3;
+}
+
+/* Active states for toggles */
+.toggle-button.shuffle-active,
+.toggle-button.repeat-active {
+    -fx-background-color: #1DB954;
+    -fx-text-fill: #000000;
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
+
+/* Ensure content adapts to window size */
+.main-content {
+    -fx-min-width: 800;
+}
+
+.now-playing-section {
+    -fx-min-width: 350;
+    -fx-max-width: 450;
+}
+
+.playlist-section {
+    -fx-min-width: 300;
+}
+
+/* Compact mode for smaller screens */
+@media (max-width: 1000px) {
+    .track-title {
+        -fx-font-size: 20px;
+    }
+    
+    .artist-name {
+        -fx-font-size: 14px;
+    }
+    
+    .album-cover {
+        -fx-fit-width: 200;
+        -fx-fit-height: 200;
+    }
+}
