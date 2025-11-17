@@ -109,6 +109,7 @@
           <Button onAction="#onClearPlaylist" styleClass="button" text="Limpiar Lista" />
           <Button onAction="#onSavePlaylist" styleClass="button" text="Guardar Lista" />
         </HBox>
+
         <ListView fx:id="playlistView" prefHeight="300" styleClass="list-view" VBox.vgrow="ALWAYS" />
       </VBox>
 
