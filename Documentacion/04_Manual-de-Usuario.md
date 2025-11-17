@@ -206,22 +206,22 @@ Las canciones añadidas desde la API se agregan como URLs o streams.
 
 ## 10. Preguntas Frecuentes (FAQ)
 
-### ¿Puedo reproducir canciones desde internet?
+### ❓ ¿Puedo reproducir canciones desde internet?
 **R:** Sí, si fueron agregadas desde la API.
 
-### ¿Puedo cargar carpetas completas?
+### ❓ ¿Puedo cargar carpetas completas?
 **R:** Actualmente no; debes cargar canciones una por una.
 
-### ¿Qué formatos soporta el reproductor?
+### ❓ ¿Qué formatos soporta el reproductor?
 **R:** MP3 y WAV.
 
-### ¿Cómo puedo editar una playlist?
+### ❓ ¿Cómo puedo editar una playlist?
 **R:** Seleccionándola en el panel izquierdo y usando los botones de agregar/eliminar canciones.
 
-### ¿Necesito internet para usarlo?
+### ❓ ¿Necesito internet para usarlo?
 **R:** Solo para buscar canciones mediante la API. El reproductor local no necesita internet.
 
-### ¿La aplicación guarda mis playlists?
+### ❓ ¿La aplicación guarda mis playlists?
 **R:** Sí, las playlists se guardan automáticamente.
 
 ---
@@ -232,3 +232,7 @@ Las canciones añadidas desde la API se agregan como URLs o streams.
 - **Versión:** 1.0.0
 - **Fecha:** Noviembre 2025
 - **Responsable:** Integrante 4 - UI/UX Developer
+
+---
+
+> 💡 **Nota:** Este manual describe todas las funcionalidades implementadas en el reproductor musical.
