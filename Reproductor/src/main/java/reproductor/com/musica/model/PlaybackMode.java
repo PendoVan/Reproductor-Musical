@@ -1,5 +1,8 @@
 package reproductor.com.musica.model;
 
-public class PlaybackMode {
-
+public enum PlaybackMode {
+	NORMAL,
+	SHUFFLE,
+	REPEAT_ONE,
+	REPEAT_ALL
 }
