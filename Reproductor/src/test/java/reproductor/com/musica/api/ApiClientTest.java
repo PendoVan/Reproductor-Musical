@@ -3,15 +3,11 @@ package reproductor.com.musica.api;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.*;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
-
-import reproductor.com.musica.api.dto.DownloadResponse;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -82,7 +82,7 @@ public class SearchService {
             }
 
             // Usar SIEMPRE el nombre de archivo que viene de la API
-            String fileName = result.getFileName();
+            String fileName = result.getName();
             if (fileName == null || fileName.isBlank()) {
                 messageCallback.update("✗ Respuesta sin archivo para: " + result.getName());
                 continue;
