@@ -167,9 +167,31 @@ public class PlaylistService {
         for (File f : files) {
             if (f == null || !f.exists()) continue;
 
-            // TODO: adapta este constructor a tu clase Song
-            // Ejemplo suponiendo: Song(String title, String filePath, double durationSeconds)
+            // Crear canción con duración inicial de 0
             Song song = new Song(f.getName(), f.getAbsolutePath(), 0);
+            
+            // Intentar obtener la duración del archivo de audio
+            try {
+                javafx.scene.media.Media media = new javafx.scene.media.Media(f.toURI().toString());
+                
+                // Si la duración ya está disponible
+                if (media.getDuration() != null && !media.getDuration().isUnknown()) {
+                    song.setDurationSeconds((int) media.getDuration().toSeconds());
+                    System.out.println("[PlaylistService] Duración cargada: " + f.getName() + " = " + song.getDurationSeconds() + "s");
+                }
+                
+                // Listener por si la duración se carga después
+                media.durationProperty().addListener((obs, oldDuration, newDuration) -> {
+                    if (newDuration != null && !newDuration.isUnknown()) {
+                        int seconds = (int) newDuration.toSeconds();
+                        song.setDurationSeconds(seconds);
+                        System.out.println("[PlaylistService] Duración actualizada: " + f.getName() + " = " + seconds + "s");
+                        javafx.application.Platform.runLater(() -> recalcTotalDuration());
+                    }
+                });
+            } catch (Exception e) {
+                System.err.println("[PlaylistService] Error al obtener duración para: " + f.getName() + " - " + e.getMessage());
+            }
 
             songs.add(song);
             added.add(song);

@@ -5,6 +5,8 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
@@ -110,7 +112,14 @@
           <Button onAction="#onSavePlaylist" styleClass="button" text="Guardar Lista" />
         </HBox>
 
-        <ListView fx:id="playlistView" prefHeight="300" styleClass="list-view" VBox.vgrow="ALWAYS" />
+        <TableView fx:id="playlistView" prefHeight="300" styleClass="table-view" VBox.vgrow="ALWAYS">
+          <columns>
+            <TableColumn fx:id="titleColumn" prefWidth="250" text="Título" />
+            <TableColumn fx:id="artistColumn" prefWidth="200" text="Artista" />
+            <TableColumn fx:id="albumColumn" prefWidth="150" text="Álbum" />
+            <TableColumn fx:id="durationColumn" prefWidth="100" text="Duración" />
+          </columns>
+        </TableView>
       </VBox>
 
     </VBox>

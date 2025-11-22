@@ -56,7 +56,11 @@ public class PlayerController {
     @FXML private CheckBox muteCheck;
 
     // Playlist
-    @FXML private ListView<Song> playlistView;
+    @FXML private TableView<Song> playlistView;
+    @FXML private TableColumn<Song, String> titleColumn;
+    @FXML private TableColumn<Song, String> artistColumn;
+    @FXML private TableColumn<Song, String> albumColumn;
+    @FXML private TableColumn<Song, String> durationColumn;
 
     // Barra de estado inferior
     @FXML private Label statusLabel;
@@ -77,6 +81,7 @@ public class PlayerController {
 
     @FXML
     public void initialize() {
+        setupTableColumns();
         setupPlaylistBinding();
         setupPlayerBinding();
         setupVolumeControl();
@@ -91,6 +96,74 @@ public class PlayerController {
     // CONFIGURACIÓN INICIAL
     // ==========================
 
+    private void setupTableColumns() {
+        // Configurar política de redimensionamiento para eliminar la columna vacía
+        playlistView.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
+        
+        titleColumn.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(
+                        cellData.getValue().getTitle()));
+
+        artistColumn.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(
+                        cellData.getValue().getArtist()));
+
+        albumColumn.setCellValueFactory(cellData -> {
+            Song song = cellData.getValue();
+            String album = song.isLocal() ? "Local" : "YouTube";
+            return new javafx.beans.property.SimpleStringProperty(album);
+        });
+
+        durationColumn.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(
+                        formatTimeFromSeconds(cellData.getValue().getDurationSeconds())));
+
+        // Aplicar clases CSS específicas a cada columna
+        titleColumn.setCellFactory(column -> {
+            var cell = new javafx.scene.control.TableCell<Song, String>();
+            cell.getStyleClass().add("title-cell");
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null) {
+                    cell.setText(newItem);
+                }
+            });
+            return cell;
+        });
+
+        artistColumn.setCellFactory(column -> {
+            var cell = new javafx.scene.control.TableCell<Song, String>();
+            cell.getStyleClass().add("artist-cell");
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null) {
+                    cell.setText(newItem);
+                }
+            });
+            return cell;
+        });
+
+        albumColumn.setCellFactory(column -> {
+            var cell = new javafx.scene.control.TableCell<Song, String>();
+            cell.getStyleClass().add("album-cell");
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null) {
+                    cell.setText(newItem);
+                }
+            });
+            return cell;
+        });
+
+        durationColumn.setCellFactory(column -> {
+            var cell = new javafx.scene.control.TableCell<Song, String>();
+            cell.getStyleClass().add("duration-cell");
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem != null) {
+                    cell.setText(newItem);
+                }
+            });
+            return cell;
+        });
+    }
+
     private void setupPlaylistBinding() {
         playlistView.setItems(playlist.getSongs());
 
@@ -103,8 +176,12 @@ public class PlayerController {
         });
 
         // Actualizar contadores
-        playlist.totalDurationProperty().addListener((obs, oldVal, newVal) ->
-                totalDurationLabel.setText(formatTimeFromSeconds(newVal.doubleValue())));
+        playlist.totalDurationProperty().addListener((obs, oldVal, newVal) -> {
+            totalDurationLabel.setText(formatTimeFromSeconds(newVal.doubleValue()));
+            // Refrescar la tabla para mostrar las duraciones actualizadas
+            playlistView.refresh();
+            System.out.println("[PlayerController] Duración total actualizada: " + formatTimeFromSeconds(newVal.doubleValue()));
+        });
 
         playlist.getSongs().addListener((javafx.collections.ListChangeListener<Song>) change -> {
             trackCountLabel.setText(playlist.getSongs().size() + " canciones");
