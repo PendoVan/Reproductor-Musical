@@ -124,4 +124,28 @@ class SongTest {
 
         assertNull(s.getFilePathString());
     }
+    
+    @Test
+    void testConstructorHandlesNullValues() {
+        Song s = new Song(null, null, (String)null);
+        
+        assertEquals("", s.getTitle(), "GetTitle debe devolver cadena vacía si es null");
+        assertEquals("Desconocido", s.getArtist(), "GetArtist debe devolver 'Desconocido' si es null");
+    }
+
+    @Test
+    void testParsingComplexFilenames() {
+        Song s = new Song("Artista - Titulo - Remix", "/path.mp3", 100);
+        
+        assertEquals("Artista", s.getArtist());
+        assertEquals("Titulo - Remix", s.getTitle());
+    }
+    
+    @Test
+    void testParsingFilenameWithoutDash() {
+        Song s = new Song("SoloTitulo", "/path.mp3", 100);
+        
+        assertEquals("Desconocido", s.getArtist());
+        assertEquals("SoloTitulo", s.getTitle());
+    }
 }

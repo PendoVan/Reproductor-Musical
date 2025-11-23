@@ -55,6 +55,16 @@ public class PlaylistFileService {
         System.out.println("  Downloads: " + downloadsDirectory);
     }
     
+    public PlaylistFileService(Path playlistsDir, Path downloadsDir) {
+        this.playlistsDirectory = playlistsDir;
+        this.downloadsDirectory = downloadsDir;
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        
+        ensurePlaylistsDirectoryExists();
+    }
+    
     /**
      * Guarda la playlist actual en un archivo JSON.
      * 

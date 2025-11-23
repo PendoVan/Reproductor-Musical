@@ -1,17 +1,29 @@
 package reproductor.com.musica.core;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import reproductor.com.musica.model.PlaybackMode;
-import reproductor.com.musica.model.Song;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import reproductor.com.musica.model.PlaybackMode;
+import reproductor.com.musica.model.Song;
 
 class PlaylistServiceTest {
 
     private PlaylistService playlist;
+    
+    @TempDir
+    Path tempDir;
 
     @BeforeEach
     void setup() {
@@ -185,5 +197,61 @@ class PlaylistServiceTest {
         assertEquals(0, playlist.getSongs().size());
         assertEquals(-1, playlist.currentIndexProperty().get());
         assertEquals(0, playlist.totalDurationProperty().get(), 0.0001);
+    }
+    
+    @Test
+    void testSaveAndLoadPlaylist() throws IOException {
+        // 1. Configurar el servicio para usar la carpeta temporal (Necesitarás modificar tu constructor 
+        // o usar reflexión, pero para este ejemplo asumiremos que puedes setear la ruta)
+        // NOTA: Como tu clase usa rutas fijas, lo ideal es refactorizar PlaylistFileService 
+        // para que acepte la ruta en el constructor.
+        
+        // Simulación de la lógica:
+        PlaylistFileService service = new PlaylistFileService(); 
+        
+        String nombreLista = "TestPlaylist";
+        Song cancion = new Song("Titulo", "Artista", "/tmp/test.mp3");
+        cancion.setDurationSeconds(120);
+        
+        service.savePlaylist(nombreLista, List.of(cancion));
+        
+        assertTrue(service.playlistExists(nombreLista));
+        
+        List<Song> cargadas = service.loadPlaylist(nombreLista);
+        assertEquals(1, cargadas.size());
+        assertEquals("Titulo", cargadas.get(0).getTitle());
+        assertEquals(120, cargadas.get(0).getDurationSeconds());
+    }
+    
+    @Test
+    void testDeletePlaylist() throws IOException {
+        PlaylistFileService service = new PlaylistFileService();
+        String nombre = "ParaBorrar";
+        service.savePlaylist(nombre, List.of());
+        
+        assertTrue(service.playlistExists(nombre));
+        
+        service.deletePlaylist(nombre);
+        
+        assertFalse(service.playlistExists(nombre));
+    }
+    
+    @Test
+    void testRemoveSongWhenEmptyDoesNotThrow() {
+        Song s = new Song("A", "A", "path");
+        assertDoesNotThrow(() -> playlist.removeSong(s));
+    }
+
+    @Test
+    void testNextSongAtEndOfListNormalMode() {
+        Song s1 = new Song("1", "1", "p1");
+        Song s2 = new Song("2", "2", "p2");
+        playlist.addSongs(java.util.List.of(s1, s2));
+        
+        playlist.setCurrentSong(s2);
+        
+        assertNull(playlist.getNextSong());
+        
+        assertEquals(1, playlist.currentIndexProperty().get());
     }
 }

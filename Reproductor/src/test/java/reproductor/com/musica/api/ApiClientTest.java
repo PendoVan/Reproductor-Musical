@@ -19,7 +19,7 @@ class ApiClientTest {
 
     @BeforeAll
     static void startServer() throws Exception {
-        server = HttpServer.create(new InetSocketAddress(0), 0); // 0 → puerto aleatorio
+        server = HttpServer.create(new InetSocketAddress(0), 0);
         port = server.getAddress().getPort();
 
 

@@ -1,0 +1,11 @@
+{
+  "nombre" : "TestPlaylist",
+  "fecha_creacion" : [ 2025, 11, 23, 17, 32, 4, 438009600 ],
+  "fecha_modificacion" : [ 2025, 11, 23, 17, 32, 4, 438009600 ],
+  "canciones" : [ {
+    "titulo" : "Titulo",
+    "artista" : "Artista",
+    "nombre_archivo" : "",
+    "duracion_segundos" : 120
+  } ]
+}
