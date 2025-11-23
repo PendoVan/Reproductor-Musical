@@ -67,7 +67,7 @@ Este manual está dirigido a:
 1. **Abrir** terminal o línea de comandos
 2. **Navegar** al directorio del backend:
    ```bash
-   cd BackendApi
+   cd yt-backend
    ```
 
 ### 5.2 Instalación de Python y Dependencias
@@ -109,7 +109,7 @@ ffmpeg -version
 
 ### 5.4 Configuración de Variables de Entorno
 
-**Crear** archivo `.env` en la carpeta `BackendApi`:
+**Crear** archivo `.env` en la carpeta `yt-backend`:
 
 ```env
 YT_QUALITY=192
@@ -154,10 +154,10 @@ INFO:     Started server process
 ### 6.1 Descarga del Proyecto
 
 1. **Ir** al repositorio o carpeta compartida
-2. **Descargar** el ZIP del reproductor JavaFX
+2. **Descargar** el ZIP del Reproductor-Musical
 3. **Extraer** en:
    ```
-   C:\ReproductorMusical\frontend\
+   C:\Reproductor-Musical\
    ```
 
 ### 6.2 Importación en el IDE
