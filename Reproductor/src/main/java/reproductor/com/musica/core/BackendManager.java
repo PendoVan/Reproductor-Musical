@@ -1,11 +1,15 @@
 package reproductor.com.musica.core;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,6 +31,7 @@ public class BackendManager {
     private static final int BACKEND_PORT = 8000;
     private static final String BACKEND_HOST = "127.0.0.1";
     private static final int STARTUP_TIMEOUT_SECONDS = 30;
+    private static final String FFMPEG_DIR = "ffmpeg";
     
     private Process backendProcess;
     private final Path projectRoot;
@@ -218,6 +223,9 @@ public class BackendManager {
             
             Path pythonExe = getPythonExecutable();
             
+            // Obtener ruta de FFmpeg
+            Path ffmpegPath = getFfmpegPath();
+            
             ProcessBuilder pb = new ProcessBuilder(
                 pythonExe.toString(),
                 "-m", "uvicorn",
@@ -229,10 +237,22 @@ public class BackendManager {
             
             pb.directory(backendPath.toFile());
             
-            // CRÍTICO: Ocultar ventana de consola en Windows
+            // CRÍTICO: Agregar FFmpeg al PATH
+            if (ffmpegPath != null) {
+                Map<String, String> env = pb.environment();
+                String currentPath = env.getOrDefault("PATH", "");
+                String newPath = ffmpegPath.toString() + File.pathSeparator + currentPath;
+                env.put("PATH", newPath);
+                log("✓ FFmpeg agregado al PATH: " + ffmpegPath);
+            } else {
+                log("⚠ FFmpeg no encontrado en el proyecto");
+                log("  Los archivos se descargarán como .webm");
+                log("  Instala FFmpeg o inclúyelo en: " + projectRoot.resolve(FFMPEG_DIR));
+            }
+            
+            // Ocultar ventana de consola en Windows
             if (isWindows()) {
                 try {
-                    // Usar ProcessBuilder para Windows sin ventana
                     pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
                     pb.redirectError(ProcessBuilder.Redirect.PIPE);
                 } catch (Exception e) {
@@ -260,6 +280,54 @@ public class BackendManager {
         } catch (Exception e) {
             logError("❌ Error en startFastAPIServer: " + e.getMessage());
             e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Busca FFmpeg en el proyecto o en el sistema.
+     * 
+     * @return Path al directorio de FFmpeg, o null si no se encuentra
+     */
+    private Path getFfmpegPath() {
+        Path ffmpegDir = projectRoot.resolve(FFMPEG_DIR);
+        
+        // Windows: buscar ffmpeg.exe
+        if (isWindows()) {
+            Path ffmpegExe = ffmpegDir.resolve("ffmpeg.exe");
+            if (Files.exists(ffmpegExe)) {
+                log("✓ FFmpeg encontrado en el proyecto");
+                return ffmpegDir;
+            }
+        } 
+        // Linux/Mac: buscar en bin/
+        else {
+            Path ffmpegBin = ffmpegDir.resolve("bin");
+            Path ffmpegExe = ffmpegBin.resolve("ffmpeg");
+            if (Files.exists(ffmpegExe)) {
+                log("✓ FFmpeg encontrado en el proyecto");
+                return ffmpegBin;
+            }
+        }
+        
+        // Buscar en el sistema
+        if (isFFmpegInSystem()) {
+            log("✓ Usando FFmpeg del sistema");
+            return null; // El PATH del sistema ya lo tiene
+        }
+        
+        return null;
+    }
+
+    /**
+     * Verifica si FFmpeg está instalado en el sistema.
+     */
+    private boolean isFFmpegInSystem() {
+        try {
+            String command = isWindows() ? "where ffmpeg" : "which ffmpeg";
+            Process p = new ProcessBuilder(command.split(" ")).start();
+            return p.waitFor() == 0;
+        } catch (Exception e) {
             return false;
         }
     }

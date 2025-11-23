@@ -22,8 +22,7 @@ import java.util.stream.Collectors;
  */
 public class PlaylistFileService {
     
-    private static final String APP_FOLDER = ".reproductor";
-    private static final String PLAYLISTS_FOLDER = "playlists";
+    private static final String PLAYLISTS_FOLDER = "yt-backend/playlists";
     private static final String BACKEND_DOWNLOADS = "yt-backend/downloads";
     
     private final Path playlistsDirectory;
@@ -32,12 +31,14 @@ public class PlaylistFileService {
     
     public PlaylistFileService() {
         // Configurar directorios
-        String userHome = System.getProperty("user.home");
-        this.playlistsDirectory = Paths.get(userHome, APP_FOLDER, PLAYLISTS_FOLDER);
-        
-        // Ruta al backend (ajustar según tu estructura)
-        String projectRoot = System.getProperty("user.dir");
+    	String projectRoot = System.getProperty("user.dir");
         Path parentDir = Paths.get(projectRoot).getParent();
+        if (parentDir != null) {
+            this.playlistsDirectory = parentDir.resolve(PLAYLISTS_FOLDER);
+        } else {
+            this.playlistsDirectory = Paths.get(projectRoot).resolve(BACKEND_DOWNLOADS);
+        }
+        
         if (parentDir != null) {
             this.downloadsDirectory = parentDir.resolve(BACKEND_DOWNLOADS);
         } else {

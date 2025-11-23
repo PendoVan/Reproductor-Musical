@@ -1,5 +1,10 @@
 package reproductor.com.musica.core;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -9,11 +14,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import reproductor.com.musica.model.PlaybackMode;
 import reproductor.com.musica.model.Song;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * Maneja la lista de reproducción actual y la lógica

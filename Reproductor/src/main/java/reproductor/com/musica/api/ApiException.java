@@ -6,7 +6,8 @@ package reproductor.com.musica.api;
  */
 public class ApiException extends Exception {
     
-    private final int statusCode;
+	private static final long serialVersionUID = 1L;
+	private final int statusCode;
     
     public ApiException(String message) {
         super(message);
