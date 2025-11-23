@@ -23,7 +23,12 @@ app.add_middleware(
 
 @app.get("/ping")
 def ping():
-    return {"status": "ok"}
+    """Health check endpoint para verificar que el servidor está vivo."""
+    return {
+        "status": "ok",
+        "message": "Backend FastAPI funcionando correctamente",
+        "version": "1.0.0"
+    }
 
 
 
