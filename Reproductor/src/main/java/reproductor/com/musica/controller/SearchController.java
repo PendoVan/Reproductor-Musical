@@ -1,11 +1,21 @@
 package reproductor.com.musica.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import reproductor.com.musica.api.ApiException;
 import reproductor.com.musica.api.SearchService;
@@ -13,14 +23,16 @@ import reproductor.com.musica.api.dto.SearchResult;
 import reproductor.com.musica.core.PlaylistService;
 import reproductor.com.musica.model.Song;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * Controlador actualizado con búsqueda sin descarga automática.
  */
 public class SearchController {
-
+	
+	@FunctionalInterface
+    public interface PlaylistUpdateListener {
+    	void onPlaylistUpdated();
+    }
+	
     @FXML private TextField searchField;
     @FXML private Button btnSearch;
     @FXML private Button btnClear;
@@ -42,6 +54,7 @@ public class SearchController {
 
     private final SearchService searchService;
     private PlaylistService playlistService;
+    private PlaylistUpdateListener playlistUpdateListener;
     private final ObservableList<SearchResult> searchResults;
 
     public SearchController() {
@@ -54,15 +67,15 @@ public class SearchController {
         this.playlistService = playlistService;
         System.out.println("[SearchController] ✅ PlaylistService inyectado correctamente");
     }
+    
+    public void setPlaylistUpdateListener(PlaylistUpdateListener listener) {
+    	this.playlistUpdateListener = listener;
+    	System.out.println("[SearchController] ✅ Listener registrado");
+    }
 
     @FXML
     public void initialize() {
         System.out.println("[SearchController] 🔧 Inicializando...");
-        
-        // Verificar que los componentes están vinculados
-        System.out.println("[SearchController] resultsTable: " + (resultsTable != null ? "✅" : "❌"));
-        System.out.println("[SearchController] titleColumn: " + (titleColumn != null ? "✅" : "❌"));
-        System.out.println("[SearchController] artistColumn: " + (artistColumn != null ? "✅" : "❌"));
         
         setupTableColumns();
         setupTableData();
@@ -75,6 +88,7 @@ public class SearchController {
         System.out.println("[SearchController] ✅ Inicializado en modo búsqueda sin descarga");
     }
 
+    // ===== ESTE ES EL MÉTODO CORRECTO =====
     @FXML
     private void onSearchClicked() {
         String query = searchField.getText().trim();
@@ -140,21 +154,10 @@ public class SearchController {
 
             System.out.println("[SearchController] 📥 Respuesta recibida: " + results.size() + " resultados");
             
-            // DEBUG: Imprimir primeros 3 resultados
-            for (int i = 0; i < Math.min(3, results.size()); i++) {
-                SearchResult r = results.get(i);
-                System.out.println("[SearchController]   " + (i+1) + ". " + r.getTitulo() + 
-                                 " - " + r.getArtista() + " (" + r.getFormattedDuration() + ")");
-            }
-
             // Limpiar y agregar resultados
             searchResults.clear();
             searchResults.addAll(results);
             
-            System.out.println("[SearchController] 📋 searchResults.size(): " + searchResults.size());
-            System.out.println("[SearchController] 📋 resultsTable.getItems().size(): " + 
-                             resultsTable.getItems().size());
-
             resultsTable.refresh();
 
             resultsCountLabel.setText(results.size() + " resultados");
@@ -206,6 +209,11 @@ public class SearchController {
             if (playlistService != null) {
                 playlistService.addSongs(songs);
                 System.out.println("[SearchController] ✅ " + songs.size() + " canciones agregadas a playlist");
+                
+                // Notificar al PlayerController
+                if (playlistUpdateListener != null) {
+                    Platform.runLater(() -> playlistUpdateListener.onPlaylistUpdated());
+                }
             }
 
             searchStatusLabel.setText("✅ Descargadas " + songs.size() + " de " + selected.size() + " canciones");
@@ -249,7 +257,6 @@ public class SearchController {
     private void setupTableColumns() {
         System.out.println("[SearchController] 🔧 Configurando columnas...");
         
-        // CRÍTICO: Configurar cellValueFactory
         titleColumn.setCellValueFactory(cellData -> {
             String titulo = cellData.getValue().getTitulo();
             return new javafx.beans.property.SimpleStringProperty(titulo);
@@ -269,7 +276,6 @@ public class SearchController {
             return new javafx.beans.property.SimpleStringProperty(duracion);
         });
 
-        // Permitir selección múltiple
         resultsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         
         System.out.println("[SearchController] ✅ Columnas configuradas correctamente");
@@ -278,7 +284,6 @@ public class SearchController {
     private void setupTableData() {
         System.out.println("[SearchController] 🔧 Vinculando datos a tabla...");
         
-        // CRÍTICO: Vincular ObservableList a la tabla
         resultsTable.setItems(searchResults);
         
         System.out.println("[SearchController] ✅ Datos vinculados: searchResults.size() = " + searchResults.size());
@@ -294,7 +299,7 @@ public class SearchController {
             }
         });
     }
-
+    
     // ===== HELPERS =====
 
     private void checkApiConnection() {

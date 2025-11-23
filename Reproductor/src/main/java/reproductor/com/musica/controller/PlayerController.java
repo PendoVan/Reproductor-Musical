@@ -642,6 +642,15 @@ public class PlayerController {
             SearchController searchController = loader.getController();
             searchController.setPlaylistService(playlist);
             
+            // Registrar listener para actualizar la tabla
+            searchController.setPlaylistUpdateListener(() -> {
+                Platform.runLater(() -> {
+                    playlistView.refresh();
+                    updateStatus("✅ Playlist actualizada con nuevas canciones");
+                    System.out.println("[PlayerController] 🔄 Tabla refrescada");
+                });
+            });
+            
             // Crear nueva ventana modal
             Stage searchStage = new Stage();
             searchStage.setTitle("Buscar Música Online");
