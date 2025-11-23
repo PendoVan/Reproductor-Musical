@@ -94,22 +94,31 @@
 
       <!-- PLAYLIST SECTION -->
       <VBox spacing="8" VBox.vgrow="ALWAYS">
-        <HBox alignment="CENTER_LEFT" spacing="12">
-          <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" styleClass="label" text="Lista de Reproducción" />
-          <Region HBox.hgrow="ALWAYS" />
-          <Button onAction="#onClearPlaylist" styleClass="button" text="Limpiar Lista" />
-          <Button onAction="#onSavePlaylist" styleClass="button" text="Guardar Lista" />
-        </HBox>
-
-        <TableView fx:id="playlistView" prefHeight="300" styleClass="table-view" VBox.vgrow="ALWAYS">
-          <columns>
-            <TableColumn fx:id="titleColumn" prefWidth="250" text="Título" />
-            <TableColumn fx:id="artistColumn" prefWidth="200" text="Artista" />
-            <TableColumn fx:id="albumColumn" prefWidth="150" text="Álbum" />
-            <TableColumn fx:id="durationColumn" prefWidth="100" text="Duración" />
-          </columns>
-        </TableView>
-      </VBox>
+		  <HBox alignment="CENTER_LEFT" spacing="12">
+		    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" 
+		           styleClass="label" text="Lista de Reproducción" />
+		    
+		    <!-- NUEVO: Indicador de playlist actual -->
+		    <Label fx:id="playlistNameLabel" 
+		           styleClass="label" 
+		           style="-fx-font-size: 12px; -fx-text-fill: #1DB954;"
+		           text="" />
+		    
+		    <Region HBox.hgrow="ALWAYS" />
+		    <Button onAction="#onClearPlaylist" styleClass="button" text="Limpiar Lista" />
+		    <Button onAction="#onSavePlaylist" styleClass="button" text="Guardar Lista" />
+		  </HBox>
+		
+		  <!-- ✅ CORREGIDO: Columnas agregadas -->
+		  <TableView fx:id="playlistView" prefHeight="300" styleClass="table-view" VBox.vgrow="ALWAYS">
+		    <columns>
+		      <TableColumn fx:id="titleColumn" prefWidth="250" text="Título" />
+		      <TableColumn fx:id="artistColumn" prefWidth="200" text="Artista" />
+		      <TableColumn fx:id="albumColumn" prefWidth="150" text="Álbum" />
+		      <TableColumn fx:id="durationColumn" prefWidth="100" text="Duración" />
+		    </columns>
+		  </TableView>
+		</VBox>
 
     </VBox>
   </center>

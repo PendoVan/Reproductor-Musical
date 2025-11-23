@@ -225,6 +225,48 @@ public class PlaylistService {
             return 180; // valor por defecto: 3 minutos
         }
     }
+    
+    /**
+     * Elimina una canción de la playlist.
+     * 
+     * @param song Canción a eliminar
+     */
+    public void removeSong(Song song) {
+        if (song != null && songs.contains(song)) {
+            songs.remove(song);
+            
+            // Si era la canción actual, resetear índice
+            if (getCurrentSong() != null && getCurrentSong().equals(song)) {
+                currentIndex.set(-1);
+            } else {
+                // Ajustar índice si es necesario
+                int idx = currentIndex.get();
+                int removedIdx = songs.indexOf(song);
+                if (idx > removedIdx) {
+                    currentIndex.set(idx - 1);
+                }
+            }
+            
+            recalcTotalDuration();
+            
+            System.out.println("[PlaylistService] 🗑️ Canción eliminada: " + song.getTitle());
+        }
+    }
+
+    /**
+     * Elimina múltiples canciones de la playlist.
+     * 
+     * @param songsToRemove Lista de canciones a eliminar
+     */
+    public void removeSongs(java.util.List<Song> songsToRemove) {
+        if (songsToRemove == null || songsToRemove.isEmpty()) return;
+        
+        for (Song song : songsToRemove) {
+            removeSong(song);
+        }
+        
+        System.out.println("[PlaylistService] 🗑️ Eliminadas " + songsToRemove.size() + " canciones");
+    }
 
     /**
      * Guarda la playlist actual. Aquí te dejo un stub;

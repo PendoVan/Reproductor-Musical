@@ -15,6 +15,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.Slider;
@@ -53,6 +54,7 @@ public class PlayerController {
     @FXML private Slider progressSlider;
     @FXML private Label currentTime;
     @FXML private Label totalTime;
+    @FXML private Label playlistNameLabel;
 
     // Controles de transporte
     @FXML private Button btnPrev;
@@ -84,6 +86,7 @@ public class PlayerController {
 
     // Preferencias (para recordar volumen)
     private final Preferences prefs = Preferences.userNodeForPackage(PlayerController.class);
+    private String currentPlaylistName = null;
 
     public PlayerController() {
         this.player = new PlayerService();
@@ -98,6 +101,7 @@ public class PlayerController {
         setupVolumeControl();
         setupProgressControl();
         setupKeyboardShortcuts();
+        setupPlaylistContextMenu();
         updateStatus("Listo - Abre archivos o busca música online");
         
         System.out.println("[PlayerController] Inicializado correctamente");
@@ -178,18 +182,22 @@ public class PlayerController {
     private void setupPlaylistBinding() {
         playlistView.setItems(playlist.getSongs());
 
-        playlistView.getSelectionModel().selectedItemProperty().addListener((obs, oldSong, newSong) -> {
-            if (newSong != null) {
-                playlist.setCurrentSong(newSong);
-                player.playSong(newSong);
-                updateStatus("▶ Reproduciendo: " + newSong.getTitle());
+        // Reproducir solo con DOBLE CLIC
+        playlistView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {  // Doble clic
+                Song selected = playlistView.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    playlist.setCurrentSong(selected);
+                    player.playSong(selected);
+                    updateStatus("▶ Reproduciendo: " + selected.getTitle());
+                }
             }
+            // Un solo clic solo selecciona, no reproduce
         });
 
         // Actualizar contadores
         playlist.totalDurationProperty().addListener((obs, oldVal, newVal) -> {
             totalDurationLabel.setText(formatTimeFromSeconds(newVal.doubleValue()));
-            // Refrescar la tabla para mostrar las duraciones actualizadas
             playlistView.refresh();
             System.out.println("[PlayerController] Duración total actualizada: " + formatTimeFromSeconds(newVal.doubleValue()));
         });
@@ -277,11 +285,84 @@ public class PlayerController {
                         case DOWN -> adjustVolume(-0.05);
                         case RIGHT -> adjustProgress(0.05);
                         case LEFT -> adjustProgress(-0.05);
+                        
+                        case DELETE -> {
+                            // Eliminar canción seleccionada con tecla Delete
+                            Song selected = playlistView.getSelectionModel().getSelectedItem();
+                            if (selected != null) {
+                                onRemoveSongFromPlaylist(selected);
+                            }
+                        }
+                        case ENTER -> {
+                            // Reproducir canción seleccionada con Enter
+                            Song selected = playlistView.getSelectionModel().getSelectedItem();
+                            if (selected != null) {
+                                playlist.setCurrentSong(selected);
+                                player.playSong(selected);
+                                updateStatus("▶ Reproduciendo: " + selected.getTitle());
+                            }
+                        }
+                        
                         default -> {}
                     }
                 });
             }
         });
+    }
+    
+    private void setupPlaylistContextMenu() {
+        ContextMenu contextMenu = new ContextMenu();
+        
+        // Opción: Reproducir
+        javafx.scene.control.MenuItem playItem = new javafx.scene.control.MenuItem("▶ Reproducir");
+        playItem.setOnAction(e -> {
+            Song selected = playlistView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                playlist.setCurrentSong(selected);
+                player.playSong(selected);
+                updateStatus("▶ Reproduciendo: " + selected.getTitle());
+            }
+        });
+        
+        // Opción: Eliminar de la lista
+        javafx.scene.control.MenuItem deleteItem = new javafx.scene.control.MenuItem("🗑️ Eliminar de la lista");
+        deleteItem.setOnAction(e -> {
+            Song selected = playlistView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                onRemoveSongFromPlaylist(selected);
+            }
+        });
+        
+        // Separador
+        javafx.scene.control.SeparatorMenuItem separator = new javafx.scene.control.SeparatorMenuItem();
+        
+        // Opción: Ver información
+        javafx.scene.control.MenuItem infoItem = new javafx.scene.control.MenuItem("📋 Información");
+        infoItem.setOnAction(e -> {
+            Song selected = playlistView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                showSongInfo(selected);
+            }
+        });
+        
+        // Opción: Eliminar todas las canciones
+        javafx.scene.control.MenuItem clearAllItem = new javafx.scene.control.MenuItem("🗑️ Limpiar toda la lista");
+        clearAllItem.setOnAction(e -> onClearPlaylist(null));
+        
+        contextMenu.getItems().addAll(playItem, deleteItem, separator, infoItem, clearAllItem);
+        
+        // Asignar el menú contextual a la tabla
+        playlistView.setContextMenu(contextMenu);
+        
+        // También habilitar que solo se muestre cuando hay una canción seleccionada
+        playlistView.setOnContextMenuRequested(event -> {
+            Song selected = playlistView.getSelectionModel().getSelectedItem();
+            playItem.setDisable(selected == null);
+            deleteItem.setDisable(selected == null);
+            infoItem.setDisable(selected == null);
+        });
+        
+        System.out.println("[PlayerController] ✓ Menú contextual configurado");
     }
 
     // ==========================
@@ -308,6 +389,96 @@ public class PlayerController {
                 updateStatus("❌ No se agregaron canciones válidas");
             }
         }
+    }
+    
+    private void onRemoveSongFromPlaylist(Song song) {
+        if (song == null) return;
+        
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmar eliminación");
+        confirm.setHeaderText("¿Eliminar esta canción de la lista?");
+        confirm.setContentText(song.getTitle() + " - " + song.getArtist());
+        
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                if (playlist.getCurrentSong() != null && 
+                    playlist.getCurrentSong().equals(song)) {
+                    player.stop();
+                }
+                
+                playlist.removeSong(song);
+                
+                // OPCIONAL: Indicar cambios sin guardar
+                if (currentPlaylistName != null) {
+                    updateStatus("🗑️ Eliminado: " + song.getTitle() + " (cambios sin guardar en '" + currentPlaylistName + "')");
+                } else {
+                    updateStatus("🗑️ Eliminado: " + song.getTitle());
+                }
+                
+                System.out.println("[PlayerController] 🗑️ Canción eliminada: " + song.getTitle());
+            }
+        });
+    }
+
+    /**
+     * Elimina múltiples canciones seleccionadas.
+     */
+    @FXML
+    public void onRemoveSelectedSongs() {
+        var selected = playlistView.getSelectionModel().getSelectedItems();
+        
+        if (selected.isEmpty()) {
+            showInfo("Selecciona al menos una canción para eliminar");
+            return;
+        }
+        
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmar eliminación");
+        confirm.setHeaderText("¿Eliminar " + selected.size() + " canción(es)?");
+        confirm.setContentText("Esta acción no se puede deshacer.");
+        
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                // Crear copia para evitar ConcurrentModificationException
+                java.util.List<Song> toRemove = new java.util.ArrayList<>(selected);
+                
+                for (Song song : toRemove) {
+                    // Si es la actual, detener
+                    if (playlist.getCurrentSong() != null && 
+                        playlist.getCurrentSong().equals(song)) {
+                        player.stop();
+                    }
+                    
+                    playlist.removeSong(song);
+                }
+                
+                updateStatus("🗑️ Eliminadas " + toRemove.size() + " canciones");
+            }
+        });
+    }
+    
+    private void showSongInfo(Song song) {
+        if (song == null) return;
+        
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Información de la canción");
+        alert.setHeaderText(song.getTitle());
+        
+        StringBuilder info = new StringBuilder();
+        info.append("Artista: ").append(song.getArtist()).append("\n");
+        info.append("Duración: ").append(formatTimeFromSeconds(song.getDurationSeconds())).append("\n");
+        info.append("\n");
+        
+        if (song.isLocal()) {
+            info.append("Tipo: Archivo local\n");
+            info.append("Ubicación: ").append(song.getFilePathString()).append("\n");
+        } else if (song.isRemote()) {
+            info.append("Tipo: Stream remoto\n");
+            info.append("URL: ").append(song.getStreamUrl()).append("\n");
+        }
+        
+        alert.setContentText(info.toString());
+        alert.showAndWait();
     }
 
     // ==========================
@@ -434,6 +605,16 @@ public class PlayerController {
             btnShuffle.getStyleClass().remove("active");
         }
     }
+    
+    private void updatePlaylistNameIndicator() {
+        if (playlistNameLabel != null) {
+            if (currentPlaylistName != null && !currentPlaylistName.isBlank()) {
+                playlistNameLabel.setText("📂 " + currentPlaylistName);
+            } else {
+                playlistNameLabel.setText("");
+            }
+        }
+    }
 
     private void updateRepeatButton(PlaybackMode mode) {
         btnRepeat.getStyleClass().removeAll("repeat-all", "repeat-one");
@@ -495,6 +676,8 @@ public class PlayerController {
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 playlist.clearCurrentPlaylist();
+                currentPlaylistName = null;
+                updatePlaylistNameIndicator();
                 updateStatus("🗑️ Lista de reproducción limpiada");
             }
         });
@@ -502,17 +685,29 @@ public class PlayerController {
 
     @FXML
     public void onSavePlaylist(ActionEvent e) {
+        // Usar el nombre actual como valor por defecto, o "Mi Playlist" si no hay ninguno
+        String defaultName = (currentPlaylistName != null && !currentPlaylistName.isBlank()) 
+                             ? currentPlaylistName 
+                             : "Mi Playlist";
+        
         // Pedir nombre de la playlist
-        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("Mi Playlist");
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog(defaultName);
         dialog.setTitle("Guardar Playlist");
         dialog.setHeaderText("Guardar la playlist actual");
-        dialog.setContentText("Nombre de la playlist:");
+        
+        if (currentPlaylistName != null && !currentPlaylistName.isBlank()) {
+            dialog.setContentText("Nombre (actual: " + currentPlaylistName + "):");
+        } else {
+            dialog.setContentText("Nombre de la playlist:");
+        }
         
         dialog.showAndWait().ifPresent(nombre -> {
             if (nombre != null && !nombre.isBlank()) {
                 try {
-                    // Verificar si ya existe
-                    if (playlistFileService.playlistExists(nombre)) {
+                    // Verificar si ya existe (y no es la actual)
+                    boolean isCurrentPlaylist = nombre.equals(currentPlaylistName);
+                    
+                    if (playlistFileService.playlistExists(nombre) && !isCurrentPlaylist) {
                         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
                         confirm.setTitle("Confirmar sobrescritura");
                         confirm.setHeaderText("La playlist '" + nombre + "' ya existe");
@@ -525,6 +720,10 @@ public class PlayerController {
                     
                     // Guardar la playlist
                     playlistFileService.savePlaylist(nombre, playlist.getSongs());
+                    
+                    // Actualizar nombre actual
+                    currentPlaylistName = nombre;
+                    updatePlaylistNameIndicator();
                     
                     updateStatus("💾 Playlist guardada: " + nombre);
                     showInfo("Playlist '" + nombre + "' guardada correctamente en:\n" + 
@@ -606,6 +805,10 @@ public class PlayerController {
         // Limpiar playlist actual y agregar nuevas canciones
         playlist.clearCurrentPlaylist();
         playlist.addSongs(songs);
+        
+        // NUEVO: Guardar el nombre de la playlist cargada
+        currentPlaylistName = nombre;
+        updatePlaylistNameIndicator();
         
         // Seleccionar primera canción
         if (!songs.isEmpty()) {
