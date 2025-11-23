@@ -1,17 +1,11 @@
-/* =============================================================================
-   SPOTIFY-INSPIRED DARK THEME - CORREGIDO SIN ERRORES
-   ============================================================================= */
 
-/* Root and Base Styles */
 .root {
     -fx-background-color: #121212;
     -fx-font-family: "Segoe UI", "Arial", "Helvetica", sans-serif;
     -fx-font-size: 14px;
 }
 
-/* =============================================================================
-   HEADER BAR
-   ============================================================================= */
+
 
 .header-bar {
     -fx-background-color: #181818;
@@ -20,29 +14,24 @@
     -fx-min-height: 60px;
 }
 
-/* =============================================================================
-   MAIN CONTENT AREA
-   ============================================================================= */
+
 
 .main-content {
     -fx-background-color: #121212;
 }
 
-/* Now Playing Section */
+
 .now-playing-section {
     -fx-background-color: #121212;
     -fx-padding: 24;
 }
 
-/* Playlist Section */
+
 .playlist-section {
     -fx-background-color: #121212;
     -fx-padding: 24;
 }
 
-/* =============================================================================
-   TEXT STYLES
-   ============================================================================= */
 
 .primary-text {
     -fx-text-fill: #FFFFFF;
@@ -82,11 +71,7 @@
     -fx-text-fill: #B3B3B3;
 }
 
-/* =============================================================================
-   BUTTONS
-   ============================================================================= */
 
-/* Base button style */
 .button {
     -fx-background-color: #1DB954;
     -fx-text-fill: #000000;
@@ -109,7 +94,7 @@
     -fx-text-fill: #000000;
 }
 
-/* Base button style */
+
 .control-button {
     -fx-background-color: #1DB954;
     -fx-text-fill: #000000;
@@ -131,7 +116,7 @@
     -fx-text-fill: #000000;
 }
 
-/* Toggle buttons */
+
 .toggle-button {
     -fx-background-color: #1DB954;
     -fx-text-fill: #000000;
@@ -143,7 +128,7 @@
     -fx-font-size: 12px;
 }
 
-/* Menu buttons (Biblioteca, Vista) */
+
 .menu-button {
     -fx-background-color: #1DB954;
     -fx-text-fill: #000000;
@@ -185,7 +170,7 @@
     -fx-text-fill: #000000;
 }
 
-/* Secondary buttons */
+
 .secondary-button {
     -fx-background-color: transparent;
     -fx-text-fill: #B3B3B3;
@@ -204,7 +189,7 @@
     -fx-border-color: #B3B3B3;
 }
 
-/* Transport Control Buttons */
+
 .transport-button {
     -fx-background-color: #1DB954;
     -fx-text-fill: #000000;
@@ -234,7 +219,7 @@
     -fx-scale-y: 0.95;
 }
 
-/* Play Button (Special) */
+
 .play-button {
     -fx-background-color: #1DB954;
     -fx-text-fill: #000000;
@@ -263,7 +248,7 @@
     -fx-scale-y: 0.98;
 }
 
-/* Animated buttons */
+
 .animated-button {
     -fx-background-color: #1DB954;
     -fx-text-fill: #000000;
@@ -289,11 +274,7 @@
     -fx-scale-y: 0.95;
 }
 
-/* =============================================================================
-   SLIDERS
-   ============================================================================= */
 
-/* Progress Slider */
 .slider {
     -fx-padding: 0;
 }
@@ -321,7 +302,7 @@
     -fx-background-color: #1DB954;
 }
 
-/* Progress slider special */
+
 .progress-slider {
     -fx-padding: 0;
 }
@@ -349,7 +330,7 @@
     -fx-background-color: #1DB954;
 }
 
-/* Volume Slider */
+
 .volume-slider {
     -fx-padding: 0;
 }
@@ -377,9 +358,7 @@
     -fx-background-color: #1DB954;
 }
 
-/* =============================================================================
-   LABELS
-   ============================================================================= */
+
 
 .label {
     -fx-text-fill: #FFFFFF;
@@ -387,9 +366,7 @@
     -fx-font-size: 14px;
 }
 
-/* =============================================================================
-   ALBUM COVER
-   ============================================================================= */
+
 
 .album-cover {
     -fx-background-color: #282828;
@@ -404,9 +381,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 16, 0.2, 0, 4);
 }
 
-/* =============================================================================
-   PLAYLIST
-   ============================================================================= */
+
 
 .playlist {
     -fx-background-color: #181818;
@@ -447,7 +422,7 @@
     -fx-font-weight: 600;
 }
 
-/* Hide scrollbars but keep functionality */
+
 .list-view .scroll-bar {
     -fx-opacity: 0;
     -fx-pref-width: 0;
@@ -458,11 +433,7 @@
     -fx-pref-width: 8;
 }
 
-/* =============================================================================
-   SEARCH RESULTS - IMPROVED READABILITY
-   ============================================================================= */
 
-/* Search results container */
 .search-results-list {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #E0E0E0;
@@ -471,7 +442,7 @@
     -fx-padding: 8;
 }
 
-/* Individual search result item */
+
 .search-result-item {
     -fx-background-color: #F5F5F5;
     -fx-padding: 12 16;
@@ -488,7 +459,7 @@
     -fx-background-color: rgba(29, 185, 84, 0.2);
 }
 
-/* Search result title (song name) */
+
 .search-result-title {
     -fx-text-fill: #000000;
     -fx-font-size: 16px;
@@ -499,7 +470,7 @@
     -fx-text-fill: #000000;
 }
 
-/* Search result artist name */
+
 .search-result-artist {
     -fx-text-fill: #000000;
     -fx-font-size: 14px;
@@ -510,7 +481,7 @@
     -fx-text-fill: #000000;
 }
 
-/* Search result duration */
+
 .search-result-duration {
     -fx-text-fill: #000000;
     -fx-font-size: 12px;
@@ -522,7 +493,7 @@
     -fx-text-fill: #000000;
 }
 
-/* Search result additional info */
+
 .search-result-info {
     -fx-text-fill: #000000;
     -fx-font-size: 12px;
@@ -533,13 +504,13 @@
     -fx-text-fill: #000000;
 }
 
-/* Search result container for layout */
+
 .search-result-content {
     -fx-spacing: 4;
     -fx-alignment: center-left;
 }
 
-/* Search result action button */
+
 .search-result-button {
     -fx-background-color: transparent;
     -fx-text-fill: #1DB954;
@@ -557,7 +528,7 @@
     -fx-text-fill: #000000;
 }
 
-/* Search result thumbnail/image placeholder */
+
 .search-result-image {
     -fx-background-color: #282828;
     -fx-background-radius: 4;
@@ -567,11 +538,7 @@
     -fx-max-height: 48;
 }
 
-/* =============================================================================
-   TABLE VIEW FOR SEARCH RESULTS AND PLAYLIST
-   ============================================================================= */
 
-/* Main playlist table */
 .table-view {
     -fx-background-color: #181818;
     -fx-border-color: #404040;
@@ -665,7 +632,7 @@
     -fx-background-color: #1DB954;
 }
 
-/* Results table container */
+
 .results-table {
     -fx-background-color: #000000;
     -fx-border-color: #E0E0E0;
@@ -674,7 +641,7 @@
     -fx-border-radius: 8;
 }
 
-/* Table header */
+
 .results-table .column-header-background {
     -fx-background-color: #000000;
     -fx-border-color: transparent transparent #E0E0E0 transparent;
@@ -693,7 +660,7 @@
     -fx-background-color: #F5F5F5;
 }
 
-/* Table cells */
+
 .results-table .table-row-cell {
     -fx-background-color: #FFFFFF;
     -fx-border-color: transparent transparent #F0F0F0 transparent;
@@ -716,7 +683,7 @@
     -fx-background-color: transparent;
 }
 
-/* Specific column styles */
+
 .results-table .table-cell.title-cell {
     -fx-text-fill: #000000;
     -fx-font-weight: 600;
@@ -748,7 +715,7 @@
     -fx-font-size: 12px;
 }
 
-/* Table corner and scrollbars */
+
 .results-table .table-view .corner {
     -fx-background-color: #F5F5F5;
 }
@@ -766,9 +733,7 @@
     -fx-background-color: #A0A0A0;
 }
 
-/* =============================================================================
-   TEXT FIELDS AND SEARCH INPUT
-   ============================================================================= */
+
 
 .text-field {
     -fx-background-color: #242424;
@@ -804,25 +769,21 @@
     -fx-background-color: #2A2A2A;
 }
 
-/* =============================================================================
-   IMPROVED LABEL STYLES FOR SEARCH
-   ============================================================================= */
 
-/* Override default label to ensure visibility */
 .search-area .label {
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 14px;
     -fx-font-weight: 400;
 }
 
-/* Search section headers */
+
 .search-header {
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 18px;
     -fx-font-weight: 700;
 }
 
-/* Search status messages */
+
 .search-status {
     -fx-text-fill: #B3B3B3;
     -fx-font-size: 14px;
@@ -830,7 +791,7 @@
     -fx-font-style: italic;
 }
 
-/* No results message */
+
 .no-results {
     -fx-text-fill: #808080;
     -fx-font-size: 16px;
@@ -838,21 +799,21 @@
     -fx-text-alignment: center;
 }
 
-/* Loading message */
+
 .loading-text {
     -fx-text-fill: #1DB954;
     -fx-font-size: 14px;
     -fx-font-weight: 500;
 }
 
-/* Error messages */
+
 .error-text {
     -fx-text-fill: #E22134;
     -fx-font-size: 14px;
     -fx-font-weight: 500;
 }
 
-/* Search title centered */
+
 .search-title {
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 20px;
@@ -861,9 +822,7 @@
     -fx-alignment: center;
 }
 
-/* =============================================================================
-   CONTEXT MENUS AND MENU ITEMS
-   ============================================================================= */
+
 
 .context-menu {
     -fx-background-color: #282828;
@@ -891,9 +850,7 @@
     -fx-text-fill: #000000;
 }
 
-/* =============================================================================
-   CHECKBOX
-   ============================================================================= */
+
 
 .check-box {
     -fx-text-fill: #B3B3B3;
@@ -931,9 +888,7 @@
     -fx-font-size: 12px;
 }
 
-/* =============================================================================
-   STATUS BAR
-   ============================================================================= */
+
 
 .status-bar {
     -fx-background-color: #181818;
@@ -942,9 +897,7 @@
     -fx-min-height: 40px;
 }
 
-/* =============================================================================
-   SEPARATOR
-   ============================================================================= */
+
 
 .separator {
     -fx-background-color: #282828;
@@ -955,9 +908,7 @@
     -fx-border-color: transparent;
 }
 
-/* =============================================================================
-   LAYOUT CONTAINERS
-   ============================================================================= */
+
 
 .border-pane {
     -fx-background-color: #121212;
@@ -980,9 +931,7 @@
     -fx-spacing: 12;
 }
 
-/* =============================================================================
-   FOCUS AND DISABLED STATES
-   ============================================================================= */
+
 
 *:focused {
     -fx-background-color: rgba(29, 185, 84, 0.1);
@@ -995,30 +944,28 @@
     -fx-opacity: 0.4;
 }
 
-/* Remove focus indicators for better Spotify look */
+
 .button:focused,
 .slider:focused {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
 
-/* =============================================================================
-   ANIMATIONS AND TRANSITIONS
-   ============================================================================= */
+
 
 .button,
 .list-cell {
     -fx-cursor: hand;
 }
 
-/* Active states for toggles */
+
 .toggle-button.shuffle-active,
 .toggle-button.repeat-active {
     -fx-background-color: #1DB954;
     -fx-text-fill: #000000;
 }
 
-/* Menu Button */
+
 .menu-button {
     -fx-background-color: #1DB954;
     -fx-text-fill: #000000;

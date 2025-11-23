@@ -9,13 +9,13 @@
   <name>reproductor-javafx</name>
 
   <properties>
-    <!-- JDK 21 -->
+
     <maven.compiler.release>21</maven.compiler.release>
     <javafx.version>21.0.5</javafx.version>
   </properties>
 
   <dependencies>
-    <!-- UI -->
+
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
@@ -29,21 +29,21 @@
       <classifier>win</classifier>
     </dependency>
 
-    <!-- Jackson para JSON -->
+
     <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>2.15.2</version>
     </dependency>
     
-    <!-- Jackson para manejar LocalDateTime -->
+
 	<dependency>
 	    <groupId>com.fasterxml.jackson.datatype</groupId>
 	    <artifactId>jackson-datatype-jsr310</artifactId>
 	    <version>2.15.2</version>
 	</dependency>
     
-    <!-- AUDIO (OBLIGATORIO para Media/MediaPlayer) -->
+ 
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-media</artifactId>
@@ -51,7 +51,7 @@
       <classifier>win</classifier>
     </dependency>
 
-    <!-- Tests -->
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -62,7 +62,7 @@
 
   <build>
     <plugins>
-      <!-- Ejecutar con: mvn javafx:run -->
+
       <plugin>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
@@ -72,7 +72,7 @@
         </configuration>
       </plugin>
 
-	    <!-- Compilador Java -->
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -83,7 +83,7 @@
       </plugin>
       
       
-      <!-- JUnit 5 -->
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>

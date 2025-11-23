@@ -22,10 +22,6 @@ class PlaylistServiceTest {
         return new Song(title, "/tmp/" + title, duration);
     }
 
-    // ---------------------------------------------------------------
-    // --------------------- TESTS BÁSICOS ---------------------------
-    // ---------------------------------------------------------------
-
     @Test
     void testAddSongUpdatesDuration() {
         Song s1 = song("A", 10);
@@ -74,10 +70,6 @@ class PlaylistServiceTest {
         assertEquals(0, playlist.currentIndexProperty().get());
     }
 
-    // ---------------------------------------------------------------
-    // ----------------------- TEST NEXT() ---------------------------
-    // ---------------------------------------------------------------
-
     @Test
     void testNextNormalMode() {
         playlist.addSongs(List.of(
@@ -94,7 +86,6 @@ class PlaylistServiceTest {
         next = playlist.getNextSong();
         assertEquals("C", next.getTitle());
 
-        // Final → NORMAL devuelve null
         assertNull(playlist.getNextSong());
     }
 
@@ -142,9 +133,6 @@ class PlaylistServiceTest {
         assertTrue(List.of("A", "B", "C").contains(next.getTitle()));
     }
 
-    // ---------------------------------------------------------------
-    // --------------------- TEST PREVIOUS() -------------------------
-    // ---------------------------------------------------------------
 
     @Test
     void testPreviousNormalMode() {
@@ -162,7 +150,7 @@ class PlaylistServiceTest {
         prev = playlist.getPreviousSong();
         assertEquals("A", prev.getTitle());
 
-        // no baja más de 0
+
         prev = playlist.getPreviousSong();
         assertEquals("A", prev.getTitle());
     }
@@ -185,9 +173,7 @@ class PlaylistServiceTest {
         assertTrue(List.of("A", "B", "C").contains(prev.getTitle()));
     }
 
-    // ---------------------------------------------------------------
-    // ----------------------- CLEAR --------------------------------
-    // ---------------------------------------------------------------
+
 
     @Test
     void testClearPlaylist() {

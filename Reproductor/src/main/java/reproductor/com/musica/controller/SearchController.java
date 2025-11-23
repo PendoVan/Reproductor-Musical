@@ -23,9 +23,6 @@ import reproductor.com.musica.api.dto.SearchResult;
 import reproductor.com.musica.core.PlaylistService;
 import reproductor.com.musica.model.Song;
 
-/**
- * Controlador actualizado con búsqueda sin descarga automática.
- */
 public class SearchController {
 	
 	@FunctionalInterface
@@ -88,7 +85,6 @@ public class SearchController {
         System.out.println("[SearchController] ✅ Inicializado en modo búsqueda sin descarga");
     }
 
-    // ===== ESTE ES EL MÉTODO CORRECTO =====
     @FXML
     private void onSearchClicked() {
         String query = searchField.getText().trim();
@@ -137,7 +133,6 @@ public class SearchController {
         System.out.println("[SearchController] ✅ Todas las canciones seleccionadas");
     }
 
-    // ===== BÚSQUEDA SIN DESCARGA =====
 
     private void performSearchOnly(String query) {
         disableSearchControls(true);
@@ -154,7 +149,6 @@ public class SearchController {
 
             System.out.println("[SearchController] 📥 Respuesta recibida: " + results.size() + " resultados");
             
-            // Limpiar y agregar resultados
             searchResults.clear();
             searchResults.addAll(results);
             
@@ -191,8 +185,6 @@ public class SearchController {
         t.start();
     }
 
-    // ===== DESCARGA DE SELECCIONADOS =====
-
     private void downloadSelectedResults(List<SearchResult> selected) {
         disableSearchControls(true);
         searchProgress.setVisible(true);
@@ -210,7 +202,6 @@ public class SearchController {
                 playlistService.addSongs(songs);
                 System.out.println("[SearchController] ✅ " + songs.size() + " canciones agregadas a playlist");
                 
-                // Notificar al PlayerController
                 if (playlistUpdateListener != null) {
                     Platform.runLater(() -> playlistUpdateListener.onPlaylistUpdated());
                 }
@@ -243,7 +234,6 @@ public class SearchController {
         t.start();
     }
 
-    // ===== CONFIGURACIÓN DE TABLA =====
 
     private void disableSearchControls(boolean disable) {
         btnSearch.setDisable(disable);
@@ -288,7 +278,6 @@ public class SearchController {
         
         System.out.println("[SearchController] ✅ Datos vinculados: searchResults.size() = " + searchResults.size());
 
-        // Doble clic para descargar solo esa canción
         resultsTable.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 SearchResult selected = resultsTable.getSelectionModel().getSelectedItem();
@@ -300,7 +289,6 @@ public class SearchController {
         });
     }
     
-    // ===== HELPERS =====
 
     private void checkApiConnection() {
         Task<Boolean> connectionTask = searchService.checkApiConnectionAsync();

@@ -32,59 +32,48 @@ import reproductor.com.musica.core.PlaylistService;
 import reproductor.com.musica.model.PlaybackMode;
 import reproductor.com.musica.model.Song;
 
-/**
- * Controlador principal del reproductor.
- * Integra la vista MainView.fxml con PlayerService y PlaylistService.
- */
+
 public class PlayerController {
 
     private static final String PREF_VOLUME_KEY = "volume";
 
     @FXML private BorderPane root;
 
-    // Barra superior / toolbar
     @FXML private Button btnOpen;
     @FXML private Button btnSearch;
     @FXML private Button btnShuffle;
     @FXML private Button btnRepeat;
     @FXML private MenuButton btnLibrary;
 
-    // Zona de información de pista
     @FXML private Label trackLabel;
     @FXML private Slider progressSlider;
     @FXML private Label currentTime;
     @FXML private Label totalTime;
     @FXML private Label playlistNameLabel;
 
-    // Controles de transporte
     @FXML private Button btnPrev;
     @FXML private Button btnPlay;
     @FXML private Button btnPause;
     @FXML private Button btnStop;
     @FXML private Button btnNext;
 
-    // Volumen
     @FXML private Slider volumeSlider;
     @FXML private CheckBox muteCheck;
 
-    // Playlist
     @FXML private TableView<Song> playlistView;
     @FXML private TableColumn<Song, String> titleColumn;
     @FXML private TableColumn<Song, String> artistColumn;
     @FXML private TableColumn<Song, String> albumColumn;
     @FXML private TableColumn<Song, String> durationColumn;
 
-    // Barra de estado inferior
     @FXML private Label statusLabel;
     @FXML private Label trackCountLabel;
     @FXML private Label totalDurationLabel;
 
-    // Servicios
     private final PlayerService player;
     private final PlaylistService playlist;
     private final PlaylistFileService playlistFileService = new PlaylistFileService();
 
-    // Preferencias (para recordar volumen)
     private final Preferences prefs = Preferences.userNodeForPackage(PlayerController.class);
     private String currentPlaylistName = null;
 
@@ -107,12 +96,8 @@ public class PlayerController {
         System.out.println("[PlayerController] Inicializado correctamente");
     }
 
-    // ==========================
-    // CONFIGURACIÓN INICIAL
-    // ==========================
 
     private void setupTableColumns() {
-        // Configurar política de redimensionamiento para eliminar la columna vacía
         playlistView.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
         
         titleColumn.setCellValueFactory(cellData ->
@@ -133,7 +118,6 @@ public class PlayerController {
                 new javafx.beans.property.SimpleStringProperty(
                         formatTimeFromSeconds(cellData.getValue().getDurationSeconds())));
 
-        // Aplicar clases CSS específicas a cada columna
         titleColumn.setCellFactory(column -> {
             var cell = new javafx.scene.control.TableCell<Song, String>();
             cell.getStyleClass().add("title-cell");
@@ -182,7 +166,6 @@ public class PlayerController {
     private void setupPlaylistBinding() {
         playlistView.setItems(playlist.getSongs());
 
-        // Reproducir solo con DOBLE CLIC
         playlistView.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {  // Doble clic
                 Song selected = playlistView.getSelectionModel().getSelectedItem();
@@ -192,10 +175,8 @@ public class PlayerController {
                     updateStatus("▶ Reproduciendo: " + selected.getTitle());
                 }
             }
-            // Un solo clic solo selecciona, no reproduce
         });
 
-        // Actualizar contadores
         playlist.totalDurationProperty().addListener((obs, oldVal, newVal) -> {
             totalDurationLabel.setText(formatTimeFromSeconds(newVal.doubleValue()));
             playlistView.refresh();
@@ -208,7 +189,6 @@ public class PlayerController {
     }
 
     private void setupPlayerBinding() {
-        // Enlazar la posición de reproducción al slider
         progressSlider.setMin(0);
         progressSlider.setMax(1);
 
@@ -225,7 +205,6 @@ public class PlayerController {
             totalTime.setText(formatTimeFromSeconds(newVal.doubleValue()));
         });
 
-        // Cambiar texto de pista cuando cambia la canción
         player.currentSongProperty().addListener((obs, oldSong, newSong) -> {
             if (newSong != null) {
                 trackLabel.setText(newSong.toString());
@@ -234,7 +213,6 @@ public class PlayerController {
             }
         });
 
-        // Cuando termina una canción, pasar a la siguiente según el modo de reproducción
         player.playingProperty().addListener((obs, wasPlaying, isNowPlaying) -> {
             if (!isNowPlaying && player.isStoppedByEndOfMedia()) {
                 Song next = playlist.getNextSong();
@@ -287,14 +265,12 @@ public class PlayerController {
                         case LEFT -> adjustProgress(-0.05);
                         
                         case DELETE -> {
-                            // Eliminar canción seleccionada con tecla Delete
                             Song selected = playlistView.getSelectionModel().getSelectedItem();
                             if (selected != null) {
                                 onRemoveSongFromPlaylist(selected);
                             }
                         }
                         case ENTER -> {
-                            // Reproducir canción seleccionada con Enter
                             Song selected = playlistView.getSelectionModel().getSelectedItem();
                             if (selected != null) {
                                 playlist.setCurrentSong(selected);
@@ -313,7 +289,6 @@ public class PlayerController {
     private void setupPlaylistContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
         
-        // Opción: Reproducir
         javafx.scene.control.MenuItem playItem = new javafx.scene.control.MenuItem("▶ Reproducir");
         playItem.setOnAction(e -> {
             Song selected = playlistView.getSelectionModel().getSelectedItem();
@@ -324,7 +299,6 @@ public class PlayerController {
             }
         });
         
-        // Opción: Eliminar de la lista
         javafx.scene.control.MenuItem deleteItem = new javafx.scene.control.MenuItem("🗑️ Eliminar de la lista");
         deleteItem.setOnAction(e -> {
             Song selected = playlistView.getSelectionModel().getSelectedItem();
@@ -333,10 +307,8 @@ public class PlayerController {
             }
         });
         
-        // Separador
         javafx.scene.control.SeparatorMenuItem separator = new javafx.scene.control.SeparatorMenuItem();
         
-        // Opción: Ver información
         javafx.scene.control.MenuItem infoItem = new javafx.scene.control.MenuItem("📋 Información");
         infoItem.setOnAction(e -> {
             Song selected = playlistView.getSelectionModel().getSelectedItem();
@@ -345,16 +317,13 @@ public class PlayerController {
             }
         });
         
-        // Opción: Eliminar todas las canciones
         javafx.scene.control.MenuItem clearAllItem = new javafx.scene.control.MenuItem("🗑️ Limpiar toda la lista");
         clearAllItem.setOnAction(e -> onClearPlaylist(null));
         
         contextMenu.getItems().addAll(playItem, deleteItem, separator, infoItem, clearAllItem);
         
-        // Asignar el menú contextual a la tabla
         playlistView.setContextMenu(contextMenu);
         
-        // También habilitar que solo se muestre cuando hay una canción seleccionada
         playlistView.setOnContextMenuRequested(event -> {
             Song selected = playlistView.getSelectionModel().getSelectedItem();
             playItem.setDisable(selected == null);
@@ -365,9 +334,6 @@ public class PlayerController {
         System.out.println("[PlayerController] ✓ Menú contextual configurado");
     }
 
-    // ==========================
-    // MANEJO DE ARCHIVOS
-    // ==========================
 
     @FXML
     public void onOpenFile(ActionEvent event) {
@@ -408,7 +374,6 @@ public class PlayerController {
                 
                 playlist.removeSong(song);
                 
-                // OPCIONAL: Indicar cambios sin guardar
                 if (currentPlaylistName != null) {
                     updateStatus("🗑️ Eliminado: " + song.getTitle() + " (cambios sin guardar en '" + currentPlaylistName + "')");
                 } else {
@@ -420,9 +385,6 @@ public class PlayerController {
         });
     }
 
-    /**
-     * Elimina múltiples canciones seleccionadas.
-     */
     @FXML
     public void onRemoveSelectedSongs() {
         var selected = playlistView.getSelectionModel().getSelectedItems();
@@ -439,7 +401,6 @@ public class PlayerController {
         
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
-                // Crear copia para evitar ConcurrentModificationException
                 java.util.List<Song> toRemove = new java.util.ArrayList<>(selected);
                 
                 for (Song song : toRemove) {
@@ -481,9 +442,6 @@ public class PlayerController {
         alert.showAndWait();
     }
 
-    // ==========================
-    // CONTROLES DE TRANSPORTE
-    // ==========================
 
     @FXML
     public void onPlay(ActionEvent event) {
@@ -559,9 +517,6 @@ public class PlayerController {
         updateStatus(mute ? "🔇 Silenciado" : "🔊 Sonido activado");
     }
 
-    // ==========================
-    // MODO ALEATORIO / REPETIR
-    // ==========================
 
     @FXML
     public void onShuffleClicked() {
@@ -625,9 +580,6 @@ public class PlayerController {
         }
     }
 
-    // ==========================
-    // BÚSQUEDA ONLINE
-    // ==========================
 
     @FXML
     public void onSearchClicked() {
@@ -638,11 +590,9 @@ public class PlayerController {
             
             Parent searchRoot = loader.load();
             
-            // Obtener el controlador y pasarle la referencia del PlaylistService
             SearchController searchController = loader.getController();
             searchController.setPlaylistService(playlist);
             
-            // Registrar listener para actualizar la tabla
             searchController.setPlaylistUpdateListener(() -> {
                 Platform.runLater(() -> {
                     playlistView.refresh();
@@ -651,7 +601,6 @@ public class PlayerController {
                 });
             });
             
-            // Crear nueva ventana modal
             Stage searchStage = new Stage();
             searchStage.setTitle("Buscar Música Online");
             searchStage.initModality(Modality.APPLICATION_MODAL);
@@ -672,9 +621,6 @@ public class PlayerController {
         }
     }
 
-    // ==========================
-    // PLAYLIST (limpiar / guardar)
-    // ==========================
 
     public void onClearPlaylist(ActionEvent e) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
@@ -694,12 +640,10 @@ public class PlayerController {
 
     @FXML
     public void onSavePlaylist(ActionEvent e) {
-        // Usar el nombre actual como valor por defecto, o "Mi Playlist" si no hay ninguno
         String defaultName = (currentPlaylistName != null && !currentPlaylistName.isBlank()) 
                              ? currentPlaylistName 
                              : "Mi Playlist";
         
-        // Pedir nombre de la playlist
         javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog(defaultName);
         dialog.setTitle("Guardar Playlist");
         dialog.setHeaderText("Guardar la playlist actual");
@@ -713,7 +657,6 @@ public class PlayerController {
         dialog.showAndWait().ifPresent(nombre -> {
             if (nombre != null && !nombre.isBlank()) {
                 try {
-                    // Verificar si ya existe (y no es la actual)
                     boolean isCurrentPlaylist = nombre.equals(currentPlaylistName);
                     
                     if (playlistFileService.playlistExists(nombre) && !isCurrentPlaylist) {
@@ -727,10 +670,8 @@ public class PlayerController {
                         }
                     }
                     
-                    // Guardar la playlist
                     playlistFileService.savePlaylist(nombre, playlist.getSongs());
                     
-                    // Actualizar nombre actual
                     currentPlaylistName = nombre;
                     updatePlaylistNameIndicator();
                     
@@ -746,14 +687,9 @@ public class PlayerController {
         });
     }
 
-    /**
-     * Abre la ventana de biblioteca para gestionar playlists guardadas.
-     * Conectado al MenuButton "Biblioteca".
-     */
     @FXML
     public void onOpenLibrary() {
         try {
-            // Obtener lista de playlists guardadas
             List<String> playlists = playlistFileService.listPlaylists();
             
             if (playlists.isEmpty()) {
@@ -762,7 +698,6 @@ public class PlayerController {
                 return;
             }
             
-            // Mostrar diálogo de selección
             javafx.scene.control.ChoiceDialog<String> dialog = 
                 new javafx.scene.control.ChoiceDialog<>(playlists.get(0), playlists);
             
@@ -785,9 +720,6 @@ public class PlayerController {
         }
     }
 
-    /**
-     * Carga una playlist desde la biblioteca.
-     */
     private void loadPlaylistFromLibrary(String nombre) throws IOException {
         // Confirmar si hay canciones actuales
         if (!playlist.getSongs().isEmpty()) {
@@ -801,7 +733,6 @@ public class PlayerController {
             }
         }
         
-        // Cargar playlist
         List<Song> songs = playlistFileService.loadPlaylist(nombre);
         
         if (songs.isEmpty()) {
@@ -811,15 +742,12 @@ public class PlayerController {
             return;
         }
         
-        // Limpiar playlist actual y agregar nuevas canciones
         playlist.clearCurrentPlaylist();
         playlist.addSongs(songs);
         
-        // NUEVO: Guardar el nombre de la playlist cargada
         currentPlaylistName = nombre;
         updatePlaylistNameIndicator();
         
-        // Seleccionar primera canción
         if (!songs.isEmpty()) {
             playlistView.getSelectionModel().select(songs.get(0));
         }
@@ -829,10 +757,6 @@ public class PlayerController {
                 "Canciones: " + songs.size());
     }
 
-    /**
-     * Gestiona las playlists guardadas (ver, eliminar, renombrar).
-     * Conectado a MenuItem "Configuración" en Biblioteca.
-     */
     @FXML
     public void onManagePlaylists() {
         try {
@@ -843,7 +767,6 @@ public class PlayerController {
                 return;
             }
             
-            // Crear ventana personalizada de gestión
             Stage stage = new Stage();
             stage.setTitle("Gestionar Playlists");
             stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
@@ -911,9 +834,6 @@ public class PlayerController {
         showAlert(Alert.AlertType.WARNING, "Advertencia", msg);
     }
 
-    // ==========================
-    // UTILIDADES
-    // ==========================
 
     private void updateStatus(String message) {
         statusLabel.setText(message);

@@ -4,9 +4,7 @@ package reproductor.com.musica.api.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-/**
- * DTO para solicitar descargas a la API.
- */
+
 public class DownloadRequest {
     
     @JsonProperty("canciones")

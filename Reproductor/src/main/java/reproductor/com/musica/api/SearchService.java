@@ -13,10 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Servicio de alto nivel para búsqueda y descarga de música.
- * Ahora soporta búsqueda sin descarga automática.
- */
+
 public class SearchService {
 
     private final ApiClient apiClient;
@@ -29,7 +26,6 @@ public class SearchService {
         this.apiClient = apiClient;
     }
 
-    // ===== NUEVO: BÚSQUEDA SIN DESCARGA =====
 
     /**
      * Busca canciones en YouTube SIN descargarlas.
@@ -71,9 +67,7 @@ public class SearchService {
         };
     }
     
-    /**
-     * Descarga canciones seleccionadas (versión síncrona).
-     */
+   
     public List<Song> downloadSelected(
             List<SearchResult> searchResults,
             ProgressCallback progressCallback,
@@ -86,15 +80,12 @@ public class SearchService {
         messageCallback.update("Descargando " + searchResults.size() + " canciones...");
         progressCallback.update(0, searchResults.size());
         
-        // Extraer video_ids
         List<String> videoIds = searchResults.stream()
                 .map(SearchResult::getVideoId)
                 .collect(Collectors.toList());
         
-        // Llamar al backend para descargar por ID
         DownloadResponse response = apiClient.downloadByVideoIds(videoIds);
         
-        // Procesar resultados
         List<Song> downloadedSongs = new ArrayList<>();
         int processed = 0;
         
@@ -119,7 +110,6 @@ public class SearchService {
                 Song song = createSongFromPath(localPath);
                 
                 if (song != null) {
-                    // Enriquecer con datos del SearchResult original
                     SearchResult original = findOriginal(searchResults, result.getName());
                     if (original != null) {
                         song.setArtist(original.getArtista());
@@ -142,7 +132,6 @@ public class SearchService {
         return downloadedSongs;
     }
 
-    // ===== MÉTODO ORIGINAL: BÚSQUEDA + DESCARGA AUTOMÁTICA =====
 
     public Task<List<Song>> searchAndDownloadAsync(List<String> searchTerms) {
         return new Task<>() {
@@ -209,7 +198,6 @@ public class SearchService {
         return downloadedSongs;
     }
 
-    // ===== OTROS MÉTODOS =====
 
     public List<Song> loadLocalSongs() {
         try {
@@ -259,8 +247,6 @@ public class SearchService {
             }
         };
     }
-
-    // ===== MÉTODOS PRIVADOS =====
 
     private Song createSongFromPath(Path filePath) {
         if (filePath == null) return null;

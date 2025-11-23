@@ -14,11 +14,11 @@ public class PlaylistTest {
 
     @BeforeAll
     static void initToolkit() {
-        // Necesario para que JavaFX inicialice el toolkit de ObservableList
+
         try {
             javafx.application.Platform.startup(() -> {});
         } catch (IllegalStateException e) {
-            // JavaFX ya estaba inicializado, no pasa nada
+
         }
     }
 
@@ -65,7 +65,7 @@ public class PlaylistTest {
         Playlist playlist = new Playlist();
         playlist.setName(null);
 
-        assertEquals("", playlist.getName()); // comportamiento definido en getName()
+        assertEquals("", playlist.getName()); 
     }
 
     @Test
@@ -94,7 +94,7 @@ public class PlaylistTest {
         Song s = new Song("Test", "Autor", Paths.get("test.mp3"));
 
         playlist.addSong(s);
-        playlist.addSong(s); // no debe duplicarse
+        playlist.addSong(s); 
 
         assertEquals(1, playlist.getSongs().size());
     }
@@ -150,6 +150,6 @@ public class PlaylistTest {
         Playlist playlist = new Playlist();
         playlist.setName(null);
 
-        assertEquals("", playlist.toString()); // porque getName() evita null
+        assertEquals("", playlist.toString()); 
     }
 }

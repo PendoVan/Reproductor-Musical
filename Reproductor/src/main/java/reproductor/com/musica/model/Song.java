@@ -9,30 +9,30 @@ public class Song {
     private String title;
     private String artist;
     private int durationSeconds;
-    private Path filePath;    // Si es archivo local
+    private Path filePath;  
     private String streamUrl;
     
-    // Constructor para archivos locales (Path)
+
     public Song(String title, String artist, Path filePath) {
         this.title = title;
         this.artist = artist;
         this.filePath = filePath;
     }
     
-    // Constructor para streams remotos
+
     public Song(String title, String artist, String streamUrl) {
         this.title = title;
         this.artist = artist;
         this.streamUrl = streamUrl;
     }
     
-    // NUEVO: Constructor simple con ruta como String
+
     public Song(String title, String filePath, double durationSeconds) {
         this.title = title;
         this.filePath = Path.of(filePath);
         this.durationSeconds = (int) durationSeconds;
         
-        // Extraer artista del título si contiene " - "
+
         if (title.contains(" - ")) {
             String[] parts = title.split(" - ", 2);
             this.artist = parts[0].trim();
@@ -42,7 +42,7 @@ public class Song {
         }
     }
     
-    // Getters y setters
+
     
     public Integer getId() {
         return id;
@@ -80,7 +80,7 @@ public class Song {
         return filePath;
     }
     
-    // NUEVO: Método para obtener la ruta como String
+
     public String getFilePathString() {
         return filePath != null ? filePath.toString() : null;
     }
@@ -97,12 +97,12 @@ public class Song {
         this.streamUrl = streamUrl;
     }
     
-    // Si se reproduce desde archivo local
+
     public boolean isLocal() {
         return filePath != null;
     }
     
-    // Si se reproduce desde un stream remoto
+
     public boolean isRemote() {
         return streamUrl != null && !streamUrl.isBlank();
     }

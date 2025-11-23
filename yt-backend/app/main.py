@@ -11,7 +11,7 @@ from app.models import CancionesRequest
 
 app = FastAPI(title="YT Music Downloader API")
 
-# Habilitar CORS para poder llamar desde tu app JavaFX (localhost)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -43,7 +43,7 @@ def buscar_canciones(q: str, max_results: int = 10):
     
     import yt_dlp
     
-    # CORRECCIÓN: Usar ytsearch sin extract_flat
+  
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
@@ -54,13 +54,13 @@ def buscar_canciones(q: str, max_results: int = 10):
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # Buscar con el formato correcto
+
             search_query = f"ytsearch{max_results}:{q}"
             info = ydl.extract_info(search_query, download=False)
             
             resultados = []
             
-            # Manejar tanto resultados directos como entries
+
             if 'entries' in info:
                 entries = info['entries']
             else:
@@ -68,18 +68,18 @@ def buscar_canciones(q: str, max_results: int = 10):
             
             for entry in entries:
                 if entry:
-                    # Extraer información
+
                     titulo = entry.get('title', 'Desconocido')
                     video_id = entry.get('id', '')
                     duracion = entry.get('duration', 0)
                     
-                    # Extraer artista del título
+
                     artista = None
                     if ' - ' in titulo:
                         partes = titulo.split(' - ', 1)
                         artista = partes[0].strip()
                     
-                    # Obtener thumbnail
+
                     thumbnail = ''
                     if 'thumbnail' in entry:
                         thumbnail = entry['thumbnail']
@@ -106,7 +106,7 @@ def buscar_canciones(q: str, max_results: int = 10):
         raise HTTPException(status_code=500, detail=f"Error en búsqueda: {str(e)}")
 
 
-# ===== NUEVO: DESCARGA POR VIDEO_ID =====
+
 @app.post("/descargar_por_id")
 def descargar_por_id(request: dict):
     """
@@ -147,7 +147,7 @@ def descargar_por_id(request: dict):
                 info = ydl.extract_info(url, download=True)
                 titulo = info.get('title', video_id)
                 
-                # Buscar el archivo descargado
+
                 archivo_nombre = None
                 for archivo in os.listdir(DOWNLOAD_DIR):
                     if archivo.endswith(".mp3") and titulo in archivo:
@@ -172,7 +172,6 @@ def descargar_por_id(request: dict):
     return {"resultados": resultados}
 
 
-# ===== ENDPOINTS EXISTENTES =====
 
 @app.get("/buscar_video")
 def buscar(query: str):
@@ -204,7 +203,7 @@ def descargar_canciones(request: CancionesRequest):
                     "estado": "descargado",
                 }
             )
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:  
             resultados.append(
                 {
                     "nombre": cancion,

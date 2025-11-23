@@ -1,9 +1,6 @@
 package reproductor.com.musica.api;
 
-/**
- * Excepción específica para errores de la API.
- * Facilita el manejo de errores y logging.
- */
+
 public class ApiException extends Exception {
     
 	private static final long serialVersionUID = 1L;

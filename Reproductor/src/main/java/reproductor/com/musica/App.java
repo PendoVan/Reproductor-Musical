@@ -21,7 +21,7 @@ public class App extends Application {
         System.out.println("🎵 REPRODUCTOR MUSICAL - Grupo 3");
         System.out.println("=".repeat(60));
         
-        // Iniciar backend automáticamente
+
         backendManager = new BackendManager();
         
         System.out.println("\n🚀 Iniciando backend FastAPI...");
@@ -38,7 +38,7 @@ public class App extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        // Cargar interfaz
+
         Parent root = FXMLLoader.load(
             getClass().getResource("/reproductor/com/musica/view/MainView.fxml")
         );
@@ -47,7 +47,7 @@ public class App extends Application {
         stage.setTitle("Reproductor Musical - Grupo 3");
         stage.setScene(scene);
         
-        // Manejar cierre de ventana
+
         stage.setOnCloseRequest(event -> {
             System.out.println("\n👋 Cerrando aplicación...");
             cleanup();
@@ -57,7 +57,7 @@ public class App extends Application {
         
         stage.show();
         
-        // Mostrar advertencia si el backend no está disponible
+
         if (backendManager != null && !backendManager.isRunning()) {
             Platform.runLater(() -> {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -81,9 +81,7 @@ public class App extends Application {
         super.stop();
     }
     
-    /**
-     * Limpia recursos al cerrar la aplicación.
-     */
+
     private void cleanup() {
         if (backendManager != null) {
             System.out.println("🛑 Deteniendo backend...");

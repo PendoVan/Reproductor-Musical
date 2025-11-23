@@ -20,14 +20,14 @@
             stylesheets="@dark-theme.css"
             fx:id="root">
 
-  <!-- HEADER BAR -->
+
   <top>
     <HBox fx:id="headerBar" styleClass="header-bar" alignment="CENTER_LEFT" spacing="16">
       <padding>
         <Insets topRightBottomLeft="12" />
       </padding>
       
-      <!-- Left Side Controls -->
+
       <HBox spacing="12" alignment="CENTER_LEFT">
         <Button fx:id="openFilesButton" onAction="#onOpenFile" 
                 text="Abrir archivos" styleClass="control-button" />
@@ -35,7 +35,7 @@
                 text="Biblioteca" styleClass="control-button" />
       </HBox>
       
-      <!-- Spacer -->
+
       <Region HBox.hgrow="ALWAYS" />
       
       <!-- Right Side Controls -->
@@ -50,27 +50,27 @@
     </HBox>
   </top>
 
-  <!-- MAIN CONTENT -->
+
   <center>
     <HBox fx:id="mainContent" styleClass="main-content" spacing="24">
       <padding>
         <Insets topRightBottomLeft="24" />
       </padding>
       
-      <!-- LEFT COLUMN - Now Playing -->
+
       <VBox fx:id="nowPlayingSection" styleClass="now-playing-section" 
             spacing="24" alignment="TOP_CENTER" prefWidth="400">
         
-        <!-- Album Cover -->
+
         <VBox alignment="CENTER">
           <ImageView fx:id="albumCover" fitWidth="250" fitHeight="250" 
                      styleClass="album-cover" preserveRatio="true">
-            <!-- Placeholder rectangle when no image -->
+
             <Rectangle width="250" height="250" styleClass="album-placeholder" />
           </ImageView>
         </VBox>
         
-        <!-- Track Info -->
+
         <VBox spacing="8" alignment="CENTER">
           <Label fx:id="currentTrackLabel" text="Selecciona una canción"
                  styleClass="primary-text, track-title" wrapText="true" />
@@ -80,7 +80,7 @@
                  styleClass="status-text" />
         </VBox>
         
-        <!-- Progress Section -->
+
         <VBox spacing="8" alignment="CENTER" prefWidth="300">
           <Slider fx:id="progressSlider" styleClass="progress-slider" 
                   prefWidth="300" />
@@ -93,7 +93,7 @@
           </HBox>
         </VBox>
         
-        <!-- Transport Controls -->
+
         <HBox spacing="16" alignment="CENTER">
           <Button fx:id="prevButton" onAction="#onPrev" 
                   text="⏮" styleClass="transport-button" />
@@ -111,7 +111,7 @@
                   text="⏭" styleClass="transport-button" />
         </HBox>
         
-        <!-- Volume Control -->
+
         <HBox spacing="12" alignment="CENTER">
           <Label text="🔊" styleClass="secondary-text" />
           <Slider fx:id="volumeSlider" styleClass="volume-slider" 
@@ -121,11 +121,11 @@
         </HBox>
       </VBox>
       
-      <!-- RIGHT COLUMN - Playlist -->
+
       <VBox fx:id="playlistSection" styleClass="playlist-section" 
             spacing="16" HBox.hgrow="ALWAYS">
         
-        <!-- Playlist Header -->
+
         <HBox alignment="CENTER_LEFT" spacing="12">
           <Label text="Lista de reproducción" 
                  styleClass="primary-text, section-title" />
@@ -134,11 +134,11 @@
                  styleClass="secondary-text" />
         </HBox>
         
-        <!-- Playlist -->
+
         <ListView fx:id="playlistView" styleClass="playlist" 
                   VBox.vgrow="ALWAYS" />
         
-        <!-- Playlist Controls -->
+
         <HBox spacing="12" alignment="CENTER_RIGHT">
           <Button fx:id="clearPlaylistButton" 
                   text="Limpiar lista" styleClass="secondary-button" />
@@ -149,21 +149,21 @@
     </HBox>
   </center>
 
-  <!-- STATUS BAR -->
+
   <bottom>
     <HBox fx:id="statusBar" styleClass="status-bar" alignment="CENTER_LEFT" spacing="16">
       <padding>
         <Insets topRightBottomLeft="8" />
       </padding>
       
-      <!-- Left Status -->
+
       <Label fx:id="statusLabel" text="Listo" 
              styleClass="secondary-text" />
       
-      <!-- Spacer -->
+
       <Region HBox.hgrow="ALWAYS" />
       
-      <!-- Right Status -->
+
       <HBox spacing="16" alignment="CENTER_RIGHT">
         <Label fx:id="totalTracksLabel" text="0 canciones en lista" 
                styleClass="secondary-text" />

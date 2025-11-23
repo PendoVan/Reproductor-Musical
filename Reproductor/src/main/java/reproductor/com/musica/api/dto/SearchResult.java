@@ -2,10 +2,7 @@ package reproductor.com.musica.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Representa un resultado de búsqueda de YouTube (SIN descarga).
- * Compatible con el endpoint GET /buscar del backend.
- */
+
 public class SearchResult {
     
     @JsonProperty("video_id")
@@ -26,7 +23,7 @@ public class SearchResult {
     @JsonProperty("url")
     private String url;
     
-    // Constructores
+    
     
     public SearchResult() {}
     
@@ -40,7 +37,7 @@ public class SearchResult {
         this.url = url;
     }
     
-    // Getters y Setters
+   
     
     public String getVideoId() {
         return videoId;
@@ -90,9 +87,7 @@ public class SearchResult {
         this.url = url;
     }
     
-    /**
-     * Formatea la duración en MM:SS para mostrar en TableView.
-     */
+    
     public String getFormattedDuration() {
         int minutos = duracion / 60;
         int segundos = duracion % 60;

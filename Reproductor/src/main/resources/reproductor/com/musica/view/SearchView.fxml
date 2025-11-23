@@ -16,14 +16,14 @@
             fx:controller="reproductor.com.musica.controller.SearchController"
             fx:id="searchRoot" styleClass="border-pane" stylesheets="@dark-theme.css">
 
-  <!-- SEARCH HEADER -->
+
   <top>
     <VBox spacing="16" styleClass="center-panel">
       <padding>
         <Insets topRightBottomLeft="20" />
       </padding>
 
-      <!-- Search Title -->
+
       <HBox spacing="12" alignment="CENTER_LEFT">
         <Button fx:id="btnBack"
                 text="← Volver"
@@ -34,7 +34,7 @@
         <Region HBox.hgrow="ALWAYS" />
       </HBox>
 
-      <!-- Search Input -->
+
       <HBox spacing="12" alignment="CENTER">
         <TextField fx:id="searchField"
                    promptText="Buscar canciones, artistas, álbumes..."
@@ -51,7 +51,7 @@
                 onAction="#onClearClicked" />
       </HBox>
 
-      <!-- Search Status -->
+
       <HBox spacing="12" alignment="CENTER_LEFT">
         <ProgressIndicator fx:id="searchProgress"
                            visible="false"
@@ -69,14 +69,14 @@
     </VBox>
   </top>
 
-  <!-- SEARCH RESULTS -->
+
   <center>
     <VBox spacing="16" styleClass="center-panel">
       <padding>
         <Insets topRightBottomLeft="20" />
       </padding>
 
-      <!-- Results Header -->
+
       <HBox spacing="12" alignment="CENTER_LEFT">
         <Label text="Resultados de Búsqueda"
                styleClass="label"
@@ -92,13 +92,13 @@
                 onAction="#onAddToPlaylistClicked" />
       </HBox>
 
-      <!-- Results Table - CORREGIDO PARA SearchResult -->
+
       <TableView fx:id="resultsTable"
                  VBox.vgrow="ALWAYS"
                  styleClass="results-table"
                  prefHeight="400">
         <columns>
-          <!-- NO usar PropertyValueFactory aquí, el controlador lo maneja -->
+
           <TableColumn fx:id="titleColumn"
                        text="Título"
                        prefWidth="300" />
@@ -113,7 +113,7 @@
                        prefWidth="100" />
         </columns>
         
-        <!-- Mensaje cuando está vacía -->
+
         <placeholder>
           <Label text="No hay resultados. Busca algo para empezar."
                  style="-fx-text-fill: #B3B3B3;" />
@@ -122,7 +122,7 @@
     </VBox>
   </center>
 
-  <!-- STATUS BAR -->
+
   <bottom>
     <HBox spacing="16" alignment="CENTER_LEFT"
           style="-fx-background-color: rgba(26, 26, 46, 0.8); -fx-padding: 8 16;">

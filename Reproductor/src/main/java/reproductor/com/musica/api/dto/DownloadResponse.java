@@ -19,9 +19,7 @@ public class DownloadResponse {
         this.results = results;
     }
     
-    /**
-     * Resultado individual de una descarga.
-     */
+    
     public static class DownloadResult {
         
         @JsonProperty("nombre")

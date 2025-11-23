@@ -7,10 +7,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import reproductor.com.musica.model.Song;
 
-/**
- * Encapsula el uso de MediaPlayer de JavaFX y expone
- * propiedades simples para que el controlador las enlace.
- */
+
 public class PlayerService {
 
     private final ObjectProperty<Song> currentSong = new SimpleObjectProperty<>(null);
@@ -23,7 +20,6 @@ public class PlayerService {
     private MediaPlayer mediaPlayer;
     private boolean stoppedByEndOfMedia = false;
 
-    // ========= PROPIEDADES EXPUESTAS =========
 
     public ObjectProperty<Song> currentSongProperty() {
         return currentSong;
@@ -83,7 +79,6 @@ public class PlayerService {
         return stoppedByEndOfMedia;
     }
 
-    // ========= CONTROL DE REPRODUCCIÓN =========
 
     public void playSong(Song song) {
         if (song == null) {
@@ -91,7 +86,7 @@ public class PlayerService {
             return;
         }
 
-        // Si ya está ese mismo song y solo estaba pausado, reanudar
+
         if (song.equals(currentSong.get()) && mediaPlayer != null) {
             mediaPlayer.play();
             playing.set(true);
@@ -172,9 +167,7 @@ public class PlayerService {
         }
     }
 
-    /**
-     * Mueve la reproducción a una fracción de la duración total.
-     */
+
     public void seekToFraction(double fraction) {
         if (mediaPlayer == null) return;
 
@@ -186,7 +179,7 @@ public class PlayerService {
         mediaPlayer.seek(Duration.seconds(targetSeconds));
     }
 
-    // ========= LIMPIEZA =========
+
 
     private void disposePlayer() {
         if (mediaPlayer != null) {
@@ -200,12 +193,12 @@ public class PlayerService {
         stoppedByEndOfMedia = false;
     }
 
-    // ========= HELPERS =========
+
 
     private String resolveMediaUri(Song song) {
         if (song == null) return null;
 
-        // CORRECCIÓN: Usar getFilePathString() en lugar de getFilePath()
+
         String filePathString = song.getFilePathString();
 
         if (filePathString == null || filePathString.isEmpty()) {

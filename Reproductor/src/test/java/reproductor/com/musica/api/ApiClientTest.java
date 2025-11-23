@@ -22,7 +22,7 @@ class ApiClientTest {
         server = HttpServer.create(new InetSocketAddress(0), 0); // 0 → puerto aleatorio
         port = server.getAddress().getPort();
 
-        // Endpoint: GET /descargas
+
         server.createContext("/descargas", exchange -> {
             if ("GET".equals(exchange.getRequestMethod())) {
                 String json = "{\"archivos\":[\"a.mp3\",\"b.mp3\"]}";
@@ -42,7 +42,7 @@ class ApiClientTest {
             }
         });
 
-        // Endpoint: GET /descargas/{archivo}
+
         server.createContext("/descargas/file.mp3", exchange -> {
             if ("GET".equals(exchange.getRequestMethod())) {
                 byte[] content = "MP3DATA".getBytes();
@@ -89,7 +89,7 @@ class ApiClientTest {
 
     @Test
     void deleteFile_returnsFalseSinceNotImplementedOnServer() throws Exception {
-        // Nuestro servidor no implementa DELETE → 405
+
         boolean result = apiClient.deleteFile("file.mp3");
 
         assertFalse(result);

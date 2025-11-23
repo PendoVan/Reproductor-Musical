@@ -21,7 +21,7 @@
             fx:controller="reproductor.com.musica.controller.SettingsController"
             fx:id="settingsRoot" styleClass="border-pane">
 
-  <!-- SETTINGS HEADER -->
+
   <top>
     <HBox spacing="16" alignment="CENTER_LEFT" styleClass="header-section">
       <Button fx:id="btnClose" text="✕" 
@@ -39,18 +39,18 @@
     </HBox>
   </top>
 
-  <!-- SETTINGS CONTENT -->
+
   <center>
     <TabPane fx:id="settingsTabPane" styleClass="tab-pane">
       
-      <!-- GENERAL SETTINGS -->
+
       <Tab text="General" closable="false" styleClass="tab">
         <VBox spacing="20" styleClass="content-section">
           <padding>
             <Insets topRightBottomLeft="20" />
           </padding>
           
-          <!-- Appearance Settings -->
+
           <VBox spacing="12">
             <Label text="Apariencia" 
                    styleClass="label" 
@@ -86,7 +86,7 @@
                      styleClass="check-box" />
           </VBox>
 
-          <!-- Startup Settings -->
+
           <VBox spacing="12">
             <Label text="Inicio" 
                    styleClass="label" 
@@ -106,14 +106,14 @@
         </VBox>
       </Tab>
 
-      <!-- AUDIO SETTINGS -->
+
       <Tab text="Audio" closable="false" styleClass="tab">
         <VBox spacing="20" styleClass="content-section">
           <padding>
             <Insets topRightBottomLeft="20" />
           </padding>
           
-          <!-- Playback Settings -->
+
           <VBox spacing="12">
             <Label text="Reproducción" 
                    styleClass="label" 
@@ -146,7 +146,7 @@
                      styleClass="check-box" />
           </VBox>
 
-          <!-- Volume Settings -->
+
           <VBox spacing="12">
             <Label text="Volumen" 
                    styleClass="label" 
@@ -177,14 +177,14 @@
         </VBox>
       </Tab>
 
-      <!-- LIBRARY SETTINGS -->
+
       <Tab text="Biblioteca" closable="false" styleClass="tab">
         <VBox spacing="20" styleClass="content-section">
           <padding>
             <Insets topRightBottomLeft="20" />
           </padding>
           
-          <!-- Library Folders -->
+
           <VBox spacing="12">
             <Label text="Carpetas de Música" 
                    styleClass="label" 
@@ -212,7 +212,7 @@
                      styleClass="check-box" />
           </VBox>
 
-          <!-- File Format Settings -->
+
           <VBox spacing="12">
             <Label text="Formatos de Archivo" 
                    styleClass="label" 
@@ -230,14 +230,14 @@
         </VBox>
       </Tab>
 
-      <!-- NETWORK SETTINGS -->
+
       <Tab text="Red" closable="false" styleClass="tab">
         <VBox spacing="20" styleClass="content-section">
           <padding>
             <Insets topRightBottomLeft="20" />
           </padding>
           
-          <!-- API Settings -->
+
           <VBox spacing="12">
             <Label text="Configuración de API" 
                    styleClass="label" 
@@ -266,7 +266,7 @@
             </HBox>
           </VBox>
 
-          <!-- Download Settings -->
+
           <VBox spacing="12">
             <Label text="Descargas" 
                    styleClass="label" 

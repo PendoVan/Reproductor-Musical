@@ -15,10 +15,7 @@ import javafx.collections.ObservableList;
 import reproductor.com.musica.model.PlaybackMode;
 import reproductor.com.musica.model.Song;
 
-/**
- * Maneja la lista de reproducción actual y la lógica
- * de navegación (next/prev/aleatorio/repetir).
- */
+
 public class PlaylistService {
 
     private final ObservableList<Song> songs = FXCollections.observableArrayList();
@@ -31,7 +28,6 @@ public class PlaylistService {
     public PlaylistService() {
     }
 
-    // ========= PROPIEDADES BÁSICAS =========
 
     public ObservableList<Song> getSongs() {
         return songs;
@@ -55,7 +51,7 @@ public class PlaylistService {
         }
     }
 
-    // ========= MANEJO DE CANCIONES =========
+
 
     public void setCurrentSong(Song song) {
         int idx = songs.indexOf(song);
@@ -84,9 +80,7 @@ public class PlaylistService {
         return songs.get(0);
     }
 
-    /**
-     * Devuelve la siguiente canción según el modo de reproducción.
-     */
+
     public Song getNextSong() {
         if (songs.isEmpty()) {
             return null;
@@ -100,21 +94,19 @@ public class PlaylistService {
                 if (idx + 1 < size) {
                     currentIndex.set(idx + 1);
                 } else {
-                    return null; // fin de la lista
+                    return null; 
                 }
             }
             case SHUFFLE -> currentIndex.set(random.nextInt(size));
             case REPEAT_ALL -> currentIndex.set((idx + 1) % size);
             case REPEAT_ONE -> {
-                // índice se mantiene
+
             }
         }
         return getCurrentSong();
     }
 
-    /**
-     * Devuelve la canción anterior (modo simple).
-     */
+
     public Song getPreviousSong() {
         if (songs.isEmpty()) {
             return null;
@@ -156,9 +148,7 @@ public class PlaylistService {
         }
     }
 
-    /**
-     * Agrega archivos locales y devuelve la lista de Songs creadas.
-     */
+
     public List<Song> addFiles(List<File> files) {
         List<Song> added = new ArrayList<>();
         if (files == null) return added;
@@ -166,21 +156,21 @@ public class PlaylistService {
         for (File f : files) {
             if (f == null || !f.exists()) continue;
 
-            // Crear canción con duración inicial estimada
+
             int duracionEstimada = estimateDurationFromFileSize(f);
             Song song = new Song(f.getName(), f.getAbsolutePath(), duracionEstimada);
             
-            // Intentar obtener duración real del archivo
+
             try {
                 javafx.scene.media.Media media = new javafx.scene.media.Media(f.toURI().toString());
                 
-                // Si la duración ya está disponible inmediatamente
+
                 if (media.getDuration() != null && !media.getDuration().isUnknown()) {
                     int seconds = (int) media.getDuration().toSeconds();
                     song.setDurationSeconds(seconds);
                     System.out.println("[PlaylistService] ✓ Duración cargada: " + f.getName() + " = " + seconds + "s");
                 } else {
-                    // Listener por si la duración se carga después
+
                     media.durationProperty().addListener((obs, oldDuration, newDuration) -> {
                         if (newDuration != null && !newDuration.isUnknown()) {
                             int seconds = (int) newDuration.toSeconds();
@@ -194,7 +184,7 @@ public class PlaylistService {
                 }
             } catch (Exception e) {
                 System.err.println("[PlaylistService] ⚠ Error al obtener duración para: " + f.getName() + " - " + e.getMessage());
-                // Ya tiene la duración estimada, así que no pasa nada
+
             }
 
             songs.add(song);
@@ -216,13 +206,11 @@ public class PlaylistService {
         try {
             long bytes = file.length();
             double mb = bytes / (1024.0 * 1024.0);
-            // Fórmula: 1 MB a 192kbps ≈ 41.7 segundos
-            // O más preciso: duración = (tamaño_bytes * 8) / (bitrate * 1000)
-            // Usando 192kbps: (bytes * 8) / (192 * 1000) = bytes / 24000
+
             int segundos = (int) (bytes / 24000.0);
-            return segundos > 0 ? segundos : 180; // mínimo 3 minutos si falla
+            return segundos > 0 ? segundos : 180; 
         } catch (Exception e) {
-            return 180; // valor por defecto: 3 minutos
+            return 180; 
         }
     }
     
@@ -235,11 +223,11 @@ public class PlaylistService {
         if (song != null && songs.contains(song)) {
             songs.remove(song);
             
-            // Si era la canción actual, resetear índice
+
             if (getCurrentSong() != null && getCurrentSong().equals(song)) {
                 currentIndex.set(-1);
             } else {
-                // Ajustar índice si es necesario
+
                 int idx = currentIndex.get();
                 int removedIdx = songs.indexOf(song);
                 if (idx > removedIdx) {
@@ -268,16 +256,13 @@ public class PlaylistService {
         System.out.println("[PlaylistService] 🗑️ Eliminadas " + songsToRemove.size() + " canciones");
     }
 
-    /**
-     * Guarda la playlist actual. Aquí te dejo un stub;
-     * puedes implementar escritura a JSON, texto, etc.
-     */
+
     public void saveCurrentPlaylist() {
         // TODO: Implementar persistencia real si el curso lo requiere.
         System.out.println("[PlaylistService] saveCurrentPlaylist(): todavía no implementado");
     }
 
-    // ========= UTILIDADES =========
+
 
     private void recalcTotalDuration() {
         double sum = 0;

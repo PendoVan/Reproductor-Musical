@@ -5,10 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Modelo para representar una playlist guardada en JSON.
- * Contiene solo referencias a los archivos MP3, no los archivos en sí.
- */
+
 public class SavedPlaylist {
     
     @JsonProperty("nombre")
@@ -23,7 +20,7 @@ public class SavedPlaylist {
     @JsonProperty("canciones")
     private List<SongReference> canciones;
     
-    // Constructores
+
     
     public SavedPlaylist() {
         this.canciones = new ArrayList<>();
@@ -36,7 +33,7 @@ public class SavedPlaylist {
         this.nombre = nombre;
     }
     
-    // Getters y Setters
+
     
     public String getNombre() {
         return nombre;
@@ -70,10 +67,7 @@ public class SavedPlaylist {
         this.canciones = canciones;
     }
     
-    /**
-     * Clase interna para representar una referencia a una canción.
-     * Solo guarda información esencial para reconstruir el Song.
-     */
+
     public static class SongReference {
         
         @JsonProperty("titulo")
@@ -97,9 +91,7 @@ public class SavedPlaylist {
             this.duracionSegundos = duracionSegundos;
         }
         
-        /**
-         * Crea una SongReference desde un Song existente.
-         */
+
         public static SongReference fromSong(Song song) {
             String nombreArchivo = "";
             if (song.getFilePath() != null) {
@@ -114,7 +106,7 @@ public class SavedPlaylist {
             );
         }
         
-        // Getters y Setters
+
         
         public String getTitulo() {
             return titulo;

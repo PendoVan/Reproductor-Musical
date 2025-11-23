@@ -16,10 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Servicio para guardar y cargar playlists desde archivos JSON.
- * Las playlists se guardan en la carpeta: user.home/.reproductor/playlists/
- */
+
 public class PlaylistFileService {
     
     private static final String PLAYLISTS_FOLDER = "yt-backend/playlists";
@@ -30,7 +27,7 @@ public class PlaylistFileService {
     private final ObjectMapper objectMapper;
     
     public PlaylistFileService() {
-        // Configurar directorios
+
     	String projectRoot = System.getProperty("user.dir");
         Path parentDir = Paths.get(projectRoot).getParent();
         if (parentDir != null) {
@@ -45,12 +42,12 @@ public class PlaylistFileService {
             this.downloadsDirectory = Paths.get(projectRoot).resolve(BACKEND_DOWNLOADS);
         }
         
-        // Configurar Jackson para manejar LocalDateTime
+
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
         this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         
-        // Crear carpeta si no existe
+
         ensurePlaylistsDirectoryExists();
         
         System.out.println("[PlaylistFileService] Inicializado");
@@ -70,18 +67,18 @@ public class PlaylistFileService {
             throw new IllegalArgumentException("El nombre de la playlist no puede estar vacío");
         }
         
-        // Crear el objeto SavedPlaylist
+
         SavedPlaylist savedPlaylist = new SavedPlaylist(nombre);
         savedPlaylist.setFechaModificacion(LocalDateTime.now());
         
-        // Convertir cada Song a SongReference
+
         List<SavedPlaylist.SongReference> referencias = songs.stream()
                 .map(SavedPlaylist.SongReference::fromSong)
                 .collect(Collectors.toList());
         
         savedPlaylist.setCanciones(referencias);
         
-        // Guardar como JSON
+
         Path filePath = getPlaylistPath(nombre);
         objectMapper.writeValue(filePath.toFile(), savedPlaylist);
         
@@ -102,10 +99,10 @@ public class PlaylistFileService {
             throw new IOException("La playlist '" + nombre + "' no existe");
         }
         
-        // Leer el JSON
+
         SavedPlaylist savedPlaylist = objectMapper.readValue(filePath.toFile(), SavedPlaylist.class);
         
-        // Reconstruir Songs desde las referencias
+
         List<Song> songs = new ArrayList<>();
         
         for (SavedPlaylist.SongReference ref : savedPlaylist.getCanciones()) {
@@ -179,12 +176,6 @@ public class PlaylistFileService {
         return Files.exists(getPlaylistPath(nombre));
     }
     
-    // ===== MÉTODOS PRIVADOS =====
-    
-    /**
-     * Reconstruye un Song desde una SongReference.
-     * Busca el archivo MP3 en yt-backend/downloads/.
-     */
     private Song reconstructSongFromReference(SavedPlaylist.SongReference ref) {
         // Buscar el archivo en downloads
         Path mp3Path = downloadsDirectory.resolve(ref.getNombreArchivo());
@@ -194,17 +185,17 @@ public class PlaylistFileService {
             return null;
         }
         
-        // Crear Song con la información guardada
+
         Song song = new Song(ref.getTitulo(), mp3Path.toString(), ref.getDuracionSegundos());
         song.setArtist(ref.getArtista());
         song.setTitle(ref.getTitulo());
         
-        // CRÍTICO: Asegurar que la duración se preserve correctamente
+
         int duracion = ref.getDuracionSegundos();
         if (duracion > 0) {
             song.setDurationSeconds(duracion);
         } else {
-            // Si no hay duración guardada, intentar obtenerla del archivo
+
             try {
                 long bytes = Files.size(mp3Path);
                 song.setDurationSeconds(estimateDurationFromFileSize(bytes));
@@ -220,26 +211,18 @@ public class PlaylistFileService {
         return song;
     }
     
-    /**
-     * Estima la duración en segundos basándose en el tamaño del archivo.
-     * Asume MP3 a 192kbps en promedio.
-     */
     private int estimateDurationFromFileSize(long bytes) {
         double mb = bytes / (1024.0 * 1024.0);
         return (int) ((mb / 1.44) * 60);
     }
     
-    /**
-     * Obtiene la ruta completa del archivo JSON de una playlist.
-     */
+
     private Path getPlaylistPath(String nombre) {
         String safeName = nombre.replaceAll("[^a-zA-Z0-9_\\-]", "_");
         return playlistsDirectory.resolve(safeName + ".json");
     }
     
-    /**
-     * Crea el directorio de playlists si no existe.
-     */
+
     private void ensurePlaylistsDirectoryExists() {
         try {
             if (!Files.exists(playlistsDirectory)) {
@@ -252,7 +235,7 @@ public class PlaylistFileService {
         }
     }
     
-    // ===== GETTERS =====
+
     
     public Path getPlaylistsDirectory() {
         return playlistsDirectory;

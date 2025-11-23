@@ -21,9 +21,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Cliente HTTP para comunicarse con la API de descarga de música.
- */
+
 public class ApiClient {
     
     private static final String ENDPOINT_SEARCH = "/buscar";
@@ -53,7 +51,7 @@ public class ApiClient {
         ensureDownloadDirectoryExists();
     }
     
-    // ===== NUEVO: BÚSQUEDA SIN DESCARGA =====
+  
     
     /**
      * Busca canciones en YouTube SIN descargarlas.
@@ -89,7 +87,7 @@ public class ApiClient {
         return search(query, 10);
     }
     
-    // ===== NUEVO: DESCARGA POR VIDEO_ID =====
+    
     
     /**
      * Descarga canciones usando sus video_id de YouTube.
@@ -120,7 +118,7 @@ public class ApiClient {
         }
     }
     
-    // ===== MÉTODOS EXISTENTES =====
+    
     
     public DownloadResponse requestDownloads(List<String> songNames) throws ApiException {
         validateSongNames(songNames);
@@ -211,7 +209,7 @@ public class ApiClient {
         }
     }
     
-    // ===== MÉTODOS PRIVADOS - BUILDERS =====
+    
     
     private HttpRequest buildPostRequest(String endpoint, String body) {
         return HttpRequest.newBuilder()
@@ -238,7 +236,7 @@ public class ApiClient {
                 .build();
     }
     
-    // ===== MÉTODOS PRIVADOS - HANDLERS =====
+   
     
     private SearchResponse handleSearchResponse(HttpResponse<String> response) 
             throws ApiException {
@@ -298,7 +296,7 @@ public class ApiClient {
         return response.body();
     }
     
-    // ===== MÉTODOS PRIVADOS - VALIDACIÓN =====
+    
     
     private void validateSongNames(List<String> songNames) throws ApiException {
         if (songNames == null || songNames.isEmpty()) {
@@ -323,7 +321,7 @@ public class ApiClient {
         }
     }
     
-    // ===== GETTERS =====
+  
     
     public Path getDownloadDirectory() {
         return downloadDirectory;

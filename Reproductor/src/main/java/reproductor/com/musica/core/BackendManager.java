@@ -12,16 +12,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Gestiona el ciclo de vida completo del backend FastAPI.
- * 
- * Responsabilidades:
- * - Detectar/crear entorno virtual Python
- * - Instalar dependencias automáticamente
- * - Levantar servidor FastAPI como proceso hijo
- * - Verificar disponibilidad del backend
- * - Cerrar el proceso al salir
- */
+
 public class BackendManager {
     
     private static final String BACKEND_DIR = "yt-backend";
@@ -40,7 +31,6 @@ public class BackendManager {
     private final Path pythonEmbeddedPath;
     
     public BackendManager() {
-        // Detectar raíz del proyecto
         this.projectRoot = detectProjectRoot();
         this.backendPath = projectRoot.resolve(BACKEND_DIR);
         this.venvPath = backendPath.resolve(VENV_DIR);
@@ -62,31 +52,26 @@ public class BackendManager {
         try {
             log("🚀 Iniciando backend...");
             
-            // 1. Verificar que existe el directorio backend
             if (!Files.exists(backendPath)) {
                 logError("❌ No se encontró el directorio: " + backendPath);
                 return false;
             }
             
-            // 2. Setup del entorno virtual
             if (!setupVirtualEnvironment()) {
                 logError("❌ Error al configurar entorno virtual");
                 return false;
             }
             
-            // 3. Instalar dependencias
             if (!installDependencies()) {
                 logError("❌ Error al instalar dependencias");
                 return false;
             }
             
-            // 4. Levantar servidor FastAPI
             if (!startFastAPIServer()) {
                 logError("❌ Error al iniciar servidor FastAPI");
                 return false;
             }
             
-            // 5. Esperar a que el backend esté listo
             if (!waitForBackend()) {
                 logError("❌ El backend no respondió a tiempo");
                 stopBackend();
@@ -103,28 +88,17 @@ public class BackendManager {
         }
     }
     
-    /**
-     * Detiene el servidor backend de forma limpia.
-     */
     public void stop() {
         stopBackend();
     }
     
-    /**
-     * Verifica si el backend está corriendo.
-     */
     public boolean isRunning() {
         return backendProcess != null && backendProcess.isAlive() && checkBackendHealth();
     }
     
-    // ==================== MÉTODOS PRIVADOS ====================
-    
-    /**
-     * Configura el entorno virtual de Python.
-     */
     private boolean setupVirtualEnvironment() {
         try {
-            // Si ya existe el venv, no hacer nada
+
             if (Files.exists(venvPath) && Files.exists(getPythonExecutable())) {
                 log("✓ Entorno virtual ya existe");
                 return true;
@@ -132,14 +106,14 @@ public class BackendManager {
             
             log("📦 Creando entorno virtual...");
             
-            // Obtener ejecutable de Python
+
             Path pythonExe = findPythonExecutable();
             if (pythonExe == null) {
                 logError("❌ No se encontró Python. Instala Python o coloca python-embedded/");
                 return false;
             }
             
-            // Crear venv
+
             ProcessBuilder pb = new ProcessBuilder(
                 pythonExe.toString(),
                 "-m", "venv",
@@ -167,9 +141,7 @@ public class BackendManager {
         }
     }
     
-    /**
-     * Instala las dependencias desde requirements.txt.
-     */
+
     private boolean installDependencies() {
         try {
             Path requirementsPath = backendPath.resolve(REQUIREMENTS_FILE);
@@ -194,7 +166,7 @@ public class BackendManager {
             
             Process process = pb.start();
             
-            // Mostrar progreso
+
             showProcessOutput(process);
             
             int exitCode = process.waitFor();
@@ -214,16 +186,14 @@ public class BackendManager {
         }
     }
     
-    /**
-     * Inicia el servidor FastAPI usando uvicorn.
-     */
+
     private boolean startFastAPIServer() {
         try {
             log("🌐 Iniciando servidor FastAPI...");
             
             Path pythonExe = getPythonExecutable();
             
-            // Obtener ruta de FFmpeg
+
             Path ffmpegPath = getFfmpegPath();
             
             ProcessBuilder pb = new ProcessBuilder(
@@ -237,7 +207,7 @@ public class BackendManager {
             
             pb.directory(backendPath.toFile());
             
-            // CRÍTICO: Agregar FFmpeg al PATH
+
             if (ffmpegPath != null) {
                 Map<String, String> env = pb.environment();
                 String currentPath = env.getOrDefault("PATH", "");
@@ -250,7 +220,7 @@ public class BackendManager {
                 log("  Instala FFmpeg o inclúyelo en: " + projectRoot.resolve(FFMPEG_DIR));
             }
             
-            // Ocultar ventana de consola en Windows
+
             if (isWindows()) {
                 try {
                     pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
@@ -262,10 +232,8 @@ public class BackendManager {
             
             backendProcess = pb.start();
             
-            // Capturar logs en background
             startLogCapture(backendProcess);
             
-            // Dar tiempo para que inicie
             Thread.sleep(2000);
             
             if (!backendProcess.isAlive()) {
@@ -292,7 +260,7 @@ public class BackendManager {
     private Path getFfmpegPath() {
         Path ffmpegDir = projectRoot.resolve(FFMPEG_DIR);
         
-        // Windows: buscar ffmpeg.exe
+
         if (isWindows()) {
             Path ffmpegExe = ffmpegDir.resolve("ffmpeg.exe");
             if (Files.exists(ffmpegExe)) {
@@ -300,7 +268,7 @@ public class BackendManager {
                 return ffmpegDir;
             }
         } 
-        // Linux/Mac: buscar en bin/
+
         else {
             Path ffmpegBin = ffmpegDir.resolve("bin");
             Path ffmpegExe = ffmpegBin.resolve("ffmpeg");
@@ -310,7 +278,7 @@ public class BackendManager {
             }
         }
         
-        // Buscar en el sistema
+
         if (isFFmpegInSystem()) {
             log("✓ Usando FFmpeg del sistema");
             return null; // El PATH del sistema ya lo tiene
@@ -319,9 +287,7 @@ public class BackendManager {
         return null;
     }
 
-    /**
-     * Verifica si FFmpeg está instalado en el sistema.
-     */
+
     private boolean isFFmpegInSystem() {
         try {
             String command = isWindows() ? "where ffmpeg" : "which ffmpeg";
@@ -332,9 +298,7 @@ public class BackendManager {
         }
     }
     
-    /**
-     * Espera hasta que el backend responda correctamente.
-     */
+
     private boolean waitForBackend() {
         log("⏳ Esperando a que el backend esté listo...");
         
@@ -358,9 +322,7 @@ public class BackendManager {
         return false;
     }
     
-    /**
-     * Verifica si el backend está respondiendo.
-     */
+
     private boolean checkBackendHealth() {
         try {
             URL url = new URL("http://" + BACKEND_HOST + ":" + BACKEND_PORT + "/ping");
@@ -379,9 +341,7 @@ public class BackendManager {
         }
     }
     
-    /**
-     * Detiene el proceso del backend.
-     */
+
     private void stopBackend() {
         if (backendProcess != null && backendProcess.isAlive()) {
             log("🛑 Deteniendo backend...");
@@ -403,9 +363,7 @@ public class BackendManager {
         }
     }
     
-    /**
-     * Busca el ejecutable de Python (embedded o del sistema).
-     */
+
     private Path findPythonExecutable() {
         // 1. Buscar Python embedded
         if (Files.exists(pythonEmbeddedPath)) {
@@ -416,7 +374,7 @@ public class BackendManager {
             }
         }
         
-        // 2. Buscar Python del sistema
+
         String[] pythonCommands = isWindows() 
             ? new String[]{"python", "python3", "py"}
             : new String[]{"python3", "python"};
@@ -434,9 +392,7 @@ public class BackendManager {
         return null;
     }
     
-    /**
-     * Obtiene la ruta al ejecutable de Python del venv.
-     */
+
     private Path getPythonExecutable() {
         if (isWindows()) {
             return venvPath.resolve("Scripts").resolve("python.exe");
@@ -445,9 +401,7 @@ public class BackendManager {
         }
     }
     
-    /**
-     * Obtiene la ruta al ejecutable pip del venv.
-     */
+
     private Path getPipExecutable() {
         if (isWindows()) {
             return venvPath.resolve("Scripts").resolve("pip.exe");
@@ -456,14 +410,12 @@ public class BackendManager {
         }
     }
     
-    /**
-     * Detecta la raíz del proyecto.
-     */
+
     private Path detectProjectRoot() {
-        // Desde el .jar o desde el IDE
+
         Path current = Paths.get(System.getProperty("user.dir"));
         
-        // Si estamos en Reproductor/, subir un nivel
+
         if (current.endsWith("Reproductor")) {
             return current.getParent();
         }
@@ -471,9 +423,7 @@ public class BackendManager {
         return current;
     }
     
-    /**
-     * Captura los logs del proceso en background.
-     */
+
     private void startLogCapture(Process process) {
         Thread outputThread = new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(
@@ -490,9 +440,7 @@ public class BackendManager {
         outputThread.start();
     }
     
-    /**
-     * Muestra la salida de un proceso en tiempo real.
-     */
+
     private void showProcessOutput(Process process) throws IOException {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream()))) {
@@ -503,9 +451,7 @@ public class BackendManager {
         }
     }
     
-    /**
-     * Imprime la salida de un proceso después de ejecutarse.
-     */
+
     private void printProcessOutput(Process process) {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream()))) {

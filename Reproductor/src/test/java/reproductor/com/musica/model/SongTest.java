@@ -8,9 +8,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SongTest {
 
-    // -------------------------------------------------------------
-    // 1) Constructor con Path (archivo local)
-    // -------------------------------------------------------------
     @Test
     void testConstructorWithPath() {
         Path p = Path.of("/music/test.mp3");
@@ -24,9 +21,7 @@ class SongTest {
         assertFalse(s.isRemote());
     }
 
-    // -------------------------------------------------------------
-    // 2) Constructor con streamUrl (remoto)
-    // -------------------------------------------------------------
+
     @Test
     void testConstructorWithStreamUrl() {
         Song s = new Song("Song", "Artist", "http://example.com/stream");
@@ -39,9 +34,7 @@ class SongTest {
         assertFalse(s.isLocal());
     }
 
-    // -------------------------------------------------------------
-    // 3) Constructor simplificado con ruta String y duración
-    // -------------------------------------------------------------
+
     @Test
     void testConstructorSimple() {
         Song s = new Song("Titulo", "/tmp/a.mp3", 12.7);
@@ -54,9 +47,7 @@ class SongTest {
         assertFalse(s.isRemote());
     }
 
-    // -------------------------------------------------------------
-    // 4) Autodetección de artista desde "Artista - Título"
-    // -------------------------------------------------------------
+
     @Test
     void testConstructorSimpleWithArtistExtraction() {
         Song s = new Song("Metallica - Nothing Else Matters", "/tmp/m.mp3", 300);
@@ -65,9 +56,7 @@ class SongTest {
         assertEquals("Metallica", s.getArtist());
     }
 
-    // -------------------------------------------------------------
-    // 5) toString() con y sin artista
-    // -------------------------------------------------------------
+
     @Test
     void testToStringWithArtist() {
         Song s = new Song("Artist - Track", "/tmp/x.mp3", 50);
@@ -82,9 +71,7 @@ class SongTest {
         assertEquals("Titulo", s.toString());
     }
 
-    // -------------------------------------------------------------
-    // 6) isLocal() e isRemote()
-    // -------------------------------------------------------------
+
     @Test
     void testLocalVsRemoteFlags() {
         Song local = new Song("A", "/tmp/a.mp3", 20);
@@ -97,9 +84,7 @@ class SongTest {
         assertFalse(remote.isLocal());
     }
 
-    // -------------------------------------------------------------
-    // 7) equals() y hashCode() sin id
-    // -------------------------------------------------------------
+
     @Test
     void testEqualsWithoutId() {
         Song s1 = new Song("A", "/tmp/a.mp3", 20);
@@ -109,9 +94,7 @@ class SongTest {
         assertEquals(s1.hashCode(), s2.hashCode());
     }
 
-    // -------------------------------------------------------------
-    // 8) equals() y hashCode() con id asignado
-    // -------------------------------------------------------------
+
     @Test
     void testEqualsWithId() {
         Song s1 = new Song("A", "/tmp/a.mp3", 20);

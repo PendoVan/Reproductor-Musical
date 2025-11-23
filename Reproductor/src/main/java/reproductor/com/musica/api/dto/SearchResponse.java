@@ -3,9 +3,7 @@ package reproductor.com.musica.api.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-/**
- * Respuesta del endpoint GET /buscar.
- */
+
 public class SearchResponse {
     
     @JsonProperty("resultados")
