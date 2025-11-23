@@ -90,9 +90,19 @@ Permite buscar canciones usando un servicio externo (API/YouTube).
 
 ### 5.1 Iniciar la Aplicación
 
-1. **Ejecutar** desde Maven: `mvn clean javafx:run`
-2. **O ejecutar** desde Eclipse/IntelliJ IDEA/VS Code según indicación del docente
-3. Al iniciar, aparecerá la **pantalla principal** del reproductor
+Para iniciar la aplicación correctamente y asegurar la carga de los módulos JavaFX, utilizaremos la herramienta de construcción de Maven integrada en Eclipse.
+
+1. En el **Package Explorer** (panel izquierdo), haga **clic derecho** sobre el proyecto `Reproductor` (o la carpeta raíz importada).
+2. Diríjase a la opción **Run As** y seleccione **Maven Build...**
+   > ⚠️ **Importante:** Seleccione la opción que tiene puntos suspensivos `...` al final.
+3. Se abrirá la ventana de configuración ("Edit Configuration").
+4. Ubique el campo de texto llamado **Goals**.
+5. Escriba el siguiente comando en ese campo:
+   ```text
+   clean javafx:run
+6. Haga clic en el botón Run.
+
+Resultado: La consola de Eclipse mostrará el proceso de compilación y, tras unos segundos, se abrirá automáticamente la ventana principal del Reproductor Musical.
 
 ### 5.2 Configuración Inicial
 
