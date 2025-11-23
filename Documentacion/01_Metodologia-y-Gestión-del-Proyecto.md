@@ -1,96 +1,176 @@
-# Documento de Metodología y Planificación  
 
-## Proyecto: “Reproductor Musical”
 
-## 1. Introducción
+# 01 Metodología y Gestión del Proyecto 
 
-### 1.1 Propósito del documento
+## **1. Introducción**
 
-El presente documento define la **metodología de trabajo**, la **organización del equipo**, el **desglose de actividades**, la **planificación temporal** y la **gestión de riesgos** del proyecto **Reproductor Musical**, desarrollado como proyecto final del curso **Algorítmica II**.
+### **1.1 Propósito del documento**
 
-Sirve como guía para:
+El presente documento define la **metodología de trabajo**, la **planificación**, la **organización del equipo**, el **desglose de actividades**, el **modelo iterativo**, los **artefactos ágiles generados** y la **gestión de riesgos** del proyecto **Reproductor Musical**, desarrollado como proyecto final del curso **Algorítmica II**.
 
-- Planificar y coordinar el trabajo de los integrantes.
-- Controlar el avance del proyecto.
-- Documentar el proceso seguido durante el desarrollo del prototipo.
+Este documento sirve para:
 
-### 1.2 Descripción general del proyecto
-
-El **Reproductor Musical** es una aplicación de escritorio desarrollada en **Java** y **JavaFX**, diseñada inicialmente para reproducir archivos de audio locales y extendida, en la versión actual del proyecto, con:
-
-- Reproducción de archivos de audio locales (.mp3, .wav).
-- Controles multimedia (play, pause, stop, siguiente, anterior, volumen, mute).
-- Gestión de playlists (crear, renombrar, eliminar, reordenar canciones).
-- Integración con una **API de música en línea** (por ejemplo, YouTube) para buscar y reproducir canciones mediante internet.
-- Uso de un patrón arquitectónico basado en **MVC/MVVM** para separar interfaz, lógica y datos.
-
-El sistema se concibe como un **prototipo académico**, pero con una base suficientemente sólida para futuras ampliaciones (persistencia avanzada, login, más servicios online).
-
-### 1.3 Objetivos de planificación
-
-1. Establecer una **metodología de desarrollo clara** (iterativa e incremental).
-2. Definir los **roles y responsabilidades** de cada integrante.
-3. Desglosar el trabajo en **fases, actividades y tareas** (WBS).
-4. Proponer un **cronograma aproximado** de ejecución.
-5. Identificar **riesgos** y definir estrategias de **mitigación**.
-6. Documentar el uso de **herramientas** (IDE, control de versiones, gestión de tareas).
+* Planificar y coordinar el trabajo del equipo.
+* Controlar el avance del proyecto.
+* Mostrar evidencia real de la metodología aplicada.
+* Justificar las fases, entregables y decisiones tomadas durante el desarrollo.
 
 ---
 
-## 2. Metodología de desarrollo
+### **1.2 Descripción general del proyecto**
 
-### 2.1 Enfoque general
+El **Reproductor Musical** es una aplicación de escritorio desarrollada en *Java + JavaFX*, enfocada en la reproducción de música local y funcionalidades adicionales como:
 
-El proyecto se desarrolla con un enfoque **iterativo e incremental**:
+* Reproducción de archivos de audio locales (.mp3, .wav).
+* Controles multimedia: **play, pause, stop, siguiente, anterior, volumen, mute**.
+* Gestión de playlists: crear, renombrar, eliminar, reordenar canciones.
+* Integración con una **API de música online** (p. ej. YouTube) para buscar canciones.
+* Arquitectura basada en **MVC/MVVM** para separar interfaz, lógica y datos.
 
-- El sistema se construye en **módulos** (reproducción local, playlists, conexión a API).
-- Cada iteración incluye:  
-  **análisis → diseño → implementación → pruebas → retroalimentación**.
-- La planificación se organiza en **fases cortas** (tipo “sprints” académicos) de 1 a 2 semanas.
-
-Este enfoque permite:
-
-- Ajustar el alcance según el tiempo disponible.
-- Detectar errores temprano.
-- Ir integrando poco a poco la interfaz con la lógica de negocio.
-
-### 2.2 Metodología “ligera tipo Scrum”
-
-Sin aplicar Scrum de forma estricta, se adoptan algunas de sus ideas:
-
-- **Backlog de tareas:** lista de funcionalidades y tareas técnicas pendientes (requisitos, diseño, código, pruebas, documentación).
-- **Iteraciones semanales:** se asignan tareas a cada integrante al inicio de la semana (por ejemplo, mediante GitHub Projects o tableros tipo Kanban).
-- **Revisiones periódicas:**
-  - Revisión del avance al cierre de cada fase (análisis, diseño, implementación, pruebas, documentación).
-  - Integración del código en la rama principal solo tras pruebas básicas.
-- **Responsable de coordinación:** el Jefe de Proyecto supervisa que las tareas se completen y que no haya bloqueos.
-
-### 2.3 Ciclo de vida del proyecto
-
-Las fases principales del ciclo de vida del proyecto son:
-
-1. **Análisis**
-   - Recopilar requisitos funcionales y no funcionales.
-   - Definir el alcance y las versiones (local + API).
-2. **Diseño**
-   - Modelo de datos (canciones, playlists).
-   - Diseño de interfaz con **Scene Builder**.
-   - Definición de la arquitectura MVC/MVVM.
-3. **Implementación**
-   - Módulo de reproducción (MediaPlayer).
-   - Módulo de playlists.
-   - Integración con API.
-   - Conexión de controladores JavaFX con la interfaz FXML.
-4. **Pruebas**
-   - Pruebas unitarias de métodos críticos (play, pause, next, gestión de listas).
-   - Pruebas de integración (flujo completo desde la interfaz).
-5. **Entrega**
-   - Documentación final (requisitos, planificación, manual de usuario).
-   - Preparación de la presentación y demostración del sistema.
+El sistema se concibe como un prototipo académico con potencial para ampliaciones futuras.
 
 ---
 
-## 3. Organización del equipo
+### **1.3 Objetivos de planificación**
+
+1. Definir la metodología y el proceso de trabajo.
+2. Establecer roles y responsabilidades del equipo.
+3. Desglosar el sistema en tareas organizadas (WBS).
+4. Crear un cronograma basado en iteraciones (sprints).
+5. Identificar y gestionar riesgos.
+6. Documentar herramientas y repositorio del proyecto.
+7. Registrar artefactos y entregables de la metodología Scrum adaptada.
+
+---
+
+## **2. Metodología de desarrollo**
+
+### **2.1 Enfoque general**
+
+El desarrollo se plantea como un proceso **iterativo e incremental**, siguiendo estos ciclos:
+
+* Análisis
+* Diseño
+* Implementación
+* Pruebas
+* Integración
+* Retroalimentación
+
+El enfoque iterativo permite entregar avances funcionales por etapas, ajustar el trabajo según resultados y mejorar progresivamente el sistema.
+
+---
+
+### **2.2 Metodología “ligera tipo Scrum”**
+
+Aunque no se implementó Scrum en su totalidad, se adoptaron los elementos esenciales:
+
+#### **Elementos incluidos:**
+
+* **Product Backlog**
+* **Sprint Backlog**
+* **Historias de Usuario**
+* **Tablero Kanban** (To Do – In Progress – Done)
+* **Incrementos por Sprint**
+* **Pruebas por iteración**
+* **Reuniones breves semanales (tipo Daily)**
+* **Sprint Review** (presentación del avance)
+* **Retrospectiva** (lecciones aprendidas)
+
+#### **Ventajas obtenidas:**
+
+* Mejor organización del trabajo.
+* Control de versiones y avances por semana.
+* Entregables parciales funcionales.
+* Flexibilidad ante cambios.
+
+---
+
+## **2.3 Artefactos Scrum**
+
+### **2.3.1 Product Backlog**
+
+| ID    | Funcionalidad / Historia       | Prioridad | Estado      |
+| ----- | ------------------------------ | --------- | ----------- |
+| PB-01 | Reproducción de música local   | Alta      | Completado  |
+| PB-02 | Controles multimedia           | Alta      | Completado  |
+| PB-03 | Sistema de playlists           | Alta      | Completado  |
+| PB-04 | GUI en JavaFX                  | Media     | Completado  |
+| PB-05 | Búsqueda de canciones locales  | Media     | Pendiente   |
+| PB-06 | Integración API externa        | Media     | En progreso |
+| PB-07 | Ecualizador / mejoras visuales | Baja      | Pendiente   |
+
+---
+
+### **2.3.2 Historias de Usuario**
+
+**HU-01 – Reproducción de música local**
+*Como usuario, quiero reproducir archivos MP3 para escuchar mi música almacenada.*
+
+**HU-02 – Control multimedia**
+*Como usuario, quiero controlar la reproducción (play/pause/stop) para gestionar las canciones.*
+
+**HU-03 – Playlists**
+*Como usuario, quiero crear y organizar playlists para agrupar mis canciones favoritas.*
+
+**HU-04 – Búsqueda local**
+*Como usuario, quiero buscar canciones dentro de mi PC para encontrarlas rápidamente.*
+
+**HU-05 – API online**
+*Como usuario, quiero buscar canciones por internet para ampliarlas opciones de música disponible.*
+
+---
+
+### **2.3.3 Sprints del proyecto**
+
+#### **Sprint 1 (Semana 1–2)**
+
+**Objetivo:** reproducción local + controles básicos.
+**Historias:** HU-01, HU-02.
+**Entrega:**
+
+* Módulo de reproducción con MediaPlayer.
+* Controles (play, pause, stop, volumen).
+* GUI básica operativa.
+
+---
+
+#### **Sprint 2 (Semana 3–4)**
+
+**Objetivo:** playlists y mejoras de interfaz.
+**Historias:** HU-03, HU-04.
+**Entrega:**
+
+* CRUD de playlists.
+* Integración GUI–controladores.
+* Navegación fluida en JavaFX.
+
+---
+
+#### **Sprint 3 (Semana 5–6)**
+
+**Objetivo:** API + pruebas + documentación.
+**Historias:** HU-05.
+**Entrega:**
+
+* Módulo de integración API externa.
+* Pruebas unitarias y funcionales.
+* Documentación final del proyecto.
+
+---
+
+## **2.4 Ciclo de vida del proyecto**
+
+
+1. **Análisis de requisitos**
+2. **Diseño arquitectónico y visual (UML + GUI)**
+3. **Implementación modular por sprints**
+4. **Pruebas por iteración y pruebas finales**
+5. **Integración completa del sistema**
+6. **Entrega final y presentación**
+
+---
+
+## **3. Organización del equipo**
 
 ### 3.1 Estructura del equipo
 
@@ -101,7 +181,7 @@ El equipo de desarrollo está organizado en los siguientes roles principales:
 - **Desarrolladores (frontend/backend):** implementación de la lógica de negocio y la interfaz.
 - **Tester:** diseño y ejecución de pruebas.
 
-### 3.2 Asignación de roles
+## 3.2 Asignación de roles
 
 | Rol                     | Nombre                                  | Responsabilidades principales                                                                 |
 |-------------------------|-----------------------------------------|-----------------------------------------------------------------------------------------------|
@@ -113,18 +193,19 @@ El equipo de desarrollo está organizado en los siguientes roles principales:
 
 > Nota: de forma práctica, los integrantes colaboran también en tareas cruzadas (por ejemplo, pruebas y documentación), según las necesidades de cada fase.
 
-### 3.3 Dinámica de trabajo
-
-- Reuniones (presenciales o virtuales) al inicio y fin de cada fase.
-- Comunicación continua por medios acordados (WhatsApp, Discord, etc.).
-- Uso de **GitHub** para:
-  - Control de versiones (ramas, commits).
-  - Revisión de código.
-  - Registro de issues y tareas pendientes.
 
 ---
 
-## 4. Desglose del trabajo (WBS)
+### **3.3 Dinámica de trabajo**
+
+* Reuniones semanales de avance.
+* Coordinación mediante WhatsApp/Discord.
+* Uso de GitHub para control de versiones y manejo de ramas.
+* Tablero Kanban en GitHub Projects/Trello.
+
+---
+
+## **4. Desglose del trabajo (WBS)**
 
 ### 4.1 Estructura de Desglose de Trabajo
 
@@ -161,11 +242,24 @@ La **Estructura de Desglose de Trabajo (EDT/WBS)** se organiza en cinco grandes 
 | 4.1 | Pruebas e integración          | Informe de validación                | Rodrigo Alonso Rodríguez Pérez   |
 | 5.1 | Documentación y presentación   | Manual, informe y demo               | Todo el equipo                   |
 
+
+### 4.3 Relación WBS ↔ Historias ↔ Sprints
+
+| WBS | Historias   | Sprint       |
+| --- | ----------- | ------------ |
+| 1.1 | HU-01–HU-05 | Sprint 1     |
+| 2.1 | HU-01–HU-03 | Sprint 1–2   |
+| 3.1 | HU-01–HU-02 | Sprint 1     |
+| 3.2 | HU-03       | Sprint 2     |
+| 3.3 | HU-05       | Sprint 3     |
+| 4.1 | Todas       | Sprint 3     |
+| 5.1 | N/A         | Sprint Final |
+
 ---
 
-## 5. Planificación temporal
+## **5. Planificación temporal**
 
-### 5.1 Fases y estimaciones
+### **5.1 Fases estimadas**
 
 A nivel académico, el proyecto se distribuye en varias semanas, por ejemplo:
 
@@ -179,7 +273,7 @@ A nivel académico, el proyecto se distribuye en varias semanas, por ejemplo:
 
 Estas estimaciones sirven como guía; en la práctica, pueden solaparse tareas (por ejemplo, empezar a codificar mientras se termina el diseño).
 
-### 5.2 Cronograma simplificado por iteraciones
+### **5.2 Cronograma por iteraciones**
 
 Un ejemplo de cronograma por “sprints” podría ser:
 
@@ -202,9 +296,13 @@ Un ejemplo de cronograma por “sprints” podría ser:
   - Redacción de informes (requisitos, planificación, manual).
   - Preparación de diapositivas y demo final.
 
+### **5.3 Burndown Chart**
+
+Se puede agregar como imagen o gráfico.
+
 ---
 
-## 6. Herramientas y gestión de configuración
+## **6. Herramientas y gestión de configuración**
 
 ### 6.1 Tecnologías principales
 
@@ -228,9 +326,10 @@ Un ejemplo de cronograma por “sprints” podría ser:
   3. Realizar **pull request** a `main` cuando la funcionalidad esté lista.
   4. Revisar código (al menos por otro integrante) antes de fusionar.
 
+
 ---
 
-## 7. Gestión de riesgos
+## **7. Gestión de riesgos**
 
 ### 7.1 Identificación de riesgos
 
@@ -251,16 +350,9 @@ Se consideran riesgos de tipo:
 | R5  | Problemas de sincronización al trabajar con ramas en el repositorio | Media | Medio | Definir convención de commits y usar *pull requests* revisados antes de cada merge.       |
 | R6  | Pérdida de archivos locales o del repositorio                    | Baja  | Alto    | Copias de seguridad periódicas en GitHub y almacenamiento en la nube.                      |
 
-### 7.3 Seguimiento de riesgos
-
-- Los riesgos se revisan al cierre de cada fase.
-- El **Jefe de Proyecto** lleva un registro de incidencias y acuerdos de mitigación.
-- Los integrantes reportan problemas técnicos u organizativos tan pronto como aparezcan.
-
 ---
 
-## 8. Seguimiento y control del proyecto
-
+## **8. Seguimiento y control**
 Para asegurar que el proyecto avance según lo planificado:
 
 - Se registran tareas y estado (Pendiente / En progreso / Completado) en un tablero tipo Kanban (GitHub Projects, Trello, etc.).
@@ -269,10 +361,14 @@ Para asegurar que el proyecto avance según lo planificado:
   - Funcionalidades implementadas.
   - Problemas encontrados.
   - Decisiones de diseño relevantes.
+  
+* Seguimiento por sprint.
+* Revisión de incrementos.
+* Validación del avance en cada fase.
 
 ---
 
-## 9. Conclusiones
+## **9. Conclusiones**
 
 Este documento de **Metodología y Planificación** establece la forma de trabajo, la estructura del equipo, el desglose de tareas, el cronograma aproximado y la gestión de riesgos del proyecto **Reproductor Musical**.
 
@@ -282,3 +378,4 @@ Su objetivo es que el desarrollo no sea solo “programar hasta que funcione”,
 - Qué fases siguió el proyecto.
 - Qué riesgos se consideraron.
 - Qué herramientas se utilizaron para coordinar el trabajo.
+
