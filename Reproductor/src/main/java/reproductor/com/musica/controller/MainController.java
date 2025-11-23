@@ -15,7 +15,6 @@ public class MainController {
 	@FXML
 	private BorderPane root;
 	
-	// TODO: métodos para cambiar el contenido central
 	
 	@FXML
 	private void openSearchView() {
