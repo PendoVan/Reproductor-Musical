@@ -9,16 +9,15 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import reproductor.com.musica.api.ApiException;
 import reproductor.com.musica.api.SearchService;
+import reproductor.com.musica.api.dto.SearchResult;
 import reproductor.com.musica.core.PlaylistService;
 import reproductor.com.musica.model.Song;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Controlador de la vista de búsqueda online.
- * Integra SearchService con la UI de JavaFX.
+ * Controlador actualizado con búsqueda sin descarga automática.
  */
 public class SearchController {
 
@@ -27,11 +26,11 @@ public class SearchController {
     @FXML private Button btnClear;
     @FXML private Button btnBack;
 
-    @FXML private TableView<Song> resultsTable;
-    @FXML private TableColumn<Song, String> titleColumn;
-    @FXML private TableColumn<Song, String> artistColumn;
-    @FXML private TableColumn<Song, String> albumColumn;
-    @FXML private TableColumn<Song, String> durationColumn;
+    @FXML private TableView<SearchResult> resultsTable;
+    @FXML private TableColumn<SearchResult, String> titleColumn;
+    @FXML private TableColumn<SearchResult, String> artistColumn;
+    @FXML private TableColumn<SearchResult, String> albumColumn;
+    @FXML private TableColumn<SearchResult, String> durationColumn;
 
     @FXML private ProgressIndicator searchProgress;
     @FXML private Label searchStatusLabel;
@@ -43,30 +42,37 @@ public class SearchController {
 
     private final SearchService searchService;
     private PlaylistService playlistService;
-    private final ObservableList<Song> searchResults;
+    private final ObservableList<SearchResult> searchResults;
 
     public SearchController() {
         this.searchService = new SearchService();
         this.searchResults = FXCollections.observableArrayList();
+        System.out.println("[SearchController] Constructor llamado");
     }
 
     public void setPlaylistService(PlaylistService playlistService) {
         this.playlistService = playlistService;
-        System.out.println("[SearchController] PlaylistService inyectado correctamente");
+        System.out.println("[SearchController] ✅ PlaylistService inyectado correctamente");
     }
 
     @FXML
     public void initialize() {
+        System.out.println("[SearchController] 🔧 Inicializando...");
+        
+        // Verificar que los componentes están vinculados
+        System.out.println("[SearchController] resultsTable: " + (resultsTable != null ? "✅" : "❌"));
+        System.out.println("[SearchController] titleColumn: " + (titleColumn != null ? "✅" : "❌"));
+        System.out.println("[SearchController] artistColumn: " + (artistColumn != null ? "✅" : "❌"));
+        
         setupTableColumns();
         setupTableData();
         checkApiConnection();
         
-        // Configurar botón de cerrar
         if (btnBack != null) {
             btnBack.setOnAction(e -> closeWindow());
         }
         
-        System.out.println("[SearchController] Inicializado");
+        System.out.println("[SearchController] ✅ Inicializado en modo búsqueda sin descarga");
     }
 
     @FXML
@@ -78,8 +84,8 @@ public class SearchController {
             return;
         }
 
-        List<String> searchTerms = parseSearchQuery(query);
-        performSearch(searchTerms);
+        System.out.println("[SearchController] 🔍 Buscando: " + query);
+        performSearchOnly(query);
     }
 
     @FXML
@@ -88,6 +94,7 @@ public class SearchController {
         searchResults.clear();
         resultsCountLabel.setText("");
         searchStatusLabel.setText("Ingresa un término de búsqueda");
+        System.out.println("[SearchController] 🧹 Resultados limpiados");
     }
 
     @FXML
@@ -97,49 +104,63 @@ public class SearchController {
             return;
         }
 
-        List<Song> selected = resultsTable.getSelectionModel().getSelectedItems();
+        List<SearchResult> selected = resultsTable.getSelectionModel().getSelectedItems()
+                .stream()
+                .collect(Collectors.toList());
 
-        if (selected == null || selected.isEmpty()) {
+        if (selected.isEmpty()) {
             showWarning("Selecciona al menos una canción para agregar");
             return;
         }
 
-        playlistService.addSongs(selected);
-        showInfo("✅ Agregadas " + selected.size() + " canciones a la playlist");
-        
-        System.out.println("[SearchController] Agregadas " + selected.size() + " canciones");
+        System.out.println("[SearchController] ⬇ Descargando " + selected.size() + " canciones seleccionadas");
+        downloadSelectedResults(selected);
     }
 
     @FXML
     private void onSelectAllClicked() {
         resultsTable.getSelectionModel().selectAll();
+        System.out.println("[SearchController] ✅ Todas las canciones seleccionadas");
     }
 
-    // ===== LÓGICA DE BÚSQUEDA =====
+    // ===== BÚSQUEDA SIN DESCARGA =====
 
-    private void performSearch(List<String> searchTerms) {
+    private void performSearchOnly(String query) {
         disableSearchControls(true);
         searchProgress.setVisible(true);
-        searchStatusLabel.setText("🔍 Buscando y descargando...");
+        searchStatusLabel.setText("🔍 Buscando resultados...");
 
-        Task<List<Song>> searchTask = searchService.searchAndDownloadAsync(searchTerms);
+        Task<List<SearchResult>> searchTask = searchService.searchOnlyAsync(query);
 
-        // Vincular progreso a UI
         searchStatusLabel.textProperty().bind(searchTask.messageProperty());
 
         searchTask.setOnSucceeded(event -> {
             searchStatusLabel.textProperty().unbind();
-            List<Song> results = searchTask.getValue();
+            List<SearchResult> results = searchTask.getValue();
 
-            searchResults.setAll(results);
+            System.out.println("[SearchController] 📥 Respuesta recibida: " + results.size() + " resultados");
+            
+            // DEBUG: Imprimir primeros 3 resultados
+            for (int i = 0; i < Math.min(3, results.size()); i++) {
+                SearchResult r = results.get(i);
+                System.out.println("[SearchController]   " + (i+1) + ". " + r.getTitulo() + 
+                                 " - " + r.getArtista() + " (" + r.getFormattedDuration() + ")");
+            }
+
+            // Limpiar y agregar resultados
+            searchResults.clear();
+            searchResults.addAll(results);
+            
+            System.out.println("[SearchController] 📋 searchResults.size(): " + searchResults.size());
+            System.out.println("[SearchController] 📋 resultsTable.getItems().size(): " + 
+                             resultsTable.getItems().size());
+
             resultsTable.refresh();
 
             resultsCountLabel.setText(results.size() + " resultados");
-            searchStatusLabel.setText("✅ Búsqueda completada - " + results.size() + " canciones encontradas");
+            searchStatusLabel.setText("✅ Búsqueda completada - Selecciona las canciones a descargar");
             disableSearchControls(false);
             searchProgress.setVisible(false);
-            
-            System.out.println("[SearchController] Búsqueda exitosa: " + results.size() + " resultados");
         });
 
         searchTask.setOnFailed(event -> {
@@ -155,17 +176,66 @@ public class SearchController {
                 errorMsg = "Error inesperado: " + ex.getMessage();
             }
             
+            System.err.println("[SearchController] ❌ Error en búsqueda: " + errorMsg);
+            ex.printStackTrace();
+            
             searchStatusLabel.setText("❌ " + errorMsg);
             showError(errorMsg);
-            
-            System.err.println("[SearchController] Error en búsqueda: " + errorMsg);
-            ex.printStackTrace();
         });
 
         Thread t = new Thread(searchTask, "search-task");
         t.setDaemon(true);
         t.start();
     }
+
+    // ===== DESCARGA DE SELECCIONADOS =====
+
+    private void downloadSelectedResults(List<SearchResult> selected) {
+        disableSearchControls(true);
+        searchProgress.setVisible(true);
+        searchStatusLabel.setText("⬇ Descargando " + selected.size() + " canciones...");
+
+        Task<List<Song>> downloadTask = searchService.downloadSelectedAsync(selected);
+
+        searchStatusLabel.textProperty().bind(downloadTask.messageProperty());
+
+        downloadTask.setOnSucceeded(event -> {
+            searchStatusLabel.textProperty().unbind();
+            List<Song> songs = downloadTask.getValue();
+
+            if (playlistService != null) {
+                playlistService.addSongs(songs);
+                System.out.println("[SearchController] ✅ " + songs.size() + " canciones agregadas a playlist");
+            }
+
+            searchStatusLabel.setText("✅ Descargadas " + songs.size() + " de " + selected.size() + " canciones");
+            searchProgress.setVisible(false);
+            disableSearchControls(false);
+
+            showInfo("✅ Agregadas " + songs.size() + " canciones a la playlist");
+            resultsTable.getSelectionModel().clearSelection();
+        });
+
+        downloadTask.setOnFailed(event -> {
+            searchStatusLabel.textProperty().unbind();
+            Throwable ex = downloadTask.getException();
+            searchProgress.setVisible(false);
+            disableSearchControls(false);
+
+            String errorMsg = "Error al descargar: " + ex.getMessage();
+            searchStatusLabel.setText("❌ " + errorMsg);
+            showError(errorMsg);
+            
+            System.err.println("[SearchController] ❌ Error en descarga: " + errorMsg);
+            ex.printStackTrace();
+        });
+
+        Thread t = new Thread(downloadTask, "download-task");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    // ===== CONFIGURACIÓN DE TABLA =====
 
     private void disableSearchControls(boolean disable) {
         btnSearch.setDisable(disable);
@@ -176,90 +246,50 @@ public class SearchController {
         searchField.setDisable(disable);
     }
 
-    private List<String> parseSearchQuery(String query) {
-        // Permite separar por coma o línea nueva
-        return Arrays.stream(query.split("[,\\n]"))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
-    }
-
     private void setupTableColumns() {
-        titleColumn.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty(
-                        cellData.getValue().getTitle()));
-
-        artistColumn.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty(
-                        cellData.getValue().getArtist()));
-
-        albumColumn.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty("YouTube"));
-
-        durationColumn.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty(
-                        formatDuration(cellData.getValue().getDurationSeconds())));
-
-        // Aplicar clases CSS específicas a cada columna
-        titleColumn.setCellFactory(column -> {
-            var cell = new javafx.scene.control.TableCell<Song, String>();
-            cell.getStyleClass().add("title-cell");
-            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                if (newItem != null) {
-                    cell.setText(newItem);
-                }
-            });
-            return cell;
+        System.out.println("[SearchController] 🔧 Configurando columnas...");
+        
+        // CRÍTICO: Configurar cellValueFactory
+        titleColumn.setCellValueFactory(cellData -> {
+            String titulo = cellData.getValue().getTitulo();
+            return new javafx.beans.property.SimpleStringProperty(titulo);
         });
 
-        artistColumn.setCellFactory(column -> {
-            var cell = new javafx.scene.control.TableCell<Song, String>();
-            cell.getStyleClass().add("artist-cell");
-            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                if (newItem != null) {
-                    cell.setText(newItem);
-                }
-            });
-            return cell;
+        artistColumn.setCellValueFactory(cellData -> {
+            String artista = cellData.getValue().getArtista();
+            return new javafx.beans.property.SimpleStringProperty(artista);
         });
 
-        albumColumn.setCellFactory(column -> {
-            var cell = new javafx.scene.control.TableCell<Song, String>();
-            cell.getStyleClass().add("album-cell");
-            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                if (newItem != null) {
-                    cell.setText(newItem);
-                }
-            });
-            return cell;
+        albumColumn.setCellValueFactory(cellData -> {
+            return new javafx.beans.property.SimpleStringProperty("YouTube");
         });
 
-        durationColumn.setCellFactory(column -> {
-            var cell = new javafx.scene.control.TableCell<Song, String>();
-            cell.getStyleClass().add("duration-cell");
-            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
-                if (newItem != null) {
-                    cell.setText(newItem);
-                }
-            });
-            return cell;
+        durationColumn.setCellValueFactory(cellData -> {
+            String duracion = cellData.getValue().getFormattedDuration();
+            return new javafx.beans.property.SimpleStringProperty(duracion);
         });
 
         // Permitir selección múltiple
-        resultsTable.getSelectionModel().setSelectionMode(
-                SelectionMode.MULTIPLE);
+        resultsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        
+        System.out.println("[SearchController] ✅ Columnas configuradas correctamente");
     }
 
     private void setupTableData() {
+        System.out.println("[SearchController] 🔧 Vinculando datos a tabla...");
+        
+        // CRÍTICO: Vincular ObservableList a la tabla
         resultsTable.setItems(searchResults);
+        
+        System.out.println("[SearchController] ✅ Datos vinculados: searchResults.size() = " + searchResults.size());
 
-        // Doble clic para agregar a playlist
+        // Doble clic para descargar solo esa canción
         resultsTable.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
-                Song selected = resultsTable.getSelectionModel().getSelectedItem();
-                if (selected != null && playlistService != null) {
-                    playlistService.addSong(selected);
-                    showInfo("✅ Agregado: " + selected.getTitle());
+                SearchResult selected = resultsTable.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    System.out.println("[SearchController] 🖱️ Doble click en: " + selected.getTitulo());
+                    downloadSelectedResults(List.of(selected));
                 }
             }
         });
@@ -276,9 +306,11 @@ public class SearchController {
                 if (connected) {
                     connectionStatusLabel.setText("🟢 Conectado");
                     connectionStatusLabel.setStyle("-fx-text-fill: #1DB954;");
+                    System.out.println("[SearchController] ✅ API conectada");
                 } else {
                     connectionStatusLabel.setText("🔴 Desconectado");
                     connectionStatusLabel.setStyle("-fx-text-fill: #f44336;");
+                    System.out.println("[SearchController] ❌ API desconectada");
                 }
             });
         });
@@ -287,17 +319,11 @@ public class SearchController {
             Platform.runLater(() -> {
                 connectionStatusLabel.setText("🔴 Error de conexión");
                 connectionStatusLabel.setStyle("-fx-text-fill: #f44336;");
+                System.err.println("[SearchController] ❌ Error al conectar con API");
             });
         });
         
         new Thread(connectionTask).start();
-    }
-
-    private String formatDuration(double seconds) {
-        int total = (int) seconds;
-        int m = total / 60;
-        int s = total % 60;
-        return String.format("%02d:%02d", m, s);
     }
 
     private void closeWindow() {
@@ -323,11 +349,5 @@ public class SearchController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    // ===== GETTERS =====
-
-    public ObservableList<Song> getSearchResults() {
-        return searchResults;
     }
 }

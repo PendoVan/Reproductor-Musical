@@ -2,6 +2,8 @@ package reproductor.com.musica.api;
 
 import javafx.concurrent.Task;
 import reproductor.com.musica.api.dto.DownloadResponse;
+import reproductor.com.musica.api.dto.SearchResponse;
+import reproductor.com.musica.api.dto.SearchResult;
 import reproductor.com.musica.model.Song;
 
 import java.io.IOException;
@@ -13,8 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * Servicio de alto nivel para búsqueda y descarga de música.
- * Coordina entre ApiClient y el modelo de dominio Song.
- * Sigue el patrón Service Layer y proporciona operaciones asíncronas.
+ * Ahora soporta búsqueda sin descarga automática.
  */
 public class SearchService {
 
@@ -28,12 +29,121 @@ public class SearchService {
         this.apiClient = apiClient;
     }
 
+    // ===== NUEVO: BÚSQUEDA SIN DESCARGA =====
+
     /**
-     * Busca y descarga canciones de forma asíncrona.
-     *
-     * @param searchTerms Lista de términos de búsqueda
-     * @return Task que se puede vincular a la UI
+     * Busca canciones en YouTube SIN descargarlas.
+     * 
+     * @param query Término de búsqueda
+     * @return Task con lista de resultados
      */
+    public Task<List<SearchResult>> searchOnlyAsync(String query) {
+        return new Task<>() {
+            @Override
+            protected List<SearchResult> call() throws Exception {
+                updateMessage("Buscando: " + query);
+                
+                SearchResponse response = apiClient.search(query, 10);
+                
+                updateMessage("Encontrados: " + response.getCount() + " resultados");
+                
+                return response.getResultados();
+            }
+        };
+    }
+    
+    /**
+     * Descarga canciones seleccionadas por el usuario.
+     * 
+     * @param searchResults Lista de SearchResult seleccionados
+     * @return Task con lista de Songs descargados
+     */
+    public Task<List<Song>> downloadSelectedAsync(List<SearchResult> searchResults) {
+        return new Task<>() {
+            @Override
+            protected List<Song> call() throws Exception {
+                return SearchService.this.downloadSelected(
+                        searchResults,
+                        this::updateProgress,
+                        this::updateMessage
+                );
+            }
+        };
+    }
+    
+    /**
+     * Descarga canciones seleccionadas (versión síncrona).
+     */
+    public List<Song> downloadSelected(
+            List<SearchResult> searchResults,
+            ProgressCallback progressCallback,
+            MessageCallback messageCallback) throws ApiException {
+        
+        if (searchResults == null || searchResults.isEmpty()) {
+            throw new ApiException("No hay resultados seleccionados");
+        }
+        
+        messageCallback.update("Descargando " + searchResults.size() + " canciones...");
+        progressCallback.update(0, searchResults.size());
+        
+        // Extraer video_ids
+        List<String> videoIds = searchResults.stream()
+                .map(SearchResult::getVideoId)
+                .collect(Collectors.toList());
+        
+        // Llamar al backend para descargar por ID
+        DownloadResponse response = apiClient.downloadByVideoIds(videoIds);
+        
+        // Procesar resultados
+        List<Song> downloadedSongs = new ArrayList<>();
+        int processed = 0;
+        
+        for (DownloadResponse.DownloadResult result : response.getResults()) {
+            progressCallback.update(++processed, searchResults.size());
+            
+            if (!result.isSuccess()) {
+                messageCallback.update("✗ Error: " + result.getName());
+                continue;
+            }
+            
+            String fileName = result.getFileName();
+            if (fileName == null || fileName.isBlank()) {
+                messageCallback.update("✗ Sin archivo para: " + result.getName());
+                continue;
+            }
+            
+            messageCallback.update("Descargando: " + fileName);
+            
+            try {
+                Path localPath = apiClient.downloadFile(fileName);
+                Song song = createSongFromPath(localPath);
+                
+                if (song != null) {
+                    // Enriquecer con datos del SearchResult original
+                    SearchResult original = findOriginal(searchResults, result.getName());
+                    if (original != null) {
+                        song.setArtist(original.getArtista());
+                        song.setTitle(original.getTitulo());
+                        song.setDurationSeconds(original.getDuracion());
+                    }
+                    
+                    downloadedSongs.add(song);
+                    messageCallback.update("✓ Descargado: " + song.getTitle());
+                }
+            } catch (Exception e) {
+                messageCallback.update("✗ Error procesando: " + fileName);
+                e.printStackTrace();
+            }
+        }
+        
+        messageCallback.update("Completado: " + downloadedSongs.size() + 
+                " de " + searchResults.size() + " canciones");
+        
+        return downloadedSongs;
+    }
+
+    // ===== MÉTODO ORIGINAL: BÚSQUEDA + DESCARGA AUTOMÁTICA =====
+
     public Task<List<Song>> searchAndDownloadAsync(List<String> searchTerms) {
         return new Task<>() {
             @Override
@@ -47,15 +157,6 @@ public class SearchService {
         };
     }
 
-    /**
-     * Busca y descarga canciones (versión síncrona).
-     *
-     * @param searchTerms      Lista de términos de búsqueda
-     * @param progressCallback Callback para actualizar progreso
-     * @param messageCallback  Callback para actualizar mensajes
-     * @return Lista de canciones descargadas
-     * @throws ApiException si hay error en la API
-     */
     public List<Song> searchAndDownload(
             List<String> searchTerms,
             ProgressCallback progressCallback,
@@ -66,10 +167,8 @@ public class SearchService {
         messageCallback.update("Iniciando descarga de " + searchTerms.size() + " canciones...");
         progressCallback.update(0, searchTerms.size());
 
-        // Paso 1: solicitar descargas a la API
         DownloadResponse response = apiClient.requestDownloads(searchTerms);
 
-        // Paso 2: procesar resultados
         List<Song> downloadedSongs = new ArrayList<>();
         int processed = 0;
 
@@ -81,27 +180,25 @@ public class SearchService {
                 continue;
             }
 
-            // Usar SIEMPRE el nombre de archivo que viene de la API
-            String fileName = result.getName();
+            String fileName = result.getFileName();
+            
             if (fileName == null || fileName.isBlank()) {
                 messageCallback.update("✗ Respuesta sin archivo para: " + result.getName());
                 continue;
             }
 
-            messageCallback.update("Procesando: " + result.getName());
+            messageCallback.update("Procesando: " + fileName);
 
             try {
-                // Descargar el archivo al directorio local configurado en ApiClient
                 Path localPath = apiClient.downloadFile(fileName);
-
-                // Crear Song a partir del MP3 local
                 Song song = createSongFromPath(localPath);
+                
                 if (song != null) {
                     downloadedSongs.add(song);
                     messageCallback.update("✓ Descargado: " + song.getTitle());
                 }
             } catch (Exception e) {
-                messageCallback.update("✗ Error procesando: " + result.getName());
+                messageCallback.update("✗ Error procesando: " + fileName);
                 e.printStackTrace();
             }
         }
@@ -112,11 +209,8 @@ public class SearchService {
         return downloadedSongs;
     }
 
-    /**
-     * Carga canciones desde el directorio local.
-     *
-     * @return Lista de canciones encontradas
-     */
+    // ===== OTROS MÉTODOS =====
+
     public List<Song> loadLocalSongs() {
         try {
             Path downloadPath = apiClient.getDownloadDirectory();
@@ -135,11 +229,6 @@ public class SearchService {
         }
     }
 
-    /**
-     * Lista archivos disponibles en el servidor de forma asíncrona.
-     *
-     * @return Task con lista de nombres de archivos
-     */
     public Task<List<String>> listServerFilesAsync() {
         return new Task<>() {
             @Override
@@ -150,12 +239,6 @@ public class SearchService {
         };
     }
 
-    /**
-     * Elimina una canción tanto del servidor como localmente.
-     *
-     * @param song Canción a eliminar
-     * @return Task que ejecuta la eliminación
-     */
     public Task<Boolean> deleteSongAsync(Song song) {
         return new Task<>() {
             @Override
@@ -165,11 +248,6 @@ public class SearchService {
         };
     }
 
-    /**
-     * Verifica la disponibilidad de la API.
-     *
-     * @return Task que verifica la conexión
-     */
     public Task<Boolean> checkApiConnectionAsync() {
         return new Task<>() {
             @Override
@@ -190,9 +268,8 @@ public class SearchService {
         String fileName = filePath.getFileName().toString();
         String nameWithoutExt = fileName.replace(".mp3", "");
 
-        Song song = new Song(nameWithoutExt, nameWithoutExt, filePath);
+        Song song = new Song(nameWithoutExt, filePath.toString(), 0);
 
-        // Intentar extraer artista y título si viene en formato "Artista - Título"
         if (nameWithoutExt.contains("-")) {
             String[] parts = nameWithoutExt.split("-", 2);
             song.setArtist(parts[0].trim());
@@ -202,9 +279,6 @@ public class SearchService {
             song.setArtist("Desconocido");
         }
 
-        song.setFilePath(filePath);
-
-        // Estimar duración basándose en tamaño
         try {
             long bytes = Files.size(filePath);
             song.setDurationSeconds(estimateDurationSeconds(bytes));
@@ -213,6 +287,13 @@ public class SearchService {
         }
 
         return song;
+    }
+    
+    private SearchResult findOriginal(List<SearchResult> results, String videoId) {
+        return results.stream()
+                .filter(r -> r.getVideoId().equals(videoId))
+                .findFirst()
+                .orElse(null);
     }
 
     private boolean deleteSong(Song song) throws ApiException, IOException {
@@ -223,7 +304,6 @@ public class SearchService {
         Path localPath = song.getFilePath();
         String fileName = localPath.getFileName().toString();
 
-        // Eliminar del servidor
         boolean serverDeleted = apiClient.deleteFile(fileName);
 
         if (Files.exists(localPath)) {
@@ -234,7 +314,6 @@ public class SearchService {
     }
 
     private int estimateDurationSeconds(long bytes) {
-        // MP3 a 192kbps ≈ 1.44 MB por minuto
         double mb = bytes / (1024.0 * 1024.0);
         return (int) ((mb / 1.44) * 60);
     }
@@ -245,13 +324,9 @@ public class SearchService {
         }
     }
 
-    // ===== GETTERS =====
-
     public ApiClient getApiClient() {
         return apiClient;
     }
-
-    // ===== INTERFACES PARA CALLBACKS =====
 
     @FunctionalInterface
     public interface ProgressCallback {

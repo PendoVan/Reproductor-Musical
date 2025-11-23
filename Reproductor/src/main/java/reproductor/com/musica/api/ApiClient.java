@@ -3,6 +3,7 @@ package reproductor.com.musica.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import reproductor.com.musica.api.dto.DownloadRequest;
 import reproductor.com.musica.api.dto.DownloadResponse;
+import reproductor.com.musica.api.dto.SearchResponse;
 import reproductor.com.musica.util.Config;
 
 import java.io.IOException;
@@ -25,7 +26,9 @@ import java.util.Map;
  */
 public class ApiClient {
     
+    private static final String ENDPOINT_SEARCH = "/buscar";
     private static final String ENDPOINT_DOWNLOAD = "/descargar";
+    private static final String ENDPOINT_DOWNLOAD_BY_ID = "/descargar_por_id";
     private static final String ENDPOINT_LIST = "/descargas";
     private static final int TIMEOUT_SECONDS = 300;
     
@@ -34,19 +37,10 @@ public class ApiClient {
     private final String baseUrl;
     private final Path downloadDirectory;
     
-    /**
-     * Constructor con configuración por defecto.
-     */
     public ApiClient() {
         this(Config.API_BASE_URL, getDefaultDownloadPath());
     }
     
-    /**
-     * Constructor con inyección de dependencias para testing.
-     * 
-     * @param baseUrl URL base de la API
-     * @param downloadDirectory Directorio de descargas local
-     */
     public ApiClient(String baseUrl, Path downloadDirectory) {
     	this.httpClient = HttpClient.newBuilder()
     	        .version(Version.HTTP_1_1)
@@ -59,13 +53,75 @@ public class ApiClient {
         ensureDownloadDirectoryExists();
     }
     
+    // ===== NUEVO: BÚSQUEDA SIN DESCARGA =====
+    
     /**
-     * Solicita la descarga de canciones a la API.
+     * Busca canciones en YouTube SIN descargarlas.
      * 
-     * @param songNames Lista de nombres de canciones a buscar
-     * @return Respuesta con el estado de cada descarga
-     * @throws ApiException si hay error en la comunicación
+     * @param query Término de búsqueda
+     * @param maxResults Máximo de resultados
+     * @return Lista de resultados de búsqueda
+     * @throws ApiException si hay error
      */
+    public SearchResponse search(String query, int maxResults) throws ApiException {
+        if (query == null || query.isBlank()) {
+            throw new ApiException("El término de búsqueda no puede estar vacío");
+        }
+        
+        try {
+            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+            String endpoint = ENDPOINT_SEARCH + "?q=" + encodedQuery + 
+                            "&max_results=" + maxResults;
+            
+            HttpRequest request = buildGetRequest(endpoint);
+            HttpResponse<String> response = httpClient.send(request, 
+                    HttpResponse.BodyHandlers.ofString());
+            
+            return handleSearchResponse(response);
+            
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ApiException("Error en búsqueda: " + e.getMessage(), e);
+        }
+    }
+    
+    public SearchResponse search(String query) throws ApiException {
+        return search(query, 10);
+    }
+    
+    // ===== NUEVO: DESCARGA POR VIDEO_ID =====
+    
+    /**
+     * Descarga canciones usando sus video_id de YouTube.
+     * 
+     * @param videoIds Lista de IDs de videos a descargar
+     * @return Respuesta con estado de cada descarga
+     * @throws ApiException si hay error
+     */
+    public DownloadResponse downloadByVideoIds(List<String> videoIds) throws ApiException {
+        if (videoIds == null || videoIds.isEmpty()) {
+            throw new ApiException("La lista de video IDs no puede estar vacía");
+        }
+        
+        try {
+            String jsonBody = objectMapper.writeValueAsString(
+                    Map.of("video_ids", videoIds)
+            );
+            
+            HttpRequest httpRequest = buildPostRequest(ENDPOINT_DOWNLOAD_BY_ID, jsonBody);
+            HttpResponse<String> response = httpClient.send(httpRequest, 
+                    HttpResponse.BodyHandlers.ofString());
+            
+            return handleDownloadResponse(response);
+            
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ApiException("Error al descargar por ID: " + e.getMessage(), e);
+        }
+    }
+    
+    // ===== MÉTODOS EXISTENTES =====
+    
     public DownloadResponse requestDownloads(List<String> songNames) throws ApiException {
         validateSongNames(songNames);
         
@@ -90,12 +146,6 @@ public class ApiClient {
         }
     }
     
-    /**
-     * Lista los archivos disponibles en el servidor.
-     * 
-     * @return Lista de nombres de archivos MP3
-     * @throws ApiException si hay error en la comunicación
-     */
     public List<String> listAvailableDownloads() throws ApiException {
         try {
             HttpRequest request = buildGetRequest(ENDPOINT_LIST);
@@ -110,13 +160,6 @@ public class ApiClient {
         }
     }
     
-    /**
-     * Descarga un archivo específico del servidor al directorio local.
-     * 
-     * @param fileName Nombre del archivo a descargar
-     * @return Path del archivo descargado
-     * @throws ApiException si hay error en la descarga
-     */
     public Path downloadFile(String fileName) throws ApiException {
         validateFileName(fileName);
         
@@ -138,13 +181,6 @@ public class ApiClient {
         }
     }
     
-    /**
-     * Elimina un archivo del servidor.
-     * 
-     * @param fileName Nombre del archivo a eliminar
-     * @return true si se eliminó correctamente
-     * @throws ApiException si hay error en la eliminación
-     */
     public boolean deleteFile(String fileName) throws ApiException {
         validateFileName(fileName);
         
@@ -164,11 +200,6 @@ public class ApiClient {
         }
     }
     
-    /**
-     * Verifica si la API está disponible.
-     * 
-     * @return true si la API responde correctamente
-     */
     public boolean isApiAvailable() {
         try {
             HttpRequest request = buildGetRequest(ENDPOINT_LIST);
@@ -208,6 +239,20 @@ public class ApiClient {
     }
     
     // ===== MÉTODOS PRIVADOS - HANDLERS =====
+    
+    private SearchResponse handleSearchResponse(HttpResponse<String> response) 
+            throws ApiException {
+        if (response.statusCode() != 200) {
+            throw new ApiException("Error HTTP " + response.statusCode() + 
+                    ": " + response.body());
+        }
+        
+        try {
+            return objectMapper.readValue(response.body(), SearchResponse.class);
+        } catch (IOException e) {
+            throw new ApiException("Error al parsear búsqueda: " + e.getMessage(), e);
+        }
+    }
     
     private DownloadResponse handleDownloadResponse(HttpResponse<String> response) 
             throws ApiException {
@@ -287,8 +332,6 @@ public class ApiClient {
     public String getBaseUrl() {
         return baseUrl;
     }
-    
-    // ===== HELPERS ESTÁTICOS =====
     
     private static Path getDefaultDownloadPath() {
         String userHome = System.getProperty("user.home");

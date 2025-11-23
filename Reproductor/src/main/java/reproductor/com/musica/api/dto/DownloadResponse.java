@@ -30,6 +30,9 @@ public class DownloadResponse {
         @JsonProperty("url")
         private String url;
         
+        @JsonProperty("archivo")
+        private String fileName;
+        
         @JsonProperty("estado")
         private String status;
         
@@ -50,6 +53,14 @@ public class DownloadResponse {
         
         public void setUrl(String url) {
             this.url = url;
+        }
+        
+        public String getFileName() {
+            return fileName;
+        }
+        
+        public void setFileName(String fileName) {
+            this.fileName = fileName;
         }
         
         public String getStatus() {

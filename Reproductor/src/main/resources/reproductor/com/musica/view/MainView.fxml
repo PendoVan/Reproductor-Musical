@@ -4,13 +4,12 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -25,10 +24,10 @@
 
       <!-- File Operations -->
       <HBox alignment="CENTER_LEFT" spacing="8">
-	    <Button fx:id="btnOpen" onAction="#onOpenFile" styleClass="button, animated-button" text="Abrir Archivos" />
+	    <Button fx:id="btnOpen" onAction="#onOpenFile" prefHeight="46.0" styleClass="button, animated-button" text="Abrir Archivos" />
 	
 	    <!-- Biblioteca con fx:id para que aplique el CSS #btnLibrary -->
-	    <MenuButton fx:id="btnLibrary" styleClass="button" text="Biblioteca">
+	    <MenuButton fx:id="btnLibrary" maxHeight="33.0" minHeight="-Infinity" styleClass="button" text="Biblioteca">
 	        <items>
 	            <MenuItem text="Importar Carpeta" />
 	            <MenuItem text="Escanear Biblioteca" />
@@ -51,15 +50,6 @@
 	    <Button fx:id="btnShuffle" onAction="#onShuffleClicked" styleClass="button, animated-button" text="Aleatorio" />
 	
 	    <Button fx:id="btnRepeat" onAction="#onRepeatClicked" styleClass="button, animated-button" text="Repetir" />
-	
-	    <!-- Vista con fx:id para que aplique el CSS #btnView -->
-	    <MenuButton fx:id="btnView" styleClass="button" text="Vista">
-	        <items>
-	            <MenuItem text="Lista Compacta" />
-	            <MenuItem text="Lista Detallada" />
-	            <MenuItem text="Visualizador" />
-	        </items>
-	    </MenuButton>
 	  </HBox>
 
     </ToolBar>
@@ -92,8 +82,8 @@
         <Button fx:id="btnPrev" onAction="#onPrev" styleClass="button, animated-button" text="⏮" />
         <Button fx:id="btnPlay" onAction="#onPlay" styleClass="button, animated-button" text="▶" />
         <Button fx:id="btnPause" onAction="#onPause" styleClass="button, animated-button" text="⏸" />
-        <Button fx:id="btnStop" onAction="#onStop" prefHeight="50" styleClass="button, animated-button" text="⏹" />
-        <Button fx:id="btnNext" onAction="#onNext" prefHeight="50" styleClass="button, animated-button" text="⏭" />
+        <Button fx:id="btnStop" onAction="#onStop" styleClass="button, animated-button" text="⏹" />
+        <Button fx:id="btnNext" onAction="#onNext" styleClass="button, animated-button" text="⏭" />
       </HBox>
 
       <!-- VOLUME CONTROL SECTION -->
