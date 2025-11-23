@@ -114,6 +114,7 @@ ffmpeg -version
 ```env
 YT_QUALITY=192
 DOWNLOAD_DIR=./downloads
+PLAYLISTS_DIR=./playlists
 API_PORT=8000
 API_URL=http://localhost:8000
 ```
