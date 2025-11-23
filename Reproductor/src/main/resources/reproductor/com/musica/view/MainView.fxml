@@ -28,12 +28,11 @@
 	
 	    <!-- Biblioteca con fx:id para que aplique el CSS #btnLibrary -->
 	    <MenuButton fx:id="btnLibrary" maxHeight="33.0" minHeight="-Infinity" styleClass="button" text="Biblioteca">
-	        <items>
-	            <MenuItem text="Importar Carpeta" />
-	            <MenuItem text="Escanear Biblioteca" />
-	            <MenuItem text="Configuración" />
-	        </items>
-	    </MenuButton>
+		    <items>
+		        <MenuItem onAction="#onOpenLibrary" text="Abrir Biblioteca" />
+		        <MenuItem onAction="#onManagePlaylists" text="Gestionar Playlists" />
+		    </items>
+		</MenuButton>
 	  </HBox>
 
       <Region HBox.hgrow="ALWAYS" />

@@ -158,7 +158,6 @@ public class PlaylistService {
 
     /**
      * Agrega archivos locales y devuelve la lista de Songs creadas.
-     * Ajusta el constructor de Song a tu propio modelo.
      */
     public List<Song> addFiles(List<File> files) {
         List<Song> added = new ArrayList<>();
@@ -167,37 +166,64 @@ public class PlaylistService {
         for (File f : files) {
             if (f == null || !f.exists()) continue;
 
-            // Crear canción con duración inicial de 0
-            Song song = new Song(f.getName(), f.getAbsolutePath(), 0);
+            // Crear canción con duración inicial estimada
+            int duracionEstimada = estimateDurationFromFileSize(f);
+            Song song = new Song(f.getName(), f.getAbsolutePath(), duracionEstimada);
             
-            // Intentar obtener la duración del archivo de audio
+            // Intentar obtener duración real del archivo
             try {
                 javafx.scene.media.Media media = new javafx.scene.media.Media(f.toURI().toString());
                 
-                // Si la duración ya está disponible
+                // Si la duración ya está disponible inmediatamente
                 if (media.getDuration() != null && !media.getDuration().isUnknown()) {
-                    song.setDurationSeconds((int) media.getDuration().toSeconds());
-                    System.out.println("[PlaylistService] Duración cargada: " + f.getName() + " = " + song.getDurationSeconds() + "s");
+                    int seconds = (int) media.getDuration().toSeconds();
+                    song.setDurationSeconds(seconds);
+                    System.out.println("[PlaylistService] ✓ Duración cargada: " + f.getName() + " = " + seconds + "s");
+                } else {
+                    // Listener por si la duración se carga después
+                    media.durationProperty().addListener((obs, oldDuration, newDuration) -> {
+                        if (newDuration != null && !newDuration.isUnknown()) {
+                            int seconds = (int) newDuration.toSeconds();
+                            song.setDurationSeconds(seconds);
+                            System.out.println("[PlaylistService] ⏱ Duración actualizada: " + f.getName() + " = " + seconds + "s");
+                            javafx.application.Platform.runLater(() -> recalcTotalDuration());
+                        }
+                    });
+                    System.out.println("[PlaylistService] ⌛ Duración pendiente para: " + f.getName() + 
+                                     " (usando estimación: " + duracionEstimada + "s)");
                 }
-                
-                // Listener por si la duración se carga después
-                media.durationProperty().addListener((obs, oldDuration, newDuration) -> {
-                    if (newDuration != null && !newDuration.isUnknown()) {
-                        int seconds = (int) newDuration.toSeconds();
-                        song.setDurationSeconds(seconds);
-                        System.out.println("[PlaylistService] Duración actualizada: " + f.getName() + " = " + seconds + "s");
-                        javafx.application.Platform.runLater(() -> recalcTotalDuration());
-                    }
-                });
             } catch (Exception e) {
-                System.err.println("[PlaylistService] Error al obtener duración para: " + f.getName() + " - " + e.getMessage());
+                System.err.println("[PlaylistService] ⚠ Error al obtener duración para: " + f.getName() + " - " + e.getMessage());
+                // Ya tiene la duración estimada, así que no pasa nada
             }
 
             songs.add(song);
             added.add(song);
         }
+        
         recalcTotalDuration();
         return added;
+    }
+    
+    /**
+     * Estima la duración de un archivo MP3 basándose en su tamaño.
+     * Asume bitrate promedio de 192 kbps.
+     * 
+     * @param file Archivo MP3
+     * @return Duración estimada en segundos
+     */
+    private int estimateDurationFromFileSize(File file) {
+        try {
+            long bytes = file.length();
+            double mb = bytes / (1024.0 * 1024.0);
+            // Fórmula: 1 MB a 192kbps ≈ 41.7 segundos
+            // O más preciso: duración = (tamaño_bytes * 8) / (bitrate * 1000)
+            // Usando 192kbps: (bytes * 8) / (192 * 1000) = bytes / 24000
+            int segundos = (int) (bytes / 24000.0);
+            return segundos > 0 ? segundos : 180; // mínimo 3 minutos si falla
+        } catch (Exception e) {
+            return 180; // valor por defecto: 3 minutos
+        }
     }
 
     /**

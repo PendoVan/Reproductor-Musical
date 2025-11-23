@@ -36,6 +36,13 @@
         <version>2.15.2</version>
     </dependency>
     
+    <!-- Jackson para manejar LocalDateTime -->
+	<dependency>
+	    <groupId>com.fasterxml.jackson.datatype</groupId>
+	    <artifactId>jackson-datatype-jsr310</artifactId>
+	    <version>2.15.2</version>
+	</dependency>
+    
     <!-- AUDIO (OBLIGATORIO para Media/MediaPlayer) -->
     <dependency>
       <groupId>org.openjfx</groupId>

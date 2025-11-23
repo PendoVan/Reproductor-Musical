@@ -11,13 +11,22 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import reproductor.com.musica.core.PlayerService;
+import reproductor.com.musica.core.PlaylistFileService;
 import reproductor.com.musica.core.PlaylistService;
 import reproductor.com.musica.model.PlaybackMode;
 import reproductor.com.musica.model.Song;
@@ -37,6 +46,7 @@ public class PlayerController {
     @FXML private Button btnSearch;
     @FXML private Button btnShuffle;
     @FXML private Button btnRepeat;
+    @FXML private MenuButton btnLibrary;
 
     // Zona de información de pista
     @FXML private Label trackLabel;
@@ -70,6 +80,7 @@ public class PlayerController {
     // Servicios
     private final PlayerService player;
     private final PlaylistService playlist;
+    private final PlaylistFileService playlistFileService = new PlaylistFileService();
 
     // Preferencias (para recordar volumen)
     private final Preferences prefs = Preferences.userNodeForPackage(PlayerController.class);
@@ -489,10 +500,203 @@ public class PlayerController {
         });
     }
 
+    @FXML
     public void onSavePlaylist(ActionEvent e) {
-        playlist.saveCurrentPlaylist();
-        updateStatus("💾 Lista de reproducción guardada");
-        showInfo("Funcionalidad de guardado en desarrollo");
+        // Pedir nombre de la playlist
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog("Mi Playlist");
+        dialog.setTitle("Guardar Playlist");
+        dialog.setHeaderText("Guardar la playlist actual");
+        dialog.setContentText("Nombre de la playlist:");
+        
+        dialog.showAndWait().ifPresent(nombre -> {
+            if (nombre != null && !nombre.isBlank()) {
+                try {
+                    // Verificar si ya existe
+                    if (playlistFileService.playlistExists(nombre)) {
+                        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                        confirm.setTitle("Confirmar sobrescritura");
+                        confirm.setHeaderText("La playlist '" + nombre + "' ya existe");
+                        confirm.setContentText("¿Deseas sobrescribirla?");
+                        
+                        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+                            return;
+                        }
+                    }
+                    
+                    // Guardar la playlist
+                    playlistFileService.savePlaylist(nombre, playlist.getSongs());
+                    
+                    updateStatus("💾 Playlist guardada: " + nombre);
+                    showInfo("Playlist '" + nombre + "' guardada correctamente en:\n" + 
+                            playlistFileService.getPlaylistsDirectory());
+                    
+                } catch (IOException ex) {
+                    showError("Error al guardar playlist: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Abre la ventana de biblioteca para gestionar playlists guardadas.
+     * Conectado al MenuButton "Biblioteca".
+     */
+    @FXML
+    public void onOpenLibrary() {
+        try {
+            // Obtener lista de playlists guardadas
+            List<String> playlists = playlistFileService.listPlaylists();
+            
+            if (playlists.isEmpty()) {
+                showInfo("No hay playlists guardadas.\n\n" +
+                        "Guarda la playlist actual usando el botón 'Guardar Lista'.");
+                return;
+            }
+            
+            // Mostrar diálogo de selección
+            javafx.scene.control.ChoiceDialog<String> dialog = 
+                new javafx.scene.control.ChoiceDialog<>(playlists.get(0), playlists);
+            
+            dialog.setTitle("Biblioteca de Playlists");
+            dialog.setHeaderText("Playlists guardadas (" + playlists.size() + ")");
+            dialog.setContentText("Selecciona una playlist:");
+            
+            dialog.showAndWait().ifPresent(nombre -> {
+                try {
+                    loadPlaylistFromLibrary(nombre);
+                } catch (IOException ex) {
+                    showError("Error al cargar playlist: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            });
+            
+        } catch (Exception ex) {
+            showError("Error al abrir biblioteca: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Carga una playlist desde la biblioteca.
+     */
+    private void loadPlaylistFromLibrary(String nombre) throws IOException {
+        // Confirmar si hay canciones actuales
+        if (!playlist.getSongs().isEmpty()) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Confirmar carga");
+            confirm.setHeaderText("La lista actual se reemplazará");
+            confirm.setContentText("¿Deseas cargar '" + nombre + "'?");
+            
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+                return;
+            }
+        }
+        
+        // Cargar playlist
+        List<Song> songs = playlistFileService.loadPlaylist(nombre);
+        
+        if (songs.isEmpty()) {
+            showWarning("La playlist '" + nombre + "' no contiene canciones válidas.\n\n" +
+                       "Verifica que los archivos MP3 existan en:\n" + 
+                       playlistFileService.getDownloadsDirectory());
+            return;
+        }
+        
+        // Limpiar playlist actual y agregar nuevas canciones
+        playlist.clearCurrentPlaylist();
+        playlist.addSongs(songs);
+        
+        // Seleccionar primera canción
+        if (!songs.isEmpty()) {
+            playlistView.getSelectionModel().select(songs.get(0));
+        }
+        
+        updateStatus("📂 Playlist cargada: " + nombre + " (" + songs.size() + " canciones)");
+        showInfo("Playlist '" + nombre + "' cargada correctamente.\n\n" +
+                "Canciones: " + songs.size());
+    }
+
+    /**
+     * Gestiona las playlists guardadas (ver, eliminar, renombrar).
+     * Conectado a MenuItem "Configuración" en Biblioteca.
+     */
+    @FXML
+    public void onManagePlaylists() {
+        try {
+            List<String> playlists = playlistFileService.listPlaylists();
+            
+            if (playlists.isEmpty()) {
+                showInfo("No hay playlists guardadas.");
+                return;
+            }
+            
+            // Crear ventana personalizada de gestión
+            Stage stage = new Stage();
+            stage.setTitle("Gestionar Playlists");
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.initOwner(root.getScene().getWindow());
+            
+            javafx.scene.control.ListView<String> listView = new javafx.scene.control.ListView<>();
+            listView.getItems().addAll(playlists);
+            
+            javafx.scene.control.Button btnLoad = new javafx.scene.control.Button("Cargar");
+            btnLoad.setOnAction(e -> {
+                String selected = listView.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    try {
+                        loadPlaylistFromLibrary(selected);
+                        stage.close();
+                    } catch (IOException ex) {
+                        showError("Error: " + ex.getMessage());
+                    }
+                }
+            });
+            
+            javafx.scene.control.Button btnDelete = new javafx.scene.control.Button("Eliminar");
+            btnDelete.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
+            btnDelete.setOnAction(e -> {
+                String selected = listView.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirm.setTitle("Confirmar eliminación");
+                    confirm.setHeaderText("¿Eliminar '" + selected + "'?");
+                    confirm.setContentText("Esta acción no se puede deshacer.");
+                    
+                    if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                        if (playlistFileService.deletePlaylist(selected)) {
+                            listView.getItems().remove(selected);
+                            showInfo("Playlist eliminada: " + selected);
+                        }
+                    }
+                }
+            });
+            
+            javafx.scene.control.Button btnClose = new javafx.scene.control.Button("Cerrar");
+            btnClose.setOnAction(e -> stage.close());
+            
+            javafx.scene.layout.HBox buttons = new javafx.scene.layout.HBox(10, btnLoad, btnDelete, btnClose);
+            buttons.setAlignment(javafx.geometry.Pos.CENTER);
+            buttons.setPadding(new javafx.geometry.Insets(10));
+            
+            javafx.scene.layout.VBox layout = new javafx.scene.layout.VBox(10, 
+                new javafx.scene.control.Label("Playlists guardadas:"), 
+                listView, 
+                buttons);
+            layout.setPadding(new javafx.geometry.Insets(15));
+            
+            javafx.scene.Scene scene = new javafx.scene.Scene(layout, 400, 500);
+            stage.setScene(scene);
+            stage.showAndWait();
+            
+        } catch (Exception ex) {
+            showError("Error: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    private void showWarning(String msg) {
+        showAlert(Alert.AlertType.WARNING, "Advertencia", msg);
     }
 
     // ==========================
